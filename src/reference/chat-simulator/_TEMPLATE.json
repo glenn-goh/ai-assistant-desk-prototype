@@ -1,0 +1,96 @@
+{
+  "id": "unique-scenario-id",
+  "title": "Your Scenario Title",
+  "description": "Brief description of what this scenario demonstrates",
+  "colorScheme": "slate",
+  
+  "_comment_colorScheme": "Available options: 'slate', 'blue', 'green', 'purple', 'indigo'. This determines the visual theme.",
+  
+  "messages": [
+    {
+      "_comment": "USER MESSAGE - The predefined text that appears character by character as user types",
+      "role": "user",
+      "content": {
+        "text": "The message the user will type"
+      }
+    },
+    {
+      "_comment": "BOT MESSAGE - Can contain multiple response blocks",
+      "role": "bot",
+      "content": [
+        {
+          "_comment": "THINKING RESPONSE - Shows the bot's thought process",
+          "type": "thinking",
+          "thoughts": [
+            "First thought that appears...",
+            "Second thought...",
+            "Final thought that stays visible"
+          ],
+          "timingMs": 1500
+        },
+        {
+          "_comment": "ASSISTANT SWITCH - Shows when AI switches to a different assistant/tool. Keep it concise - just the assistant name.",
+          "type": "assistantSwitch",
+          "message": "Assistant Name"
+        },
+        {
+          "_comment": "TEXT RESPONSE - Standard chat message",
+          "type": "text",
+          "content": "Your bot response text here. Can include \\n\\n for line breaks.",
+          "delayMs": 1000
+        },
+        {
+          "_comment": "ARTIFACT RESPONSE - A clickable card that opens content in side panel",
+          "type": "artifact",
+          "title": "Artifact Title",
+          "fileType": "document",
+          "description": "Brief description shown on the card",
+          "interactive": false,
+          "content": "<div class=\"p-6\"><h1>Your HTML content here</h1><p>This appears in the side panel</p></div>"
+        },
+        {
+          "_comment": "INTERACTIVE FORM ARTIFACT - A form that users can fill out",
+          "type": "artifact",
+          "title": "Form Title",
+          "fileType": "form",
+          "description": "Form description",
+          "interactive": true,
+          "content": "<div class=\"p-6\"><form id=\"yourFormId\"><input type=\"text\" name=\"field1\" required class=\"w-full px-3 py-2 border rounded-md\"><button type=\"submit\" class=\"w-full bg-blue-600 text-white py-2 rounded-md\">Submit</button></form></div>"
+        }
+      ]
+    },
+    {
+      "_comment": "You can add more user and bot message pairs to continue the conversation",
+      "role": "user",
+      "content": {
+        "text": "Follow-up question from user"
+      }
+    },
+    {
+      "role": "bot",
+      "content": [
+        {
+          "type": "text",
+          "content": "Bot's follow-up response"
+        }
+      ]
+    }
+  ],
+  
+  "_instructions": {
+    "fileType_options": [
+      "document - For text documents and reports",
+      "code - For code snippets",
+      "chart - For data visualizations",
+      "form - For interactive forms"
+    ],
+    "styling_notes": "When creating artifact content (HTML), use Tailwind CSS classes. Match the colorScheme: blue-* classes for 'blue', green-* for 'green', purple-* for 'purple', slate-* for 'slate', indigo-* for 'indigo'",
+    "form_requirements": "Forms must have an id attribute. When interactive is true, the form submission will be handled automatically.",
+    "timing_defaults": {
+      "thinking": "1500ms per thought (configurable with timingMs)",
+      "text": "1000ms delay before appearing (configurable with delayMs)",
+      "artifact": "1000ms delay before appearing (configurable with delayMs)",
+      "bot_response": "3000ms initial delay with thinking dots before any bot response starts"
+    }
+  }
+}
