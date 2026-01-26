@@ -50,7 +50,7 @@ export function LibraryManager({
   return (
     <div className="space-y-6">
       {showDescription && (
-        <p className="text-slate-600 dark:text-slate-400 text-sm">
+        <p className="text-gray-500 text-sm">
           Create a library to organize documents by topic or project. Your AI assistant will reference these documents to provide contextual responses. You can connect cloud sources or upload files directly.
         </p>
       )}
@@ -69,7 +69,7 @@ export function LibraryManager({
         <Button
           variant="outline"
           onClick={onAdd}
-          className="w-full border-dashed border-2 hover:border-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 text-slate-600 dark:text-slate-400"
+          className="w-full border-dashed border-2 border-gray-300 hover:border-gray-900 hover:bg-gray-100 text-gray-500"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Another Library

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, ArrowLeft, Plus, Folder, Cloud, Database, HardDrive, Trash2, Check, ChevronsUpDown } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Plus, Folder, Cloud, Database, HardDrive, Trash2, ChevronsUpDown, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -30,12 +30,6 @@ const JOB_ROLES = [
   "Solution Architect",
   "DevOps Engineer",
   "Cyber Security Specialist",
-];
-
-const STEPS = [
-  { number: 1, label: 'Profile & Work' },
-  { number: 2, label: 'Communication Style' },
-  { number: 3, label: 'Libraries' }
 ];
 
 export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: OnboardingPageProps) {
@@ -121,74 +115,20 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
     onComplete();
   };
 
-  const getIconForType = (type: string) => {
-    switch (type) {
-      case 'sharepoint': return <Database className="w-5 h-5" />;
-      case 'local': return <Folder className="w-5 h-5" />;
-      case 'aws': return <Cloud className="w-5 h-5" />;
-      case 'gdrive': return <HardDrive className="w-5 h-5" />;
-      default: return <Folder className="w-5 h-5" />;
-    }
-  };
-
-  const progress = ((currentStep - 1) / (STEPS.length - 1)) * 100;
-
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-      <Card className="w-full max-w-3xl shadow-2xl border-slate-200 dark:border-slate-800">
-        {/* Progress Tracker */}
-        <div className="p-8 pb-6 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
-          <div className="relative px-5">
-            {/* Progress Line */}
-            <div className="absolute top-5 left-5 right-5 h-0.5 bg-slate-200 dark:bg-slate-700">
-              <div
-                className="h-full bg-indigo-600 transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            {/* Steps */}
-            <div className="relative flex justify-between">
-              {STEPS.map((step) => (
-                <div key={step.number} className="flex flex-col items-center">
-                  <div
-                    className={cn(
-                      "w-10 h-10 rounded-full border-2 flex items-center justify-center font-semibold text-sm mb-2 bg-white dark:bg-slate-900 transition-all",
-                      step.number < currentStep
-                        ? "border-indigo-600 bg-indigo-600 text-white"
-                        : step.number === currentStep
-                          ? "border-indigo-600 bg-indigo-600 text-white"
-                          : "border-slate-300 dark:border-slate-600 text-slate-400"
-                    )}
-                  >
-                    {step.number < currentStep ? <Check className="w-5 h-5" /> : step.number}
-                  </div>
-                  <div
-                    className={cn(
-                      "text-xs font-medium text-center",
-                      step.number === currentStep
-                        ? "text-slate-900 dark:text-white"
-                        : "text-slate-500"
-                    )}
-                  >
-                    {step.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
+      <Card className="w-full max-w-3xl shadow-lg border-gray-300 bg-white">
         {/* Content Area */}
         <CardContent className="p-8">
           {/* Step 1: Profile & Work Context */}
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+                <p className="text-xs text-gray-500 mb-2">Step 1 of 3</p>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   Your Profile & Work Context
                 </h2>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-gray-500">
                   Tell us about yourself and your work to help us personalize your AI experience.
                 </p>
               </div>
@@ -196,13 +136,13 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
 
               <div className="space-y-8">
                 <div>
-                  <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
                     Your Profile
                   </h3>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="name">How should I address you?</Label>
-                      <p className="text-xs text-slate-500 mt-1 mb-2">
+                      <p className="text-xs text-gray-500 mt-1 mb-2">
                         Choose something you're comfortable with—your first name, nickname, or preferred title.
                       </p>
                       <Input
@@ -210,7 +150,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="e.g., Jayden, Jay, Mr. Tan"
-                        className="mt-2 bg-transparent border-slate-300 dark:border-slate-700"
+                        className="mt-2 bg-white border-gray-300"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-6">
@@ -220,7 +160,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                           id="email"
                           value={email}
                           disabled
-                          className="mt-2 bg-slate-50 dark:bg-slate-900/50"
+                          className="mt-2 bg-gray-100 border-gray-300"
                         />
                       </div>
                       <div>
@@ -229,23 +169,23 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                           id="agency"
                           value={agency}
                           disabled
-                          className="mt-2 bg-slate-50 dark:bg-slate-900/50"
+                          className="mt-2 bg-gray-100 border-gray-300"
                         />
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <Separator className="my-6" />
+                <Separator className="my-6 bg-gray-300" />
 
                 <div>
-                  <h3 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
                     Work Context
                   </h3>
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="job-role">Job Role</Label>
-                      <p className="text-xs text-slate-500 mt-1 mb-2">
+                      <p className="text-xs text-gray-500 mt-1 mb-2">
                         This helps the AI understand your professional context.
                       </p>
                       <Popover open={openJobRole} onOpenChange={setOpenJobRole}>
@@ -254,14 +194,14 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                             variant="outline"
                             role="combobox"
                             aria-expanded={openJobRole}
-                            className="w-full justify-between mt-2 bg-slate-50 dark:bg-slate-900/50"
+                            className="w-full justify-between mt-2 bg-gray-100 border-gray-300"
                             disabled={true}
                           >
                             {jobRole || "Select your role"}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-full p-0">
+                        <PopoverContent className="w-full p-0 bg-white border-gray-300">
                           <Command>
                             <CommandInput placeholder="Search role..." />
                             <CommandList>
@@ -294,9 +234,9 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
 
                     <div>
                       <Label htmlFor="profile">
-                        Professional Background <span className="text-slate-400 font-normal">(Optional)</span>
+                        Professional Background <span className="text-gray-500 font-normal">(Optional)</span>
                       </Label>
-                      <p className="text-xs text-slate-500 mt-1 mb-2">
+                      <p className="text-xs text-gray-500 mt-1 mb-2">
                         Share your experience and expertise to receive more tailored assistance.
                       </p>
                       <Textarea
@@ -304,15 +244,15 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                         value={profileDescription}
                         onChange={(e) => setProfileDescription(e.target.value)}
                         placeholder="E.g., I specialize in digital transformation initiatives with 5 years of experience in public sector technology projects..."
-                        className="mt-2 min-h-[80px] resize-none bg-transparent border-slate-300 dark:border-slate-700"
+                        className="mt-2 min-h-[80px] resize-none bg-white border-gray-300"
                       />
                     </div>
 
                     <div>
                       <Label htmlFor="work-focus">
-                        Current Work Focus <span className="text-slate-400 font-normal">(Optional)</span>
+                        Current Work Focus <span className="text-gray-500 font-normal">(Optional)</span>
                       </Label>
-                      <p className="text-xs text-slate-500 mt-1 mb-2">
+                      <p className="text-xs text-gray-500 mt-1 mb-2">
                         What are your main projects or priorities right now?
                       </p>
                       <Textarea
@@ -320,7 +260,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                         value={workFocus}
                         onChange={(e) => setWorkFocus(e.target.value)}
                         placeholder="E.g., Currently leading the implementation of a new citizen engagement platform, with emphasis on accessibility and user experience..."
-                        className="mt-2 min-h-[80px] resize-none bg-transparent border-slate-300 dark:border-slate-700"
+                        className="mt-2 min-h-[80px] resize-none bg-white border-gray-300"
                       />
                     </div>
                   </div>
@@ -333,10 +273,11 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
           {currentStep === 2 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+                <p className="text-xs text-gray-500 mb-2">Step 2 of 3</p>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   AI Communication Style
                 </h2>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-gray-500">
                   Choose how you'd like the AI to communicate with you.
                 </p>
               </div>
@@ -344,7 +285,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
               <div className="space-y-6">
                 <div>
                   <Label>Select Your Preferred Traits</Label>
-                  <p className="text-xs text-slate-500 mt-1 mb-4">
+                  <p className="text-xs text-gray-500 mt-1 mb-4">
                     You can select multiple traits that match your preferences.
                   </p>
                   <div className="grid grid-cols-2 gap-3">
@@ -360,7 +301,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                         />
                         <label
                           htmlFor={`trait-${trait}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-gray-700"
                         >
                           {trait}
                         </label>
@@ -371,9 +312,9 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
 
                 <div>
                   <Label htmlFor="custom-instructions">
-                    Additional Preferences <span className="text-slate-400 font-normal">(Optional)</span>
+                    Additional Preferences <span className="text-gray-500 font-normal">(Optional)</span>
                   </Label>
-                  <p className="text-xs text-slate-500 mt-1 mb-2">
+                  <p className="text-xs text-gray-500 mt-1 mb-2">
                     Any specific preferences for how the AI should respond to you?
                   </p>
                   <Textarea
@@ -381,7 +322,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                     value={customInstructions}
                     onChange={(e) => setCustomInstructions(e.target.value)}
                     placeholder="E.g., Always provide sources for factual claims, use bullet points for action items, avoid technical jargon when possible..."
-                    className="mt-2 min-h-[100px] resize-none bg-transparent border-slate-300 dark:border-slate-700"
+                    className="mt-2 min-h-[100px] resize-none bg-white border-gray-300"
                   />
                 </div>
               </div>
@@ -392,10 +333,11 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
           {currentStep === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
-                <h2 className="text-2xl font-semibold text-slate-900 dark:text-white mb-2">
+                <p className="text-xs text-gray-500 mb-2">Step 3 of 3</p>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   Set Up Your First Library
                 </h2>
-                <p className="text-slate-600 dark:text-slate-400">
+                <p className="text-gray-500">
                   Create a library to organize documents by topic or project. Your AI assistant will reference these documents to provide contextual responses. You can connect cloud sources or upload files directly.
                 </p>
               </div>
@@ -408,21 +350,21 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                 showDescription={false}
               />
 
-              <p className="text-xs text-slate-500 text-center">
-                You can manage your libraries anytime in <span className="text-indigo-600 dark:text-indigo-400">Library</span>
+              <p className="text-xs text-gray-500 text-center">
+                You can manage your libraries anytime in <span className="text-gray-900 font-medium">Library</span>
               </p>
             </div>
           )}
         </CardContent>
 
         {/* Navigation */}
-        <div className="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="p-6 border-t border-gray-300 bg-gray-100">
           <div className="flex justify-between items-center gap-4">
             <Button
               variant="ghost"
               onClick={handleSkip}
               className={cn(
-                "text-slate-500 hover:text-slate-700 h-12 text-base",
+                "text-gray-500 hover:text-gray-700 hover:bg-gray-200 h-12 text-base",
                 currentStep === 3 && "invisible"
               )}
             >
@@ -434,7 +376,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                 variant="outline"
                 onClick={handleBack}
                 className={cn(
-                  "gap-2 h-12 text-base",
+                  "gap-2 h-12 text-base border-gray-300 hover:bg-gray-100",
                   currentStep === 1 && "invisible"
                 )}
               >
@@ -445,7 +387,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
               {currentStep < 3 ? (
                 <Button
                   onClick={handleNext}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-12 text-base px-8"
+                  className="bg-gray-900 hover:bg-gray-800 text-white gap-2 h-12 text-base px-8"
                 >
                   Next
                   <ArrowRight className="w-4 h-4" />
@@ -453,7 +395,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
               ) : (
                 <Button
                   onClick={handleComplete}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 h-12 text-base px-8"
+                  className="bg-gray-900 hover:bg-gray-800 text-white gap-2 h-12 text-base px-8"
                 >
                   Complete Setup
                   <ArrowRight className="w-4 h-4" />

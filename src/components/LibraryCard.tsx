@@ -90,7 +90,7 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
   };
 
   return (
-    <div className="space-y-4 p-6 border border-slate-200 dark:border-slate-700 rounded-lg bg-slate-50/50 dark:bg-slate-900/20">
+    <div className="space-y-4 p-6 border border-gray-300 rounded-lg bg-gray-100">
       <div className="flex items-start justify-between">
         <div className="flex-shrink-0" style={{ minWidth: '160px' }}>
           {isEditingName ? (
@@ -101,18 +101,18 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
               onBlur={handleNameBlur}
               onKeyDown={handleNameKeyDown}
               maxLength={30}
-              className="h-8 px-2 bg-transparent border-slate-300 dark:border-slate-700"
+              className="h-8 px-2 bg-white border-gray-300"
               style={{ width: `${getInputWidth()}px` }}
             />
           ) : (
             <button
               onClick={handleNameClick}
-              className="flex items-center gap-2 group hover:bg-slate-100 dark:hover:bg-slate-800 px-2 py-1 rounded transition-colors"
+              className="flex items-center gap-2 group hover:bg-gray-200 px-2 py-1 rounded transition-colors"
               style={{ minWidth: '160px' }}
             >
-              <FolderOpen className="w-4 h-4 text-slate-600 dark:text-slate-400 flex-shrink-0" />
+              <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
               <span className="truncate">{source.name}</span>
-              <Pencil className="w-3.5 h-3.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+              <Pencil className="w-3.5 h-3.5 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
             </button>
           )}
         </div>
@@ -121,7 +121,7 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
             variant="ghost"
             size="sm"
             onClick={() => onRemove(source.id)}
-            className="ml-2 h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+            className="ml-2 h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
           >
             <Trash2 className="w-4 h-4" />
           </Button>
@@ -201,7 +201,7 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
                       source.type === 'aws' ? 's3://bucket-name/path' :
                         '/Users/username/documents'
                 }
-                className="mt-2 bg-transparent border-slate-300 dark:border-slate-700"
+                className="mt-2 bg-white border-gray-300"
               />
             </>
           )}
@@ -223,13 +223,13 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
               {uploadedFiles.map((file) => (
                 <div
                   key={file.id}
-                  className="flex items-center justify-between gap-3 bg-white dark:bg-slate-800 p-3 rounded border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                  className="flex items-center justify-between gap-3 bg-white p-3 rounded border border-gray-300 hover:border-gray-500 transition-colors"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
                       <div className="text-sm truncate">{file.name}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                      <div className="text-xs text-gray-500">
                         {formatFileSize(file.size)}
                       </div>
                     </div>
@@ -238,7 +238,7 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRemoveFile(file.id)}
-                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex-shrink-0"
+                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -246,7 +246,7 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
               ))}
             </div>
           ) : (
-            <div className="text-sm text-slate-500 dark:text-slate-400 italic py-2">
+            <div className="text-sm text-gray-500 italic py-2">
               No files uploaded yet
             </div>
           )}
