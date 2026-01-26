@@ -48,23 +48,22 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
   // Component to render assistant cards
   const renderAssistantCard = (assistant: Assistant) => {
     const IconComponent = assistant.icon;
-    
-    // Special styling for HR Workday Shortlister
-    const isWorkdayShortlister = assistant.id === 'workday-shortlister';
-    const iconBgColor = isWorkdayShortlister ? 'bg-indigo-50' : 'bg-blue-50';
-    const iconColor = isWorkdayShortlister ? 'text-indigo-600' : 'text-blue-600';
+
+    // Lo-fi grayscale styling
+    const iconBgColor = 'bg-gray-100';
+    const iconColor = 'text-gray-700';
     
     return (
       <Card
         key={assistant.id}
-        className="hover:shadow-xl transition-all duration-300 cursor-pointer group border-0 shadow-sm bg-white overflow-hidden"
+        className="hover:shadow-md transition-all duration-300 cursor-pointer group border border-gray-300 shadow-sm bg-white overflow-hidden"
         onClick={() => onStartAssistantChat(assistant.name, assistant.assistantType)}
       >
         <CardContent className="p-6">
           {/* Header Row */}
           <div className="flex justify-between items-start mb-4">
             {/* Icon Container */}
-            <div className={`w-12 h-12 rounded-xl ${iconBgColor} flex items-center justify-center flex-shrink-0`}>
+            <div className={`w-12 h-12 rounded-lg ${iconBgColor} flex items-center justify-center flex-shrink-0`}>
               <IconComponent className={`w-6 h-6 ${iconColor}`} />
             </div>
             
@@ -86,7 +85,7 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
           
           {/* Content */}
           <div className="mb-4">
-            <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-1">
+            <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors line-clamp-1">
               {assistant.name}
             </h3>
             <p className="text-sm text-gray-500 leading-relaxed line-clamp-2 h-10">
@@ -109,7 +108,7 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
           </div>
 
           {/* Footer Tags */}
-          <div className="mt-4 flex flex-wrap gap-2 pt-4 border-t border-gray-50">
+          <div className="mt-4 flex flex-wrap gap-2 pt-4 border-t border-gray-200">
             {assistant.tags.map(tag => (
               <Badge 
                 key={tag} 
@@ -147,7 +146,7 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <Input
               placeholder="Search assistants..."
-              className={`pl-10 text-sm py-6 rounded-xl ${theme.inputBorder} ${font.input} bg-white shadow-sm`}
+              className={`pl-10 text-sm py-6 rounded-lg border-gray-300 ${font.input} bg-white`}
             />
           </div>
 
@@ -158,9 +157,9 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
                 key={category}
                 variant={category === 'All' ? 'default' : 'outline'}
                 className={`cursor-pointer px-5 py-2 text-xs rounded-full transition-all ${
-                  category === 'All' 
-                    ? 'bg-gray-900 hover:bg-gray-800' 
-                    : 'bg-white hover:bg-gray-100 border-gray-200 text-gray-600'
+                  category === 'All'
+                    ? 'bg-gray-900 text-white hover:bg-gray-700'
+                    : 'bg-white hover:bg-gray-200 border-gray-300 text-gray-700'
                 }`}
               >
                 {category}
@@ -171,8 +170,8 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
           {/* Tailored to Your Work Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Target className="w-5 h-5 text-blue-600" />
-              <h2 className={`text-lg font-semibold ${theme.chatItemText} ${font.title}`}>Tailored to your work</h2>
+              <Target className="w-5 h-5 text-gray-700" />
+              <h2 className="text-lg font-semibold text-gray-900">Tailored to your work</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -183,8 +182,8 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
           {/* Essential Productivity Tools Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-yellow-500" />
-              <h2 className={`text-lg font-semibold ${theme.chatItemText} ${font.title}`}>Essential productivity tools</h2>
+              <Sparkles className="w-5 h-5 text-gray-700" />
+              <h2 className="text-lg font-semibold text-gray-900">Essential productivity tools</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -195,8 +194,8 @@ export function ExplorePage({ onToggleSidebar, colorTheme, fontStyle, onStartAss
           {/* Top-rated by Public Officers Section */}
           <div className="space-y-6">
             <div className="flex items-center gap-2">
-              <Star className="w-5 h-5 text-amber-500" />
-              <h2 className={`text-lg font-semibold ${theme.chatItemText} ${font.title}`}>Top-rated by public officers</h2>
+              <Star className="w-5 h-5 text-gray-700" />
+              <h2 className="text-lg font-semibold text-gray-900">Top-rated by public officers</h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

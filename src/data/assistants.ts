@@ -337,12 +337,12 @@ export const getClassificationText = (code: string): string => {
   return classificationMap[code] || code;
 };
 
-// Helper to get type badge styles
+// Helper to get type badge styles (lo-fi grayscale)
 export const getTypeBadgeStyles = (type: string): string => {
   const styleMap: Record<string, string> = {
-    'Official': 'bg-green-50 text-green-700 border-green-200',
-    'Community': 'bg-purple-50 text-purple-700 border-purple-200',
-    'Developer': 'bg-blue-50 text-blue-700 border-blue-200',
+    'Official': 'bg-gray-100 text-gray-700 border-gray-300',
+    'Community': 'bg-gray-100 text-gray-700 border-gray-300',
+    'Developer': 'bg-gray-100 text-gray-700 border-gray-300',
   };
-  return styleMap[type] || 'bg-gray-100 text-gray-700 border-gray-200';
+  return styleMap[type] || 'bg-gray-100 text-gray-700 border-gray-300';
 };
