@@ -1,11 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileText, Code, BarChart3, ClipboardList, X, PanelLeft, Bot, Paperclip, FolderOpen, Wrench, Send, Search, Mic, MessageSquare, ScanLine, PanelRight, ArrowLeft, File } from 'lucide-react';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuTrigger 
-} from './ui/dropdown-menu';
-import userAvatar from 'figma:asset/ed3327b092c51eb4f6fab282e873ac3eb916ae69.png';
+import { FileText, Code, BarChart3, ClipboardList, X, PanelLeft, PanelRight, ArrowLeft } from 'lucide-react';
+import { MessageInput } from './MessageInput';
 
 // Type definitions
 interface ChatSimulation {
@@ -65,13 +60,15 @@ interface ChatSimulatorProps {
   onFormSubmit?: (formData: any, artifactTitle: string) => void;
   onComplete?: () => void;
   onToggleSidebar?: () => void;
+  onBack?: () => void;
 }
 
-export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({ 
-  data, 
+export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
+  data,
   onFormSubmit,
   onComplete,
-  onToggleSidebar
+  onToggleSidebar,
+  onBack
 }) => {
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
@@ -83,44 +80,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [isComplete, setIsComplete] = useState(false);
   const [searchingAssistant, setSearchingAssistant] = useState(false);
   const [showOutputPanel, setShowOutputPanel] = useState(false);
-  const [selectedTools, setSelectedTools] = useState<string[]>([]);
-  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
-  const [isLibraryPopoverOpen, setIsLibraryPopoverOpen] = useState(false);
-  const [isToolsPopoverOpen, setIsToolsPopoverOpen] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const outputContentRef = useRef<HTMLDivElement>(null);
 
   const colorScheme = data.colorScheme || 'slate';
-
-  const tools = [
-    { id: 'internet-search', name: 'Internet Search', icon: Search },
-    { id: 'audio-transcription', name: 'Audio Transcription', icon: Mic },
-    { id: 'key-info-extraction', name: 'Key Info Extraction (KIE)', icon: ScanLine },
-  ];
-
-  const libraries = [
-    { id: 'govtech-branding', name: 'GovTech branding guidelines', type: 'SharePoint' },
-    { id: 'procurement-guidelines', name: 'Procurement Guidelines', type: 'SharePoint' },
-    { id: 'ai-programme', name: 'AI Programme Resources', type: 'Google Drive' },
-    { id: 'policy-documents', name: 'Policy Documents', type: 'AWS S3' },
-  ];
-
-  const toggleTool = (toolId: string) => {
-    setSelectedTools(prev => 
-      prev.includes(toolId) 
-        ? prev.filter(id => id !== toolId)
-        : [...prev, toolId]
-    );
-  };
-
-  const toggleLibrary = (libraryId: string) => {
-    setSelectedLibraries(prev => 
-      prev.includes(libraryId) 
-        ? prev.filter(id => id !== libraryId)
-        : [...prev, libraryId]
-    );
-  };
 
   // Color scheme mapping
   const colors = {
@@ -244,35 +207,27 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     }
   };
 
-  // Handle keypress for typing animation
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  // Handle message send from MessageInput
+  const handleSendMessage = (text: string) => {
     if (currentMessageIndex >= data.messages.length) return;
-    
+
     const currentMsg = data.messages[currentMessageIndex];
     if (currentMsg.role !== 'user') return;
 
     const targetText = (currentMsg.content as UserMessage).text;
 
-    if (e.key === 'Enter') {
-      // Complete the text immediately and send
-      setTypedText(targetText);
-      setIsTyping(false);
-      
-      setTimeout(() => {
-        setDisplayedMessages(prev => [...prev, { role: 'user', text: targetText }]);
-        setTypedText("");
-        setCurrentMessageIndex(prev => prev + 1);
-        // Refocus input after a short delay to allow state updates
-        setTimeout(() => {
-          inputRef.current?.focus();
-        }, 100);
-      }, 100);
-    } else {
-      // Type next character
-      if (typedText.length < targetText.length) {
-        setTypedText(targetText.substring(0, typedText.length + 1));
-      }
-    }
+    setIsTyping(false);
+    setDisplayedMessages(prev => [...prev, { role: 'user', text: targetText }]);
+    setTypedText("");
+    setCurrentMessageIndex(prev => prev + 1);
+  };
+
+  // Get the current target text for typing simulation
+  const getCurrentTargetText = () => {
+    if (currentMessageIndex >= data.messages.length) return undefined;
+    const currentMsg = data.messages[currentMessageIndex];
+    if (currentMsg.role !== 'user') return undefined;
+    return (currentMsg.content as UserMessage).text;
   };
 
   // Process bot messages
@@ -297,7 +252,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       } else {
         // Normal user typing
         setIsTyping(true);
-        inputRef.current?.focus();
       }
     } else {
       // Bot message
@@ -334,11 +288,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     }
 
     setCurrentMessageIndex(prev => prev + 1);
-    
-    // Refocus input after bot response completes
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100);
   };
 
   const processThinkingResponse = async (response: ThinkingResponse) => {
@@ -400,11 +349,12 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="max-w-chat mx-auto space-y-6">
           {displayedMessages.map((msg, idx) => (
             <div key={idx}>
               {msg.role === 'user' && (
-                <div className="flex justify-end items-end gap-2">
+                <div className="flex justify-end items-end gap-2 ml-24 mb-12">
                   <div className="bg-blue-500 text-white rounded-2xl px-4 py-3 max-w-2xl" style={{ fontSize: '14px' }}>
                     {msg.text}
                   </div>
@@ -433,7 +383,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
               {msg.type === 'text' && (
                 <div className="flex justify-start items-end gap-2">
-                  <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 max-w-2xl whitespace-pre-wrap" style={{ fontSize: '14px' }}>
+                  <div className="w-full whitespace-pre-wrap" style={{ fontSize: '14px' }}>
                     {msg.content}
                   </div>
                 </div>
@@ -503,168 +453,24 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             </div>
           )}
 
-          <div ref={chatEndRef} />
+            <div ref={chatEndRef} />
+          </div>
         </div>
 
         {/* Input Area */}
-        <div className="bg-white border-t border-gray-200 px-6 py-4">
-          <div className={`rounded-lg border border-gray-300 p-2 focus-within:ring-2 focus-within:ring-blue-500/20`}>
-            {/* Text input */}
-            <div className="mb-2">
-              <input
-                ref={inputRef}
-                type="text"
-                value={typedText}
-                onKeyDown={handleKeyPress}
-                disabled={!isTyping}
-                placeholder={isTyping ? "Type to continue..." : "Waiting for response..."}
-                className={`w-full min-h-[36px] resize-none border-0 focus:outline-none focus:ring-0 bg-transparent text-sm disabled:bg-transparent disabled:text-gray-400`}
-              />
-            </div>
-
-            {/* Icons and Send button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
-                <button className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600">
-                  <Paperclip className="w-3.5 h-3.5" />
-                </button>
-
-                {/* Library Button */}
-                <DropdownMenu open={isLibraryPopoverOpen} onOpenChange={setIsLibraryPopoverOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600 relative"
-                    >
-                      <FolderOpen className="w-3.5 h-3.5" />
-                      {selectedLibraries.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                          {selectedLibraries.length}
-                        </span>
-                      )}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    className="w-64 p-0 z-50" 
-                    align="start" 
-                    side="top" 
-                    sideOffset={8}
-                  >
-                    <div className="p-3 border-b">
-                      <h3 className="font-medium text-xs">Select Libraries</h3>
-                      <p className="text-xs text-muted-foreground">Connect this chat to libraries</p>
-                    </div>
-                    <div className="p-2">
-                      {libraries.map((library) => {
-                        const isSelected = selectedLibraries.includes(library.id);
-                        return (
-                          <button
-                            key={library.id}
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              toggleLibrary(library.id);
-                            }}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
-                          >
-                            <FolderOpen className="w-5 h-5 flex-shrink-0" />
-                            <div className="flex-1 text-left">
-                              <div className="text-xs">{library.name}</div>
-                              <div className="text-[10px] text-muted-foreground">{library.type}</div>
-                            </div>
-                            {isSelected && (
-                              <div className="w-2 h-2 rounded-full bg-purple-500" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                {/* Tools Button */}
-                <DropdownMenu open={isToolsPopoverOpen} onOpenChange={setIsToolsPopoverOpen}>
-                  <DropdownMenuTrigger asChild>
-                    <button
-                      type="button"
-                      className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors text-gray-600 relative"
-                    >
-                      <Wrench className="w-3.5 h-3.5" />
-                      {selectedTools.length > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                          {selectedTools.length}
-                        </span>
-                      )}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    className="w-64 p-0 z-50" 
-                    align="start" 
-                    side="top" 
-                    sideOffset={8}
-                  >
-                    <div className="p-3 border-b">
-                      <h3 className="font-medium text-xs">Available Tools</h3>
-                      <p className="text-xs text-muted-foreground">Select tools to enable</p>
-                    </div>
-                    <div className="p-2">
-                      {tools.map((tool) => {
-                        const Icon = tool.icon;
-                        const isSelected = selectedTools.includes(tool.id);
-                        return (
-                          <button
-                            key={tool.id}
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              toggleTool(tool.id);
-                            }}
-                            className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
-                          >
-                            <Icon className="w-5 h-5 flex-shrink-0" />
-                            <span className="flex-1 text-left text-xs">{tool.name}</span>
-                            {isSelected && (
-                              <div className="w-2 h-2 rounded-full bg-blue-500" />
-                            )}
-                          </button>
-                        );
-                      })}
-                      
-                      {/* Explore AI Common Tools link */}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          // TODO: Navigate to AI Common Tools page
-                          console.log('Navigate to AI Common Tools');
-                        }}
-                        className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mt-1 border-t border-gray-200 pt-3"
-                      >
-                        <span className="flex-1 text-left text-xs text-blue-600 font-medium">Explore AI Common Tools</span>
-                      </button>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-
-              <button 
-                disabled={!isTyping}
-                className={`h-7 w-7 flex items-center justify-center rounded-md transition-colors ${
-                  isTyping 
-                    ? 'bg-blue-500 hover:bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </div>
+        <div className="bg-white px-6 py-4">
+          <div className="max-w-chat mx-auto">
+            <MessageInput
+              onSend={handleSendMessage}
+              value={typedText}
+              onChange={setTypedText}
+              autoTypeText={getCurrentTargetText()}
+              disabled={!isTyping}
+            />
+            {isTyping && (
+              <p className="text-xs text-gray-500 mt-2">Press Enter to send the complete message</p>
+            )}
           </div>
-          {isTyping && (
-            <p className="text-xs text-gray-500 mt-2">Press Enter to send the complete message</p>
-          )}
         </div>
       </div>
 

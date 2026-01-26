@@ -1,11 +1,7 @@
-import { Plus, MessageSquare, Sparkles, Clock, User, Settings, ChevronDown, Pencil, Archive, Trash2, FolderOpen, Home, Compass, Wrench, ChevronRight, BookOpen, MessageSquarePlus, Shield, ShieldOff, MoreHorizontal, Users, Pin, Play, PanelLeftClose, Info } from 'lucide-react';
+import { Settings, Trash2, FolderOpen, Compass, MessageSquarePlus, MoreHorizontal, Users, Info } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
-import { Label } from './ui/label';
-import { Switch } from './ui/switch';
-import { Separator } from './ui/separator';
-import { Badge } from './ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import type { Chat, View } from '../App';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
@@ -71,35 +67,13 @@ export function ChatSidebar({
   const font = getFontClasses(fontStyle);
 
   return (
-    <div className={`flex flex-col h-screen w-80 border-r ${theme.sidebar} ${font.base} flex-shrink-0`}>
+    <div className={`flex flex-col h-screen w-[280px] border-r ${theme.sidebar} ${font.base} flex-shrink-0`}>
       {/* App Title with Mode Switch */}
       <div className="p-3 space-y-2 flex-shrink-0">
         <div className="flex items-center">
-          <h2 className={`${theme.title} ${font.title} text-sm`}>
-            {mode === 'desk' ? 'AI Assistant Desk' : 'AI Assistant Studio'}
+          <h2 className={`${theme.title} text-lg font-bold tracking-tight`}>
+            AI Assistant Desk
           </h2>
-        </div>
-        
-        {/* Mode Toggle */}
-        <div className="flex items-center gap-2">
-          <Label htmlFor="mode-switch" className={`${theme.navItem} cursor-pointer text-xs`}>
-            Desk
-          </Label>
-          <Switch
-            id="mode-switch"
-            checked={mode === 'studio'}
-            onCheckedChange={(checked) => {
-              onModeChange(checked ? 'studio' : 'desk');
-              if (checked) {
-                onStudioClick();
-              } else {
-                onHomeClick();
-              }
-            }}
-          />
-          <Label htmlFor="mode-switch" className={`${theme.navItem} cursor-pointer text-xs`}>
-            Studio
-          </Label>
         </div>
       </div>
 
@@ -109,81 +83,15 @@ export function ChatSidebar({
           <div className="px-2 pb-4">
             {mode === 'desk' ? (
               <>
-                {/* Home Button */}
+                {/* New Chat Button - Links to Home (no highlight) */}
                 <Button
+                  className={`w-full justify-start gap-2 h-8 text-xs mb-1 ${theme.navItem} hover:bg-gray-100 dark:hover:bg-gray-800`}
                   variant="ghost"
-                  className={`w-full justify-start gap-2 h-7 text-xs mb-1 ${theme.navItem} hover:bg-gray-100 dark:hover:bg-gray-800 ${activeView === 'home' ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
-                  onClick={onHomeClick}
+                  onClick={onNewChat}
                 >
-                  <Home className="w-3.5 h-3.5" />
-                  Home
+                  <MessageSquarePlus className="w-3.5 h-3.5" />
+                  <span>New Chat</span>
                 </Button>
-
-                <Separator className={`my-2 ${theme.separator}`} />
-
-                {/* New Chat Button with Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      className={`w-full justify-between gap-2 h-8 text-xs mb-1 ${theme.navItem} hover:bg-gray-100 dark:hover:bg-gray-800`}
-                      variant="ghost"
-                    >
-                      <div className="flex items-center gap-2">
-                        <MessageSquarePlus className="w-3.5 h-3.5" />
-                        <span>New Chat</span>
-                      </div>
-                      <ChevronDown className="w-3.5 h-3.5 opacity-50" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <DropdownMenuItem onClick={onNewChat} className="cursor-pointer">
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center w-full">
-                              <MessageSquarePlus className="w-3.5 h-3.5 mr-2" />
-                              <span className="flex-1">New R/SN Chat</span>
-                              <Badge variant="secondary" className="ml-auto text-[10px] px-1 py-0">R/SN</Badge>
-                            </div>
-                          </TooltipTrigger>
-                        </DropdownMenuItem>
-                        <TooltipContent side="right">
-                          <p>Restricted / Sensitive Normal</p>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <DropdownMenuItem onClick={onNewCCESNChat} className="cursor-pointer">
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center w-full">
-                              <Shield className="w-3.5 h-3.5 mr-2" />
-                              <span className="flex-1">New C(CE)/SN Chat</span>
-                              <Badge variant="secondary" className="ml-auto text-[10px] px-1 py-0">C(CE)/SN</Badge>
-                            </div>
-                          </TooltipTrigger>
-                        </DropdownMenuItem>
-                        <TooltipContent side="right">
-                          <p>Confidential (Cloud-Eligible)/ Sensitive Normal</p>
-                        </TooltipContent>
-                      </Tooltip>
-
-                      <Tooltip>
-                        <DropdownMenuItem onClick={onNewSHChat} className="cursor-pointer">
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center w-full">
-                              <ShieldOff className="w-3.5 h-3.5 mr-2" />
-                              <span className="flex-1">New C(CE)/SH Chat</span>
-                              <Badge variant="secondary" className="ml-auto text-[10px] px-1 py-0">C(CE)/SH</Badge>
-                            </div>
-                          </TooltipTrigger>
-                        </DropdownMenuItem>
-                        <TooltipContent side="right">
-                          <p>Confidential (Cloud-Eligible)/ Sensitive High</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </DropdownMenuContent>
-                </DropdownMenu>
 
                 {/* Library Tab */}
                 <Button
@@ -195,15 +103,6 @@ export function ChatSidebar({
                   <span className="flex-1 text-left">Library</span>
                 </Button>
 
-                <Separator className={`my-2 ${theme.separator}`} />
-
-                <div className="flex items-center justify-between px-2 py-1 mt-4">
-                  <div className={`flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400`}>
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Assistants</span>
-                  </div>
-                </div>
-
                 <Button
                   variant="ghost"
                   className={`w-full justify-start gap-2 h-7 text-xs ${theme.navItem} hover:bg-gray-100 dark:hover:bg-gray-800 ${activeView === 'explore' ? 'bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
@@ -213,123 +112,11 @@ export function ChatSidebar({
                   Explore All Assistants
                 </Button>
 
-                {/* Role-Specific Pinned Assistants - 3 assistants with pin icon */}
-                <div className="space-y-0.5 mt-1">
-                  {userProfile.role === 'HR Officer' ? (
-                    <>
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-blue-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">👔</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Recruitment Assistant</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-green-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">📋</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Policy Drafter</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-purple-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">🎓</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Onboarding Assistant</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-                    </>
-                  ) : userProfile.role === 'Marketing Officer' ? (
-                    <>
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-pink-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">📢</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Campaign Strategist</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-blue-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">✍️</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Content Writer</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-green-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">💡</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">PM Ideation Assistant</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-orange-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">📝</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Meeting Minutes AI</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-
-                      <button
-                        className={`w-full text-left px-2 py-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${theme.navItem}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded bg-indigo-500 flex items-center justify-center flex-shrink-0">
-                            <span className="text-white text-[8px]">📊</span>
-                          </div>
-                          <span className="text-xs truncate flex-1">Project Report Writer</span>
-                          <Pin className="w-3 h-3 text-gray-400 flex-shrink-0" />
-                        </div>
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <Separator className={`my-2 ${theme.separator}`} />
-
                 {/* Chats Section Header */}
-                <div className="flex items-center justify-between px-2 py-1">
+                <div className="flex items-center justify-between px-2 py-1 mt-6">
                   <div className="flex items-center gap-2">
-                    <div className={`flex items-center gap-2 text-xs font-medium text-gray-500 dark:text-gray-400`}>
-                      <MessageSquare className="w-3.5 h-3.5" />
-                      <span>Chats</span>
-                    </div>
-                    
+                    <span className={`text-[11px] font-medium text-gray-500 dark:text-gray-400`}>Chats</span>
+
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>

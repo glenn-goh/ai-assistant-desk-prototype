@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChatArea } from './components/ChatArea';
 import { ChatSidebar } from './components/ChatSidebar';
 import { ExplorePage } from './components/ExplorePage';
@@ -75,6 +75,24 @@ export default function App() {
   const [activeView, setActiveView] = useState<View>('home');
   const [mode, setMode] = useState<Mode>('desk');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [homeResetKey, setHomeResetKey] = useState(0);
+
+  // Handle browser back button to return to login
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Push a new history state when authenticated
+      window.history.pushState({ authenticated: true }, '');
+    }
+
+    const handlePopState = () => {
+      // When browser back is pressed, sign out
+      setIsAuthenticated(false);
+      setHasOnboarded(false);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isAuthenticated]);
 
   // Derived active chat state handling draft chats
   const activeChat = activeChatId.startsWith('new-') 
@@ -175,7 +193,8 @@ export default function App() {
 
   const handleNewChat = () => {
     setActiveChatId('new-rsn');
-    setActiveView('chat');
+    setActiveView('home');
+    setHomeResetKey(prev => prev + 1);
   };
 
   const handleNewCCESNChat = () => {
@@ -417,6 +436,7 @@ export default function App() {
         />
       ) : (
         <HomePage
+          key={homeResetKey}
           colorTheme={colorTheme}
           fontStyle={fontStyle}
           onSelectChat={handleSelectChat}

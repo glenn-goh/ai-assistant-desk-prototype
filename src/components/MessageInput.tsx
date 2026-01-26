@@ -1,34 +1,78 @@
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
-import { Send, Paperclip, Wrench, Search, ImagePlus, Mic, FolderOpen, ScanLine } from 'lucide-react';
+import { Send, Paperclip, Wrench, Search, ImagePlus, Mic, FolderOpen, ScanLine, Shield, ChevronDown } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem
 } from './ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 
+export type ClassificationType = 'r-sn' | 'cce-sn' | 'cce-sh';
+
 interface MessageInputProps {
-  onSend: (content: string) => void;
-  colorTheme: ColorTheme;
-  fontStyle: FontStyle;
+  onSend: (content: string, classificationType?: ClassificationType) => void;
+  colorTheme?: ColorTheme;
+  fontStyle?: FontStyle;
   showFileUpload?: boolean;
   autoTypeText?: string;
+  showClassification?: boolean;
+  defaultClassification?: ClassificationType;
+  value?: string;
+  onChange?: (value: string) => void;
+  disabled?: boolean;
+  showTypingHint?: boolean;
+  placeholder?: string;
 }
 
-export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = false, autoTypeText }: MessageInputProps) {
-  const [input, setInput] = useState('');
+export function MessageInput({
+  onSend,
+  colorTheme = 'light',
+  fontStyle = 'modern',
+  showFileUpload = false,
+  autoTypeText,
+  showClassification = false,
+  defaultClassification = 'r-sn',
+  value,
+  onChange,
+  disabled = false,
+  showTypingHint = false,
+  placeholder
+}: MessageInputProps) {
+  const [internalInput, setInternalInput] = useState('');
+
+  // Support both controlled and uncontrolled modes
+  const input = value !== undefined ? value : internalInput;
+  const setInput = (newValue: string) => {
+    if (onChange) {
+      onChange(newValue);
+    }
+    setInternalInput(newValue);
+  };
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
   const [isLibraryPopoverOpen, setIsLibraryPopoverOpen] = useState(false);
   const [isToolsPopoverOpen, setIsToolsPopoverOpen] = useState(false);
+  const [isClassificationOpen, setIsClassificationOpen] = useState(false);
+  const [classificationType, setClassificationType] = useState<ClassificationType>(defaultClassification);
   const [typedLength, setTypedLength] = useState(0);
   const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
+
+  // Determine if input is disabled (either explicitly or waiting for response)
+  const isInputDisabled = disabled;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const classificationOptions = [
+    { id: 'r-sn' as ClassificationType, label: 'R/SN', fullName: 'Restricted / Sensitive Normal' },
+    { id: 'cce-sn' as ClassificationType, label: 'C(CE)/SN', fullName: 'Confidential (Cloud-Eligible) / Sensitive Normal' },
+    { id: 'cce-sh' as ClassificationType, label: 'C(CE)/SH', fullName: 'Confidential (Cloud-Eligible) / Sensitive High' },
+  ];
 
   const tools = [
     { id: 'internet-search', name: 'Internet Search', icon: Search },
@@ -45,7 +89,7 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
 
   const handleSend = () => {
     if (input.trim()) {
-      onSend(input);
+      onSend(input, showClassification ? classificationType : undefined);
       setInput('');
     }
   };
@@ -108,9 +152,9 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
       // Complete the text immediately and send
       setInput(autoTypeText);
       setTypedLength(autoTypeText.length);
-      
+
       setTimeout(() => {
-        onSend(autoTypeText);
+        onSend(autoTypeText, showClassification ? classificationType : undefined);
         setInput('');
         setTypedLength(0);
       }, 100);
@@ -140,10 +184,11 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
           value={input}
           onChange={autoTypeText ? undefined : (e => setInput(e.target.value))}
           onKeyDown={handleTypingKeyDown}
-          placeholder={autoTypeText ? "Type to continue..." : "Message AI Assistant..."}
-          className={`w-full min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent ${font.input}`}
+          placeholder={placeholder || (autoTypeText ? "Type to continue..." : isInputDisabled ? "Waiting for response..." : "Message AI Assistant...")}
+          className={`w-full min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent ${font.input} ${isInputDisabled ? 'text-gray-400' : ''}`}
           rows={1}
           readOnly={!!autoTypeText}
+          disabled={isInputDisabled}
         />
       </div>
 
@@ -182,17 +227,17 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              className="w-64 p-0 z-50" 
-              align="start" 
-              side="top" 
+            <DropdownMenuContent
+              className="w-64 p-0 z-50 bg-white dark:bg-gray-900"
+              align="start"
+              side="top"
               sideOffset={8}
             >
-              <div className="p-3 border-b">
+              <div className="p-3 border-b bg-white dark:bg-gray-900">
                 <h3 className="font-medium text-xs">Select Libraries</h3>
                 <p className="text-xs text-muted-foreground">Connect this chat to libraries</p>
               </div>
-              <div className="p-2">
+              <div className="p-2 bg-white dark:bg-gray-900">
                 {libraries.map((library) => {
                   const isSelected = selectedLibraries.includes(library.id);
                   return (
@@ -238,17 +283,17 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              className="w-64 p-0 z-50" 
-              align="start" 
-              side="top" 
+            <DropdownMenuContent
+              className="w-64 p-0 z-50 bg-white dark:bg-gray-900"
+              align="start"
+              side="top"
               sideOffset={8}
             >
-              <div className="p-3 border-b">
+              <div className="p-3 border-b bg-white dark:bg-gray-900">
                 <h3 className="font-medium text-xs">Available Tools</h3>
                 <p className="text-xs text-muted-foreground">Select tools to enable</p>
               </div>
-              <div className="p-2">
+              <div className="p-2 bg-white dark:bg-gray-900">
                 {tools.map((tool) => {
                   const Icon = tool.icon;
                   const isSelected = selectedTools.includes(tool.id);
@@ -271,7 +316,7 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
                     </button>
                   );
                 })}
-                
+
                 {/* Explore AI Common Tools link */}
                 <button
                   type="button"
@@ -290,15 +335,79 @@ export function MessageInput({ onSend, colorTheme, fontStyle, showFileUpload = f
           </DropdownMenu>
         </div>
 
-        <Button
-          onClick={handleSend}
-          disabled={!input.trim()}
-          size="icon"
-          className={`h-7 w-7 flex-shrink-0 ${theme.sendButton}`}
-        >
-          <Send className="w-3.5 h-3.5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {/* Classification Dropdown */}
+          {showClassification && (
+            <TooltipProvider>
+              <DropdownMenu open={isClassificationOpen} onOpenChange={setIsClassificationOpen}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 px-2 flex-shrink-0 gap-1 text-xs"
+                      >
+                        <Shield className="w-3.5 h-3.5" />
+                        <span>{classificationOptions.find(c => c.id === classificationType)?.label}</span>
+                        <ChevronDown className="w-3 h-3 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                  </TooltipTrigger>
+                  <TooltipContent side="top">
+                    <p>{classificationOptions.find(c => c.id === classificationType)?.fullName}</p>
+                  </TooltipContent>
+                </Tooltip>
+                <DropdownMenuContent
+                  className="w-64 p-0 z-50 bg-white dark:bg-gray-900"
+                  align="end"
+                  side="top"
+                  sideOffset={8}
+                >
+                  <div className="p-3 border-b bg-white dark:bg-gray-900">
+                    <h3 className="font-medium text-xs">Data Classification</h3>
+                    <p className="text-xs text-muted-foreground">Select the classification level</p>
+                  </div>
+                  <div className="p-2 bg-white dark:bg-gray-900">
+                    {classificationOptions.map((option) => {
+                      const isSelected = classificationType === option.id;
+                      return (
+                        <DropdownMenuItem
+                          key={option.id}
+                          onClick={() => setClassificationType(option.id)}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                        >
+                          <Shield className="w-4 h-4 flex-shrink-0" />
+                          <div className="flex-1">
+                            <div className="text-xs font-medium">{option.label}</div>
+                            <div className="text-[10px] text-muted-foreground">{option.fullName}</div>
+                          </div>
+                          {isSelected && (
+                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          )}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </TooltipProvider>
+          )}
+
+          <Button
+            onClick={handleSend}
+            disabled={!input.trim() || isInputDisabled}
+            size="icon"
+            className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : theme.sendButton}`}
+          >
+            <Send className="w-3.5 h-3.5" />
+          </Button>
+        </div>
       </div>
+      {showTypingHint && !isInputDisabled && (
+        <p className="text-xs text-gray-500 mt-2">Press Enter to send the complete message</p>
+      )}
     </div>
   );
 }
