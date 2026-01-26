@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FileText, Code, BarChart3, ClipboardList, X, PanelLeft, PanelRight, ArrowLeft } from 'lucide-react';
 import { MessageInput } from './MessageInput';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
 
 // Type definitions
 interface ChatSimulation {
@@ -279,11 +280,12 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   };
 
   return (
-    <div className="flex h-full bg-white">
+    <ResizablePanelGroup direction="horizontal" className="h-full bg-gray-100">
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col border-r border-gray-300">
+      <ResizablePanel defaultSize={showOutputPanel ? 50 : 100} minSize={30}>
+        <div className="flex-1 flex flex-col h-full">
         {/* Chat Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 bg-white">
+        <div className="flex items-center gap-3 px-4 py-3 bg-gray-100">
           <button
             onClick={onToggleSidebar}
             className="text-gray-700 hover:text-gray-900 transition-colors"
@@ -303,13 +305,13 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
-          <div className="max-w-chat mx-auto space-y-6">
+        <div className="flex-1 overflow-y-auto px-6 py-4 bg-gray-100">
+          <div className="max-w-chat mx-auto space-y-8">
           {displayedMessages.map((msg, idx) => (
             <div key={idx}>
               {msg.role === 'user' && (
                 <div className="flex justify-end items-end gap-2 ml-24 mb-12">
-                  <div className="bg-gray-900 text-white rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '14px' }}>
+                  <div className="bg-gray-200 text-black rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                     {msg.text}
                   </div>
                 </div>
@@ -317,7 +319,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
               {msg.type === 'thinking' && (
                 <div className="flex justify-start items-end gap-2">
-                  <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '14px' }}>
+                  <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '16px' }}>
                     {msg.thought}
                   </div>
                 </div>
@@ -336,32 +338,29 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               )}
 
               {msg.type === 'text' && (
-                <div className="flex justify-start items-end gap-2">
-                  <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '14px' }}>
+                <div className="flex justify-start items-end gap-2 mb-2">
+                  <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                     {msg.content}
                   </div>
                 </div>
               )}
 
               {msg.type === 'artifact' && (
-                <div className="flex justify-start items-end gap-2">
+                <div className="w-full">
                   <button
                     onClick={() => {
                       setSelectedArtifact(msg.data);
                       setShowOutputPanel(true);
                     }}
-                    className="bg-white border-2 border-gray-900 rounded-lg px-4 py-3 max-w-md hover:bg-gray-100 transition-colors text-left"
+                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="text-gray-700 mt-1">
+                    <div className="flex items-center gap-3">
+                      <div className="text-gray-500">
                         {getFileIcon(msg.data.fileType)}
                       </div>
                       <div className="flex-1">
-                        <div className="font-semibold text-gray-900 text-sm">{msg.data.title}</div>
-                        <div className="text-xs text-gray-500 mt-1">{msg.data.description}</div>
-                        <div className="text-xs text-gray-700 mt-2 underline">
-                          {msg.data.interactive ? 'Click to fill out →' : 'Click to view →'}
-                        </div>
+                        <div className="font-medium text-gray-900 text-sm">{msg.data.title}</div>
+                        <div className="text-xs text-gray-500 mt-0.5">{msg.data.description}</div>
                       </div>
                     </div>
                   </button>
@@ -373,7 +372,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           {/* Active thinking state */}
           {currentThought && (
             <div className="flex justify-start items-end gap-2">
-              <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '14px' }}>
+              <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '16px' }}>
                 <div className="flex-shrink-0">
                   <div className={`w-2 h-2 ${theme.accent} rounded-full animate-pulse`} style={{ animationDuration: '1s' }}></div>
                 </div>
@@ -412,7 +411,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         </div>
 
         {/* Input Area */}
-        <div className="bg-white px-6 py-4">
+        <div className="bg-gray-100 px-6 py-4">
           <div className="max-w-chat mx-auto">
             <MessageInput
               onSend={handleSendMessage}
@@ -426,13 +425,19 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             )}
           </div>
         </div>
-      </div>
+        </div>
+      </ResizablePanel>
 
-      {/* Output Panel */}
+      {/* Resizable Handle */}
       {showOutputPanel && (
-        <div className="w-1/2 flex flex-col bg-gray-100 border-l border-gray-300">
+        <>
+          <ResizableHandle withHandle className="bg-gray-200 hover:bg-gray-300 transition-colors" />
+
+          {/* Output Panel */}
+          <ResizablePanel defaultSize={50} minSize={20}>
+            <div className="flex flex-col h-full bg-white">
           {/* Output Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 bg-white">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 bg-white h-[52px]">
             <div className="flex items-center gap-2">
               {selectedArtifact && (
                 <button
@@ -469,7 +474,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   </div>
 
                   {/* Artifact Content */}
-                  <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
+                  <div className="prose prose-sm max-w-none prose-lofi" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
 
                 </div>
               </div>
@@ -510,8 +515,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               </div>
             )}
           </div>
-        </div>
+            </div>
+          </ResizablePanel>
+        </>
       )}
-    </div>
+    </ResizablePanelGroup>
   );
 };

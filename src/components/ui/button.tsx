@@ -18,7 +18,7 @@ const buttonVariants = cva(
         // Secondary filled
         secondary: "bg-gray-100 text-gray-900 border border-gray-300 hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700",
         // Ghost: minimal, just hover effect
-        ghost: "hover:bg-gray-100 text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800",
+        ghost: "hover:bg-gray-200 text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800",
         // Link style
         link: "text-gray-900 underline-offset-4 hover:underline dark:text-white",
       },

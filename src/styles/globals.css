@@ -241,3 +241,175 @@
 .hover-subtle:hover {
   background-color: var(--gray-100);
 }
+
+/* Lo-fi prose styles for artifact content */
+.prose-lofi {
+  filter: grayscale(100%);
+  --tw-prose-body: var(--gray-700);
+  --tw-prose-headings: var(--gray-900);
+  --tw-prose-lead: var(--gray-700);
+  --tw-prose-links: var(--gray-900);
+  --tw-prose-bold: var(--gray-900);
+  --tw-prose-counters: var(--gray-500);
+  --tw-prose-bullets: var(--gray-500);
+  --tw-prose-hr: var(--gray-300);
+  --tw-prose-quotes: var(--gray-700);
+  --tw-prose-quote-borders: var(--gray-300);
+  --tw-prose-captions: var(--gray-500);
+  --tw-prose-code: var(--gray-900);
+  --tw-prose-pre-code: var(--gray-700);
+  --tw-prose-pre-bg: var(--gray-100);
+  --tw-prose-th-borders: var(--gray-300);
+  --tw-prose-td-borders: var(--gray-300);
+}
+
+.prose-lofi table {
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+.prose-lofi th {
+  background-color: var(--gray-100);
+  font-weight: var(--font-weight-semibold);
+  color: var(--gray-900);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-300);
+  text-align: left;
+}
+
+.prose-lofi td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--gray-300);
+  color: var(--gray-700);
+}
+
+.prose-lofi tr:last-child td {
+  border-bottom: none;
+}
+
+.prose-lofi ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.prose-lofi ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.prose-lofi li {
+  color: var(--gray-700);
+  margin-bottom: 0.5rem;
+}
+
+.prose-lofi code {
+  background-color: var(--gray-100);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+
+.prose-lofi pre {
+  background-color: var(--gray-100);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--radius);
+  padding: 1rem;
+  overflow-x: auto;
+}
+
+.prose-lofi blockquote {
+  border-left: 3px solid var(--gray-300);
+  padding-left: 1rem;
+  font-style: italic;
+  color: var(--gray-700);
+}
+
+.prose-lofi a {
+  color: var(--gray-900);
+  text-decoration: underline;
+}
+
+.prose-lofi a:hover {
+  color: var(--gray-700);
+}
+
+.prose-lofi hr {
+  border-color: var(--gray-300);
+}
+
+/* Override colorful elements in artifact content */
+.prose-lofi h1,
+.prose-lofi h2,
+.prose-lofi h3,
+.prose-lofi h4,
+.prose-lofi h5,
+.prose-lofi h6 {
+  color: var(--gray-900) !important;
+}
+
+.prose-lofi p,
+.prose-lofi span,
+.prose-lofi div {
+  color: var(--gray-700);
+}
+
+/* Override colored backgrounds */
+.prose-lofi [style*="background"] {
+  background-color: var(--gray-100) !important;
+  border-color: var(--gray-300) !important;
+}
+
+/* Override progress bars */
+.prose-lofi progress,
+.prose-lofi [role="progressbar"],
+.prose-lofi .progress-bar,
+.prose-lofi [style*="green"],
+.prose-lofi [style*="blue"] {
+  background-color: var(--gray-300) !important;
+  color: var(--gray-700) !important;
+}
+
+.prose-lofi progress::-webkit-progress-bar {
+  background-color: var(--gray-100);
+}
+
+.prose-lofi progress::-webkit-progress-value {
+  background-color: var(--gray-700);
+}
+
+.prose-lofi progress::-moz-progress-bar {
+  background-color: var(--gray-700);
+}
+
+/* Override checkmarks and status indicators */
+.prose-lofi svg {
+  color: var(--gray-500) !important;
+  fill: var(--gray-500);
+}
+
+/* Override any blue/green text colors */
+.prose-lofi [style*="color: rgb(0, 128"],
+.prose-lofi [style*="color: rgb(34, 197"],
+.prose-lofi [style*="color: green"],
+.prose-lofi [style*="color: blue"],
+.prose-lofi [style*="#22c55e"],
+.prose-lofi [style*="#3b82f6"],
+.prose-lofi [style*="#10b981"],
+.prose-lofi [style*="#0ea5e9"] {
+  color: var(--gray-700) !important;
+}
+
+/* Override card-like containers */
+.prose-lofi > div {
+  background-color: var(--white) !important;
+  border: 1px solid var(--gray-300) !important;
+  border-radius: var(--radius);
+}
+
+.prose-lofi > div > div {
+  background-color: transparent !important;
+  border: none !important;
+}

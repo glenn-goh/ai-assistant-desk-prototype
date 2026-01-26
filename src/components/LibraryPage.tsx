@@ -136,9 +136,9 @@ export function LibraryPage({ onToggleSidebar, colorTheme, fontStyle }: LibraryP
   };
 
   return (
-    <div className={`flex-1 flex flex-col ${theme.mainBg} ${font.base}`}>
+    <div className={`flex-1 flex flex-col bg-gray-100 ${font.base}`}>
       {/* Header */}
-      <div className={`flex items-center gap-2 p-4 border-b ${theme.header}`}>
+      <div className="flex items-center gap-2 p-4 bg-gray-100">
         <Button
           variant="ghost"
           size="sm"
@@ -146,7 +146,7 @@ export function LibraryPage({ onToggleSidebar, colorTheme, fontStyle }: LibraryP
         >
           <PanelLeft className="w-5 h-5" />
         </Button>
-        <h1 className={theme.title + ' ' + font.title}>Library</h1>
+        <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>Library</h1>
       </div>
 
       {/* Content */}

@@ -1,4 +1,4 @@
-import { Settings, Trash2, FolderOpen, Compass, MessageSquarePlus, MoreHorizontal, Users, Info } from 'lucide-react';
+import { Settings, Trash2, FolderOpen, Compass, Plus, MessageSquare, MoreHorizontal, Users, Info } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
@@ -62,9 +62,9 @@ export function ChatSidebar({
   if (!isOpen) return null;
 
   return (
-    <div className="flex flex-col h-screen w-[280px] border-r-2 border-gray-900 bg-gray-100 flex-shrink-0">
+    <div className="flex flex-col h-screen w-[280px] border-r border-gray-300 bg-gray-100 flex-shrink-0">
       {/* App Title */}
-      <div className="p-4 border-b border-gray-300">
+      <div className="p-4">
         <h2 className="text-lg font-bold text-gray-900">
           AI Assistant Desk
         </h2>
@@ -78,37 +78,47 @@ export function ChatSidebar({
               <>
                 {/* New Chat Button */}
                 <Button
-                  className="w-full justify-start gap-2 mb-2"
+                  className="w-full justify-start gap-2 mb-1 px-2 text-base"
                   variant="ghost"
                   onClick={onNewChat}
                 >
-                  <MessageSquarePlus className="w-4 h-4" />
+                  <Plus className="w-5 h-5" />
                   <span>New Chat</span>
+                </Button>
+
+                {/* Chats Link */}
+                <Button
+                  onClick={() => onViewChange('chats')}
+                  className={`w-full justify-start gap-2 mb-1 px-2 text-base ${activeView === 'chats' ? 'bg-gray-200' : ''}`}
+                  variant="ghost"
+                >
+                  <MessageSquare className="w-5 h-5" />
+                  <span>Chats</span>
                 </Button>
 
                 {/* Library Tab */}
                 <Button
                   onClick={() => onViewChange('library')}
-                  className={`w-full justify-start gap-2 mb-1 ${activeView === 'library' ? 'bg-gray-200' : ''}`}
+                  className={`w-full justify-start gap-2 mb-1 px-2 text-base ${activeView === 'library' ? 'bg-gray-200' : ''}`}
                   variant="ghost"
                 >
-                  <FolderOpen className="w-4 h-4" />
+                  <FolderOpen className="w-5 h-5" />
                   <span className="flex-1 text-left">Library</span>
                 </Button>
 
                 <Button
                   variant="ghost"
-                  className={`w-full justify-start gap-2 ${activeView === 'explore' ? 'bg-gray-200' : ''}`}
+                  className={`w-full justify-start gap-2 px-2 text-base ${activeView === 'explore' ? 'bg-gray-200' : ''}`}
                   onClick={onExploreClick}
                 >
-                  <Compass className="w-4 h-4" />
-                  Explore All Assistants
+                  <Compass className="w-5 h-5" />
+                  Explore Assistants
                 </Button>
 
                 {/* Chats Section Header */}
-                <div className="flex items-center justify-between px-2 py-2 mt-6">
+                <div className="flex items-center justify-between px-2 py-2 mt-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Chats</span>
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Recent Chats</span>
 
                     <TooltipProvider>
                       <Tooltip>
@@ -126,12 +136,12 @@ export function ChatSidebar({
                 </div>
 
                 {/* Chat List */}
-                <div className="space-y-1 mt-2">
+                <div className="space-y-0.5 mt-1">
                   {/* Demo Simulations */}
                   <button
                     onClick={() => onSelectSimulation?.('marketing-software-aor')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-marketing-software-aor' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-marketing-software-aor' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     Marketing Software AOR
@@ -139,8 +149,8 @@ export function ChatSidebar({
 
                   <button
                     onClick={() => onSelectSimulation?.('hr-candidate-shortlisting')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-hr-candidate-shortlisting' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-hr-candidate-shortlisting' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     HR Candidate Shortlisting
@@ -148,8 +158,8 @@ export function ChatSidebar({
 
                   <button
                     onClick={() => onSelectSimulation?.('pq-response-mnd')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-pq-response-mnd' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-pq-response-mnd' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     PQ Response - MND Housing
@@ -157,8 +167,8 @@ export function ChatSidebar({
 
                   <button
                     onClick={() => onSelectSimulation?.('feature-overview')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-feature-overview' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-feature-overview' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     Feature Overview
@@ -166,8 +176,8 @@ export function ChatSidebar({
 
                   <button
                     onClick={() => onSelectSimulation?.('customer-support')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-customer-support' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-customer-support' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     Customer Support
@@ -175,8 +185,8 @@ export function ChatSidebar({
 
                   <button
                     onClick={() => onSelectSimulation?.('feedback-collection')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-feedback-collection' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-feedback-collection' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     Feedback Collection
@@ -184,8 +194,8 @@ export function ChatSidebar({
 
                   <button
                     onClick={() => onSelectSimulation?.('procurement-rfq')}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                      activeChatId === 'sim-procurement-rfq' ? 'bg-gray-200 font-medium' : 'hover:bg-gray-200'
+                    className={`w-full text-left px-2 py-1.5 rounded-lg transition-colors text-base font-normal ${
+                      activeChatId === 'sim-procurement-rfq' ? 'bg-gray-200' : 'hover:bg-gray-200'
                     }`}
                   >
                     Procurement RFQ to AOR
@@ -198,9 +208,9 @@ export function ChatSidebar({
                     return (
                       <div
                         key={chat.id}
-                        className={`group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors text-sm ${
+                        className={`group flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-pointer transition-colors text-base font-normal ${
                           chat.id === activeChatId
-                            ? 'bg-gray-200 font-medium'
+                            ? 'bg-gray-200'
                             : 'hover:bg-gray-200'
                         }`}
                         onClick={() => onSelectChat(chat.id)}
@@ -243,18 +253,18 @@ export function ChatSidebar({
                 {/* Studio Mode Sidebar */}
                 <Button
                   onClick={onStudioClick}
-                  className={`w-full justify-start gap-2 mb-2 ${activeView === 'studio' ? 'bg-gray-700' : ''}`}
+                  className={`w-full justify-start gap-2 mb-1 px-2 text-base ${activeView === 'studio' ? 'bg-gray-700' : ''}`}
                   variant="outline"
                 >
-                  <MessageSquarePlus className="w-4 h-4" />
+                  <Plus className="w-5 h-5" />
                   New Assistant
                 </Button>
 
                 <Button
                   variant="ghost"
-                  className="w-full justify-start gap-2"
+                  className="w-full justify-start gap-2 px-2 text-base"
                 >
-                  <Users className="w-4 h-4" />
+                  <Users className="w-5 h-5" />
                   My Assistants
                 </Button>
               </>

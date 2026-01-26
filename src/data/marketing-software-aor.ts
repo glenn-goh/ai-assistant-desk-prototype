@@ -76,59 +76,59 @@ export const marketingSoftwareAorData = {
         </tr>
         <tr class="bg-gray-50">
           <td class="p-3 border border-gray-200 font-medium">Budget Fit ($30-35K)</td>
-          <td class="p-3 border border-gray-200 text-center">❌ 65% over</td>
-          <td class="p-3 border border-gray-200 text-center">❌ 35% over</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Within</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Within</td>
-          <td class="p-3 border border-gray-200 text-center">✅ Under</td>
+          <td class="p-3 border border-gray-200 text-center">No - 65% over</td>
+          <td class="p-3 border border-gray-200 text-center">No - 35% over</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Yes - Within</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Yes - Within</td>
+          <td class="p-3 border border-gray-200 text-center">Yes - Under</td>
         </tr>
         <tr>
           <td class="p-3 border border-gray-200 font-medium">Marketing Materials Creation</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Limited</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Excellent</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Excellent</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Basic</td>
-          <td class="p-3 border border-gray-200 text-center">❌ None</td>
+          <td class="p-3 border border-gray-200 text-center">Limited</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Excellent</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Excellent</td>
+          <td class="p-3 border border-gray-200 text-center">Basic</td>
+          <td class="p-3 border border-gray-200 text-center">None</td>
         </tr>
         <tr class="bg-gray-50">
           <td class="p-3 border border-gray-200 font-medium">Email Marketing</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Basic</td>
-          <td class="p-3 border border-gray-200 text-center">✅ Good</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
-          <td class="p-3 border border-gray-200 text-center">❌ None</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
+          <td class="p-3 border border-gray-200 text-center">Basic</td>
+          <td class="p-3 border border-gray-200 text-center">Good</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
+          <td class="p-3 border border-gray-200 text-center">None</td>
         </tr>
         <tr>
           <td class="p-3 border border-gray-200 font-medium">Campaign Management</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Limited</td>
-          <td class="p-3 border border-gray-200 text-center">✅ Good</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Limited</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
+          <td class="p-3 border border-gray-200 text-center">Limited</td>
+          <td class="p-3 border border-gray-200 text-center">Good</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
+          <td class="p-3 border border-gray-200 text-center">Limited</td>
         </tr>
         <tr class="bg-gray-50">
           <td class="p-3 border border-gray-200 font-medium">Team Collaboration</td>
-          <td class="p-3 border border-gray-200 text-center">✅ Good</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Excellent</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Excellent</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Excellent</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Basic</td>
+          <td class="p-3 border border-gray-200 text-center">Good</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Excellent</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Excellent</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Excellent</td>
+          <td class="p-3 border border-gray-200 text-center">Basic</td>
         </tr>
         <tr>
           <td class="p-3 border border-gray-200 font-medium">Analytics & Reporting</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Limited</td>
-          <td class="p-3 border border-gray-200 text-center">✅ Good</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Advanced</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
+          <td class="p-3 border border-gray-200 text-center">Limited</td>
+          <td class="p-3 border border-gray-200 text-center">Good</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Advanced</td>
         </tr>
         <tr>
           <td class="p-3 border border-gray-200 font-medium">Social Media Management</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Full suite</td>
-          <td class="p-3 border border-gray-200 text-center">❌ None</td>
-          <td class="p-3 border border-gray-200 text-center bg-green-50">✅ Good</td>
-          <td class="p-3 border border-gray-200 text-center">✅ Good</td>
-          <td class="p-3 border border-gray-200 text-center">⚠️ Limited</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Full suite</td>
+          <td class="p-3 border border-gray-200 text-center">None</td>
+          <td class="p-3 border border-gray-200 text-center bg-green-50">Good</td>
+          <td class="p-3 border border-gray-200 text-center">Good</td>
+          <td class="p-3 border border-gray-200 text-center">Limited</td>
         </tr>
         <tr>
           <td class="p-3 border border-gray-200 font-medium">Primary Strength</td>
@@ -193,7 +193,7 @@ export const marketingSoftwareAorData = {
   <p class="text-gray-600 mb-6">Based on Budget ($30-35K) & Requirements (Marketing Materials Creation)</p>
   
   <div class="mb-6 p-4 bg-yellow-50 border-2 border-yellow-500 rounded-lg">
-    <h3 class="font-bold text-yellow-900 mb-3">🎯 SHORTLISTED: TOP 3 OPTIONS</h3>
+    <h3 class="font-bold text-yellow-900 mb-3">SHORTLISTED: TOP 3 OPTIONS</h3>
     <p class="text-sm text-gray-700 mb-4">Based on your needs (marketing materials creation + $30-35K budget), here are my top 3 recommendations:</p>
     
     <div class="space-y-3">
@@ -239,7 +239,7 @@ export const marketingSoftwareAorData = {
   </div>
   
   <div class="p-4 bg-red-50 border border-red-200 rounded-lg mb-4">
-    <h3 class="font-bold text-red-900 mb-2">❌ Not Shortlisted:</h3>
+    <h3 class="font-bold text-red-900 mb-2">Not Shortlisted:</h3>
     <ul class="text-sm text-gray-700 space-y-1">
       <li><strong>HubSpot:</strong> Excellent marketing platform but 65% over budget ($55K vs $30-35K) + weak on design/content creation</li>
       <li><strong>Semrush:</strong> Great for SEO/analytics but NOT suitable for creating marketing materials - it's a research tool, not a creation platform</li>
@@ -247,14 +247,14 @@ export const marketingSoftwareAorData = {
   </div>
   
   <div class="mt-6 p-4 bg-green-50 border-2 border-green-500 rounded-lg">
-    <h3 class="font-bold text-green-900 mb-2">💡 My Recommendation: Canva for Teams</h3>
+    <h3 class="font-bold text-green-900 mb-2">My Recommendation: Canva for Teams</h3>
     <p class="text-sm text-gray-700">For your specific need to "create marketing materials for campaigns" with a 15-person team, Canva for Teams offers the best overall package - excellent design tools + solid campaign management + perfect budget fit.</p>
   </div>
 </div>`
         },
         {
           type: "text" as const,
-          content: "These are your top 3 options that will be presented in the AOR. Based on your specific needs:\n\n**🥇 Canva for Teams** - Best overall value (materials creation + campaigns + budget fit)\n**🥈 Monday.com Marketing** - Strong alternative (campaign workflows + under budget, but weaker design)\n**🥉 Adobe Creative Cloud** - Premium option (professional design, but over budget + no campaign tools)\n\nWhich option would you like to proceed with for the AOR?"
+          content: "These are your top 3 options that will be presented in the AOR. Based on your specific needs:\n\n**#1 Canva for Teams** - Best overall value (materials creation + campaigns + budget fit)\n**#2 Monday.com Marketing** - Strong alternative (campaign workflows + under budget, but weaker design)\n**#3 Adobe Creative Cloud** - Premium option (professional design, but over budget + no campaign tools)\n\nWhich option would you like to proceed with for the AOR?"
         }
       ]
     },
@@ -486,19 +486,19 @@ export const marketingSoftwareAorData = {
         
         <div class="ml-4 space-y-2">
           <div>
-            <p class="font-semibold">✅ Best Fit for Requirements</p>
+            <p class="font-semibold">Best Fit for Requirements</p>
             <p class="ml-4">Excellent design tools for creating marketing materials + solid campaign management features</p>
           </div>
           <div>
-            <p class="font-semibold">✅ Price-to-Value Ratio</p>
+            <p class="font-semibold">Price-to-Value Ratio</p>
             <p class="ml-4">Comprehensive features at optimal price point within budget</p>
           </div>
           <div>
-            <p class="font-semibold">✅ Team Collaboration</p>
+            <p class="font-semibold">Team Collaboration</p>
             <p class="ml-4">Superior collaboration capabilities for 15-person marketing team</p>
           </div>
           <div>
-            <p class="font-semibold">✅ Budget Alignment</p>
+            <p class="font-semibold">Budget Alignment</p>
             <p class="ml-4">Fits within allocated budget of $30,000-35,000</p>
           </div>
         </div>
@@ -522,21 +522,21 @@ export const marketingSoftwareAorData = {
               <tr class="bg-green-50">
                 <td class="p-2 border border-gray-300 font-semibold">Canva for Teams</td>
                 <td class="p-2 border border-gray-300 text-center">$32,000</td>
-                <td class="p-2 border border-gray-300 text-center">✅ Perfect</td>
+                <td class="p-2 border border-gray-300 text-center">Yes - Perfect</td>
                 <td class="p-2 border border-gray-300">Excellent design + campaign tools, easy adoption</td>
                 <td class="p-2 border border-gray-300">Analytics less advanced</td>
               </tr>
               <tr>
                 <td class="p-2 border border-gray-300 font-semibold">Monday.com</td>
                 <td class="p-2 border border-gray-300 text-center">$28,000</td>
-                <td class="p-2 border border-gray-300 text-center">✅ Under</td>
+                <td class="p-2 border border-gray-300 text-center">Yes - Under</td>
                 <td class="p-2 border border-gray-300">Strong workflows, advanced analytics</td>
                 <td class="p-2 border border-gray-300">Weak design capabilities</td>
               </tr>
               <tr>
                 <td class="p-2 border border-gray-300 font-semibold">Adobe CC</td>
                 <td class="p-2 border border-gray-300 text-center">$45,000</td>
-                <td class="p-2 border border-gray-300 text-center">❌ Over</td>
+                <td class="p-2 border border-gray-300 text-center">No - Over</td>
                 <td class="p-2 border border-gray-300">Professional-grade design tools</td>
                 <td class="p-2 border border-gray-300">35% over budget, no campaign tools</td>
               </tr>
@@ -670,7 +670,7 @@ export const marketingSoftwareAorData = {
           interactive: false,
           content: `<div class="p-6 bg-white max-w-4xl mx-auto">
   <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-    <h2 class="text-sm font-bold text-blue-900 mb-3">📧 EMAIL DRAFT FOR YOUR REVIEW</h2>
+    <h2 class="text-sm font-bold text-blue-900 mb-3">EMAIL DRAFT FOR YOUR REVIEW</h2>
     <div class="space-y-2 text-sm">
       <div><strong>To:</strong> Sarah Chen (sarah.chen@tech.gov.sg)</div>
       <div><strong>CC:</strong> Mike Lim (mike.lim@tech.gov.sg)</div>
@@ -722,17 +722,17 @@ export const marketingSoftwareAorData = {
       <p>Marketing Officer</p>
       <p>Public Communications & Outreach Department</p>
       <p>Government Technology Agency</p>
-      <p>📧 jayden.tan@tech.gov.sg | ☎️ +65 6211 2345</p>
+      <p>jayden.tan@tech.gov.sg | +65 6211 2345</p>
     </div>
     
     <div class="mt-6 p-3 bg-gray-100 rounded">
       <h3 class="font-bold text-gray-900 mb-2">Attachments:</h3>
       <ul class="text-xs space-y-1">
-        <li>📄 AOR_Marketing_Software_HealthierSG_2025.docx</li>
-        <li>📄 Annex_A_Vendor_Comparison.pdf</li>
-        <li>📄 Annex_B_Technical_Specifications.pdf</li>
-        <li>📄 Annex_C_Team_Allocation.pdf</li>
-        <li>📄 Annex_D_Implementation_Timeline.pdf</li>
+        <li>AOR_Marketing_Software_HealthierSG_2025.docx</li>
+        <li>Annex_A_Vendor_Comparison.pdf</li>
+        <li>Annex_B_Technical_Specifications.pdf</li>
+        <li>Annex_C_Team_Allocation.pdf</li>
+        <li>Annex_D_Implementation_Timeline.pdf</li>
       </ul>
     </div>
   </div>
@@ -768,7 +768,7 @@ export const marketingSoftwareAorData = {
         },
         {
           type: "text" as const,
-          content: "✅ **Email sent successfully!**\n\nYour AOR has been sent to:\n- **Sarah Chen** (sarah.chen@tech.gov.sg) - Approving Officer\n- **Mike Lim** (mike.lim@tech.gov.sg) - CC'd\n\nAll 5 attachments included (2.4 MB total)\n\nI'll monitor the status and notify you when there's a response. You can also download a copy of all documents for your records if you'd like."
+          content: "**Email sent successfully!**\n\nYour AOR has been sent to:\n- **Sarah Chen** (sarah.chen@tech.gov.sg) - Approving Officer\n- **Mike Lim** (mike.lim@tech.gov.sg) - CC'd\n\nAll 5 attachments included (2.4 MB total)\n\nI'll monitor the status and notify you when there's a response. You can also download a copy of all documents for your records if you'd like."
         },
         {
           type: "artifact" as const,
@@ -777,7 +777,7 @@ export const marketingSoftwareAorData = {
           description: "AOR Drafting Summary",
           interactive: false,
           content: `<div class="p-6 bg-white max-w-4xl mx-auto">
-  <h1 class="text-2xl font-bold mb-6 text-blue-900">📊 SESSION SUMMARY</h1>
+  <h1 class="text-2xl font-bold mb-6 text-blue-900">SESSION SUMMARY</h1>
   
   <div class="grid grid-cols-2 gap-4 mb-6">
     <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -796,29 +796,29 @@ export const marketingSoftwareAorData = {
     </div>
     
     <div class="p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-      <div class="text-3xl font-bold text-emerald-700 mb-1">✅ 100%</div>
+      <div class="text-3xl font-bold text-emerald-700 mb-1">100%</div>
       <div class="text-sm text-gray-600">Compliance Status</div>
     </div>
   </div>
   
   <div class="space-y-4">
     <div class="p-4 bg-gray-50 rounded-lg">
-      <h2 class="font-bold text-gray-900 mb-3">Status: ✅ Submitted to Sarah Chen for approval</h2>
+      <h2 class="font-bold text-gray-900 mb-3">Status: Submitted to Sarah Chen for approval</h2>
       <div class="space-y-2 text-sm text-gray-700">
         <div class="flex items-center gap-2">
-          <span class="text-green-600 font-bold">✓</span>
+          <span class="text-green-600 font-bold">Done</span>
           <span>Market research completed (HubSpot, Mailchimp, Canva)</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-green-600 font-bold">✓</span>
+          <span class="text-green-600 font-bold">Done</span>
           <span>AOR document drafted with full compliance</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-green-600 font-bold">✓</span>
+          <span class="text-green-600 font-bold">Done</span>
           <span>All annexes generated (vendor comparison, technical specs, team allocation, timeline)</span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-green-600 font-bold">✓</span>
+          <span class="text-green-600 font-bold">Done</span>
           <span>Email sent to approving officer with all attachments</span>
         </div>
       </div>
@@ -849,7 +849,7 @@ export const marketingSoftwareAorData = {
       content: [
         {
           type: "text" as const,
-          content: "You're welcome! Good luck with the approval - I'll be here if you need help with future procurements. 😊"
+          content: "You're welcome! Good luck with the approval - I'll be here if you need help with future procurements."
         }
       ]
     }

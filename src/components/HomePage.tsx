@@ -58,12 +58,12 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
   };
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-white">
+    <div className="flex-1 h-full flex flex-col bg-gray-100">
       {/* Main Content */}
       <div className="flex-1 overflow-auto flex items-center">
         <div className="flex flex-col w-full max-w-chat mx-auto px-6">
           {/* Welcome Header */}
-          <div className="pb-6">
+          <div className="pb-10">
             <h1 className="text-2xl mb-1 tracking-tight font-semibold text-gray-900" style={{ fontSize: '2rem' }}>
               Good {today.getHours() < 12 ? 'Morning' : today.getHours() < 18 ? 'Afternoon' : 'Evening'}, {userProfile.name.split(' ')[0]}
             </h1>
@@ -89,7 +89,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
             </div>
 
             {/* PromptSuggestions - hide without shifting layout when input has text */}
-            <div className={`mt-4 flex flex-wrap gap-2 transition-opacity ${inputValue ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className={`mt-8 flex flex-wrap gap-2 transition-opacity ${inputValue ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
               {promptSuggestions.map((prompt, index) => (
                 <button
                   key={index}

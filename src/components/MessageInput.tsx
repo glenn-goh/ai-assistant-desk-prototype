@@ -182,7 +182,7 @@ export function MessageInput({
           onChange={autoTypeText ? undefined : (e => setInput(e.target.value))}
           onKeyDown={handleTypingKeyDown}
           placeholder={placeholder || (autoTypeText ? "Type to continue..." : isInputDisabled ? "Waiting for response..." : "Message AI Assistant...")}
-          className={`w-full min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-gray-900 ${isInputDisabled ? 'text-gray-400' : ''}`}
+          className={`w-full min-h-[48px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-gray-900 text-base ${isInputDisabled ? 'text-gray-400' : ''}`}
           rows={1}
           readOnly={!!autoTypeText}
           disabled={isInputDisabled}

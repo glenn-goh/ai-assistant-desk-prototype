@@ -4,6 +4,7 @@ import { ChatSidebar } from './components/ChatSidebar';
 import { ExplorePage } from './components/ExplorePage';
 import { StudioPage } from './components/StudioPage';
 import { LibraryPage } from './components/LibraryPage';
+import { ChatsPage } from './components/ChatsPage';
 import { HomePage } from './components/HomePage';
 import { LoginPage } from './components/LoginPage';
 import { OnboardingPage } from './components/OnboardingPage';
@@ -37,7 +38,7 @@ export interface Chat {
   classificationType?: 'rsn' | 'cce-sn' | 'cce-sh';
 }
 
-export type View = 'chat' | 'explore' | 'studio' | 'home' | 'library';
+export type View = 'chat' | 'explore' | 'studio' | 'home' | 'library' | 'chats';
 export type Mode = 'desk' | 'studio';
 
 export interface UserProfile {
@@ -433,6 +434,16 @@ export default function App() {
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           colorTheme={colorTheme}
           fontStyle={fontStyle}
+        />
+      ) : activeView === 'chats' ? (
+        <ChatsPage
+          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          colorTheme={colorTheme}
+          fontStyle={fontStyle}
+          chats={chats}
+          onSelectChat={handleSelectChat}
+          onDeleteChat={handleDeleteChat}
+          onSelectSimulation={handleSelectSimulation}
         />
       ) : (
         <HomePage
