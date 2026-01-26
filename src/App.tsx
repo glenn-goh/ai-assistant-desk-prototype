@@ -67,53 +67,7 @@ export default function App() {
     agency: 'GovTech'
   });
 
-  const [chats, setChats] = useState<Chat[]>([
-    // Commented out to hide from sidebar per user request
-    // {
-    //   id: '2',
-    //   type: 'assistant',
-    //   classificationType: 'cce-sn',
-    //   title: 'Deep Research AI - AI Ethics',
-    //   messages: [
-    //     {
-    //       id: 'msg1',
-    //       role: 'user',
-    //       content: 'I need to research the latest developments in AI ethics frameworks for public sector use, particularly focusing on transparency and accountability.',
-    //       timestamp: new Date(Date.now() - 3600000),
-    //     },
-    //     {
-    //       id: 'msg2',
-    //       role: 'assistant',
-    //       content: 'I\'ll conduct comprehensive research on AI ethics frameworks for the public sector. Let me gather information from academic papers, government reports, and policy documents.',
-    //       timestamp: new Date(Date.now() - 3500000),
-    //     },
-    //   ],
-    //   createdAt: new Date(Date.now() - 3600000),
-    //   assistantType: 'deep-research-ai',
-    // },
-    // {
-    //   id: '3',
-    //   type: 'assistant',
-    //   classificationType: 'cce-sn',
-    //   title: 'Parliamentary Question Assistant',
-    //   messages: [
-    //     {
-    //       id: 'msg-pq1',
-    //       role: 'user',
-    //       content: 'What is the progress in the adoption of generative AI tools in the Public Service, and what training will be provided for public servants to use these tools?',
-    //       timestamp: new Date(Date.now() - 18000000),
-    //     },
-    //     {
-    //       id: 'msg-pq2',
-    //       role: 'assistant',
-    //       content: 'I\'ll help you find comprehensive information to answer this parliamentary question. Let me gather data from multiple authoritative sources.',
-    //       timestamp: new Date(Date.now() - 17950000),
-    //     },
-    //   ],
-    //   createdAt: new Date(Date.now() - 18000000),
-    //   assistantType: 'parliamentary-qa',
-    // },
-  ]);
+  const [chats, setChats] = useState<Chat[]>([]);
   const [activeChatId, setActiveChatId] = useState('new-rsn');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [colorTheme, setColorTheme] = useState<ColorTheme>('light');
@@ -324,52 +278,7 @@ export default function App() {
       agency: 'GovTech'
     });
     // Clear chats
-    setChats([
-      {
-        id: '2',
-        type: 'assistant',
-        classificationType: 'cce-sn',
-        title: 'Deep Research AI - AI Ethics',
-        messages: [
-          {
-            id: 'msg1',
-            role: 'user',
-            content: 'I need to research the latest developments in AI ethics frameworks for public sector use, particularly focusing on transparency and accountability.',
-            timestamp: new Date(Date.now() - 3600000),
-          },
-          {
-            id: 'msg2',
-            role: 'assistant',
-            content: 'I\'ll conduct comprehensive research on AI ethics frameworks for the public sector. Let me gather information from academic papers, government reports, and policy documents.',
-            timestamp: new Date(Date.now() - 3500000),
-          },
-        ],
-        createdAt: new Date(Date.now() - 3600000),
-        assistantType: 'deep-research-ai',
-      },
-      {
-        id: '3',
-        type: 'assistant',
-        classificationType: 'cce-sn',
-        title: 'Parliamentary Question Assistant',
-        messages: [
-          {
-            id: 'msg-pq1',
-            role: 'user',
-            content: 'What is the progress in the adoption of generative AI tools in the Public Service, and what training will be provided for public servants to use these tools?',
-            timestamp: new Date(Date.now() - 18000000),
-          },
-          {
-            id: 'msg-pq2',
-            role: 'assistant',
-            content: 'I\'ll help you find comprehensive information to answer this parliamentary question. Let me gather data from multiple authoritative sources.',
-            timestamp: new Date(Date.now() - 17950000),
-          },
-        ],
-        createdAt: new Date(Date.now() - 18000000),
-        assistantType: 'parliamentary-qa',
-      },
-    ]);
+    setChats([]);
     // Reset view states
     setActiveView('home');
     setActiveChatId('new-rsn');
