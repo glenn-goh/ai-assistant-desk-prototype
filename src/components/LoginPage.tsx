@@ -142,7 +142,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
             <Card className="w-full max-w-md shadow-2xl border-slate-200 dark:border-slate-800">
-                <CardContent className="p-8 space-y-6">
+                <CardContent className="p-8 pb-12 space-y-6">
                     <h1 className="text-slate-800 dark:text-white text-center">
                         Log in to the WOG AI-Assistant
                     </h1>
@@ -156,13 +156,10 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     </Button>
 
                     {/* Divider */}
-                    <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-slate-300"></div>
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                            <span className="px-4 bg-white dark:bg-slate-900 text-slate-500">or</span>
-                        </div>
+                    <div className="flex items-center gap-3 text-slate-400 text-sm">
+                        <div className="flex-1 h-px bg-slate-300"></div>
+                        <span>or</span>
+                        <div className="flex-1 h-px bg-slate-300"></div>
                     </div>
 
                     {/* Email / OTP Login */}
@@ -286,12 +283,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                         )}
                     </div>
 
-                    {/* Footer Link */}
-                    <div className="text-center">
-                        <a href="#" className="text-sm text-indigo-600 hover:text-indigo-700 hover:underline">
-                            For select agencies
-                        </a>
-                    </div>
                 </CardContent>
             </Card>
         </div>
