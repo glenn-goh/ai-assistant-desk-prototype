@@ -5,7 +5,12 @@
       "Bash(wc:*)",
       "Bash(grep:*)",
       "Bash(find:*)",
-      "Bash(xargs perl:*)"
+      "Bash(xargs perl:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node -e:*)",
+      "Bash(npm run build:*)",
+      "Bash(git push)",
+      "Bash(git commit:*)"
     ]
   }
 }
