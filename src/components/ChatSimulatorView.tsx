@@ -83,61 +83,15 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const chatEndRef = useRef<HTMLDivElement>(null);
   const outputContentRef = useRef<HTMLDivElement>(null);
 
-  const colorScheme = data.colorScheme || 'slate';
-
-  // Color scheme mapping
-  const colors = {
-    indigo: {
-      primary: 'bg-indigo-600 hover:bg-indigo-700',
-      light: 'bg-indigo-50',
-      border: 'border-indigo-200',
-      text: 'text-indigo-900',
-      accent: 'bg-indigo-500',
-      ring: 'focus:ring-indigo-500'
-    },
-    slate: {
-      primary: 'bg-slate-600 hover:bg-slate-700',
-      light: 'bg-slate-50',
-      border: 'border-slate-200',
-      text: 'text-slate-900',
-      accent: 'bg-slate-500',
-      ring: 'focus:ring-slate-500'
-    },
-    blue: {
-      primary: 'bg-blue-600 hover:bg-blue-700',
-      light: 'bg-blue-50',
-      border: 'border-blue-200',
-      text: 'text-blue-900',
-      accent: 'bg-blue-500',
-      ring: 'focus:ring-blue-500'
-    },
-    green: {
-      primary: 'bg-green-600 hover:bg-green-700',
-      light: 'bg-green-50',
-      border: 'border-green-200',
-      text: 'text-green-900',
-      accent: 'bg-green-500',
-      ring: 'focus:ring-green-500'
-    },
-    purple: {
-      primary: 'bg-purple-600 hover:bg-purple-700',
-      light: 'bg-purple-50',
-      border: 'border-purple-200',
-      text: 'text-purple-900',
-      accent: 'bg-purple-500',
-      ring: 'focus:ring-purple-500'
-    },
-    emerald: {
-      primary: 'bg-emerald-600 hover:bg-emerald-700',
-      light: 'bg-emerald-50',
-      border: 'border-emerald-200',
-      text: 'text-emerald-900',
-      accent: 'bg-emerald-500',
-      ring: 'focus:ring-emerald-500'
-    }
+  // Lo-fi grayscale theme
+  const theme = {
+    primary: 'bg-gray-900 hover:bg-gray-700',
+    light: 'bg-gray-100',
+    border: 'border-gray-300',
+    text: 'text-gray-900',
+    accent: 'bg-gray-700',
+    ring: 'focus:ring-gray-500'
   };
-
-  const theme = colors[colorScheme];
 
   // Auto scroll to bottom
   useEffect(() => {
@@ -327,22 +281,22 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   return (
     <div className="flex h-full bg-white">
       {/* Chat Area */}
-      <div className={`flex-1 flex flex-col border-r border-gray-200`}>
+      <div className="flex-1 flex flex-col border-r border-gray-300">
         {/* Chat Header */}
-        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-white">
-          <button 
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-300 bg-white">
+          <button
             onClick={onToggleSidebar}
-            className="text-gray-600 hover:text-gray-900"
+            className="text-gray-700 hover:text-gray-900 transition-colors"
           >
             <PanelLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            <span className="text-sm text-gray-900">{data.title}</span>
-            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">C(CE) + SN</span>
+            <span className="text-sm font-medium text-gray-900">{data.title}</span>
+            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">C(CE) + SN</span>
           </div>
-          <button 
+          <button
             onClick={() => setShowOutputPanel(!showOutputPanel)}
-            className={`text-gray-600 hover:text-gray-900 rounded-md p-1 transition-colors ${showOutputPanel ? 'bg-gray-100' : ''}`}
+            className={`text-gray-700 hover:text-gray-900 rounded-lg p-1 transition-colors ${showOutputPanel ? 'bg-gray-200' : ''}`}
           >
             <PanelRight className="w-5 h-5" />
           </button>
@@ -355,7 +309,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             <div key={idx}>
               {msg.role === 'user' && (
                 <div className="flex justify-end items-end gap-2 ml-24 mb-12">
-                  <div className="bg-blue-500 text-white rounded-2xl px-4 py-3 max-w-2xl" style={{ fontSize: '14px' }}>
+                  <div className="bg-gray-900 text-white rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '14px' }}>
                     {msg.text}
                   </div>
                 </div>
@@ -363,7 +317,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
               {msg.type === 'thinking' && (
                 <div className="flex justify-start items-end gap-2">
-                  <div className={`${theme.light} ${theme.text} rounded-2xl px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '14px' }}>
+                  <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '14px' }}>
                     {msg.thought}
                   </div>
                 </div>
@@ -371,19 +325,19 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
               {msg.type === 'assistantSwitch' && (
                 <div className="flex justify-center">
-                  <div className="flex items-center gap-2 text-xs text-gray-600 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+                  <div className="flex items-center gap-2 text-xs text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
                     <span className="text-gray-500">Switched to</span>
                     <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
-                    <span className="font-medium">{msg.message}</span>
+                    <span className="font-semibold text-gray-900">{msg.message}</span>
                   </div>
                 </div>
               )}
 
               {msg.type === 'text' && (
                 <div className="flex justify-start items-end gap-2">
-                  <div className="w-full whitespace-pre-wrap" style={{ fontSize: '14px' }}>
+                  <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '14px' }}>
                     {msg.content}
                   </div>
                 </div>
@@ -396,16 +350,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       setSelectedArtifact(msg.data);
                       setShowOutputPanel(true);
                     }}
-                    className={`bg-white border-2 ${theme.border} rounded-2xl px-4 py-3 max-w-md hover:border-${colorScheme}-500 transition-colors text-left`}
+                    className="bg-white border-2 border-gray-900 rounded-lg px-4 py-3 max-w-md hover:bg-gray-100 transition-colors text-left"
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`text-${colorScheme}-600 mt-1`}>
+                      <div className="text-gray-700 mt-1">
                         {getFileIcon(msg.data.fileType)}
                       </div>
                       <div className="flex-1">
-                        <div className={`font-semibold ${theme.text} text-sm`}>{msg.data.title}</div>
-                        <div className="text-xs text-gray-600 mt-1">{msg.data.description}</div>
-                        <div className={`text-xs text-${colorScheme}-600 mt-2`}>
+                        <div className="font-semibold text-gray-900 text-sm">{msg.data.title}</div>
+                        <div className="text-xs text-gray-500 mt-1">{msg.data.description}</div>
+                        <div className="text-xs text-gray-700 mt-2 underline">
                           {msg.data.interactive ? 'Click to fill out →' : 'Click to view →'}
                         </div>
                       </div>
@@ -419,7 +373,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           {/* Active thinking state */}
           {currentThought && (
             <div className="flex justify-start items-end gap-2">
-              <div className={`${theme.light} ${theme.text} rounded-2xl px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '14px' }}>
+              <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '14px' }}>
                 <div className="flex-shrink-0">
                   <div className={`w-2 h-2 ${theme.accent} rounded-full animate-pulse`} style={{ animationDuration: '1s' }}></div>
                 </div>
@@ -431,7 +385,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           {/* Searching assistant loading state */}
           {searchingAssistant && (
             <div className="flex justify-center">
-              <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+              <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
                 <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
@@ -443,7 +397,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           {/* Thinking dots */}
           {showThinkingDots && (
             <div className="flex justify-start items-end gap-2">
-              <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3">
+              <div className="bg-white border border-gray-300 rounded-lg px-4 py-3">
                 <div className="flex gap-1">
                   <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
                   <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '75ms' }}></div>
@@ -476,23 +430,23 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
       {/* Output Panel */}
       {showOutputPanel && (
-        <div className="w-1/2 flex flex-col bg-gray-50 border-l border-gray-200">
+        <div className="w-1/2 flex flex-col bg-gray-100 border-l border-gray-300">
           {/* Output Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 bg-white">
             <div className="flex items-center gap-2">
               {selectedArtifact && (
-                <button 
+                <button
                   onClick={() => setSelectedArtifact(null)}
                   className="mr-2 flex items-center gap-1 text-gray-500 hover:text-gray-900 transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
               )}
-              <h2 className="text-sm font-semibold text-gray-700">Output</h2>
+              <h2 className="text-sm font-semibold text-gray-900">Output</h2>
             </div>
-            <button 
+            <button
               onClick={() => setShowOutputPanel(false)}
-              className="text-gray-500 hover:text-gray-700 transition-colors"
+              className="text-gray-500 hover:text-gray-900 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -505,12 +459,12 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 <div className="p-8 max-w-4xl mx-auto">
                   {/* Artifact Header */}
                   <div className="mb-6 flex items-start gap-3">
-                    <div className={`text-${colorScheme}-600 mt-1`}>
+                    <div className="text-gray-700 mt-1">
                       {getFileIcon(selectedArtifact.fileType)}
                     </div>
                     <div>
-                      <h1 className="text-2xl text-gray-900 mb-1">{selectedArtifact.title}</h1>
-                      <p className="text-xs text-gray-600">{selectedArtifact.description}</p>
+                      <h1 className="text-2xl font-semibold text-gray-900 mb-1">{selectedArtifact.title}</h1>
+                      <p className="text-xs text-gray-500">{selectedArtifact.description}</p>
                     </div>
                   </div>
 
@@ -523,30 +477,30 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               <div className="h-full p-4">
                 <div className="mb-4">
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Generated Files</h3>
-                  
+
                   {displayedMessages.filter(m => m.type === 'artifact').length > 0 ? (
                     <div className="space-y-2">
                       {displayedMessages.filter(m => m.type === 'artifact').map((msg, idx) => (
                         <button
                           key={idx}
                           onClick={() => setSelectedArtifact(msg.data)}
-                          className="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-400 hover:shadow-sm transition-all text-left"
+                          className="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-300 hover:border-gray-900 hover:shadow-sm transition-all text-left"
                         >
-                          <div className={`p-2 rounded bg-${colorScheme}-50 text-${colorScheme}-600`}>
+                          <div className="p-2 rounded-lg bg-gray-100 text-gray-700">
                             {getFileIcon(msg.data.fileType)}
                           </div>
                           <div className="flex-1">
                             <div className="text-sm font-medium text-gray-900">{msg.data.title}</div>
                             <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{msg.data.description}</div>
                           </div>
-                          <div className="text-gray-400">
+                          <div className="text-gray-500">
                             <ArrowLeft className="w-4 h-4 rotate-180" />
                           </div>
                         </button>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-12 text-gray-400 bg-white rounded-lg border border-dashed border-gray-200">
+                    <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
                       <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
                       <p className="text-sm">No output files generated yet</p>
                       <p className="text-xs mt-1">Files created during the chat will appear here</p>

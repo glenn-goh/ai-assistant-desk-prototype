@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { MessageInput } from './MessageInput';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
-import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 
 interface HomePageProps {
   colorTheme: ColorTheme;
@@ -49,8 +48,6 @@ const getPromptSuggestions = (role: string) => {
 };
 
 export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onToggleSidebar, isSidebarOpen, userProfile, onSelectSimulation }: HomePageProps) {
-  const theme = getThemeClasses(colorTheme);
-  const font = getFontClasses(fontStyle);
   const [inputValue, setInputValue] = useState('');
 
   const today = new Date();
@@ -61,23 +58,23 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
   };
 
   return (
-    <div className={`flex-1 h-full flex flex-col ${font.base}`}>
+    <div className="flex-1 h-full flex flex-col bg-white">
       {/* Main Content */}
       <div className="flex-1 overflow-auto flex items-center">
         <div className="flex flex-col w-full max-w-chat mx-auto px-6">
           {/* Welcome Header */}
           <div className="pb-6">
-            <h1 className={`text-2xl mb-1 tracking-tight font-semibold ${theme.title} ${font.title}`} style={{ fontSize: '2rem' }}>
+            <h1 className="text-2xl mb-1 tracking-tight font-semibold text-gray-900" style={{ fontSize: '2rem' }}>
               Good {today.getHours() < 12 ? 'Morning' : today.getHours() < 18 ? 'Afternoon' : 'Evening'}, {userProfile.name.split(' ')[0]}
             </h1>
-            <p className={`text-xs opacity-70`} style={{ color: 'inherit' }}>
+            <p className="text-xs text-gray-500">
               {today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
 
           {/* Chat Input Section */}
           <div>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-300">
               <MessageInput
                 onSend={(message, classificationType) => {
                   console.log('Quick chat message:', message, 'Classification:', classificationType);
@@ -97,7 +94,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
                 <button
                   key={index}
                   onClick={() => handlePromptClick(prompt)}
-                  className="px-3 py-2 text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                  className="px-3 py-2 text-sm bg-white border border-gray-900 rounded-full hover:bg-gray-100 transition-colors text-gray-900"
                 >
                   {prompt}
                 </button>

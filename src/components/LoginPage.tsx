@@ -77,7 +77,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     };
 
     const handleWOGLogin = () => {
-        // WOG AD login bypasses everything and goes to onboarding
         const defaultProfile: UserProfile = {
             name: 'Jayden Tan',
             email: 'jayden.tan@tech.gov.sg',
@@ -95,7 +94,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             return;
         }
 
-        // Check if email matches a mock account
         const account = MOCK_ACCOUNTS.find(acc => acc.email.toLowerCase() === email.toLowerCase());
 
         if (!account) {
@@ -109,15 +107,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     const handleOtpSubmit = () => {
         setError('');
 
-        // Accept any random number, but let's enforce 6 digits as requested
         if (!otp || otp.length !== 6 || isNaN(Number(otp))) {
             setError('Please enter a valid 6-digit OTP');
             return;
         }
 
-        // Find account again to pass to onLogin
         const account = MOCK_ACCOUNTS.find(acc => acc.email.toLowerCase() === email.toLowerCase());
-        
+
         if (account) {
             const userProfile: UserProfile = {
                 name: account.name,
@@ -125,7 +121,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 role: account.role,
                 agency: account.agency
             };
-            onLogin(userProfile, true); // true = skip onboarding
+            onLogin(userProfile, true);
         }
     };
 
@@ -140,37 +136,37 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     };
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-4">
-            <Card className="w-full max-w-md shadow-2xl border-slate-200 dark:border-slate-800">
-                <CardContent className="p-8 pb-12 space-y-6">
-                    <h1 className="text-slate-800 dark:text-white text-center">
+        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
+            <Card className="w-full max-w-md">
+                <CardContent className="p-8 pb-10 space-y-6">
+                    <h1 className="text-gray-900 text-center text-lg font-bold">
                         Log in to the WOG AI-Assistant
                     </h1>
 
                     {/* WOG AD Login */}
                     <Button
-                        className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white"
+                        className="w-full h-12"
                         onClick={handleWOGLogin}
                     >
                         Log in with WOG AD
                     </Button>
 
                     {/* Divider */}
-                    <div className="flex items-center gap-3 text-slate-400 text-sm">
-                        <div className="flex-1 h-px bg-slate-300"></div>
+                    <div className="flex items-center gap-3 text-gray-500 text-sm">
+                        <div className="flex-1 h-px bg-gray-300"></div>
                         <span>or</span>
-                        <div className="flex-1 h-px bg-slate-300"></div>
+                        <div className="flex-1 h-px bg-gray-300"></div>
                     </div>
 
                     {/* Email / OTP Login */}
                     <div className="space-y-4">
-                        <p className="text-sm text-slate-700 dark:text-slate-300">
-                            {step === 'email' 
+                        <p className="text-sm text-gray-700">
+                            {step === 'email'
                                 ? 'Log in with a .gov.sg or other whitelisted email address'
                                 : `Enter the 6-digit OTP sent to ${email}`
                             }
                         </p>
-                        
+
                         {step === 'email' ? (
                             <>
                                 {/* Email Input with Autocomplete */}
@@ -186,27 +182,27 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                             }
                                         }}
                                         onKeyPress={handleKeyPress}
-                                        className="h-12 bg-transparent border-slate-300 dark:border-slate-700"
+                                        className="h-12"
                                         autoComplete="off"
                                     />
-                                    
+
                                     {/* Autocomplete Dropdown */}
                                     {showSuggestions && filteredSuggestions.length > 0 && (
                                         <div
                                             ref={suggestionsRef}
-                                            className="absolute z-50 w-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                                            className="absolute z-50 w-full mt-1 bg-white border-2 border-gray-900 rounded-lg shadow-md max-h-48 overflow-y-auto"
                                         >
                                             {filteredSuggestions.map((account) => (
                                                 <button
                                                     key={account.email}
-                                                    className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 flex flex-col transition-colors"
+                                                    className="w-full px-4 py-3 text-left hover:bg-gray-100 flex flex-col transition-colors first:rounded-t-md last:rounded-b-md"
                                                     onClick={() => handleSelectEmail(account.email)}
                                                     type="button"
                                                 >
-                                                    <span className="text-slate-900 dark:text-white">
+                                                    <span className="text-gray-900 font-medium">
                                                         {account.email}
                                                     </span>
-                                                    <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                                    <span className="text-xs text-gray-500 mt-0.5">
                                                         {account.name} • {account.role}
                                                     </span>
                                                 </button>
@@ -216,13 +212,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                 </div>
 
                                 {error && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">
+                                    <p className="text-sm text-red-500 font-medium">
                                         {error}
                                     </p>
                                 )}
 
                                 <Button
-                                    className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white"
+                                    variant="outline"
+                                    className="w-full h-12"
                                     onClick={handleEmailSubmit}
                                 >
                                     Log in with Email OTP
@@ -238,13 +235,11 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                     maxLength={6}
                                     value={otp}
                                     onChange={(e) => {
-                                        // Only allow numbers
                                         const re = /^[0-9\b]+$/;
                                         if (e.target.value === '' || re.test(e.target.value)) {
                                             setOtp(e.target.value);
                                             setError('');
-                                            
-                                            // Auto-fill logic: if user types at least one digit, fill the rest randomly
+
                                             if (e.target.value.length === 1) {
                                                 const randomSuffix = Math.floor(10000 + Math.random() * 90000).toString();
                                                 setOtp(e.target.value + randomSuffix);
@@ -252,25 +247,25 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                                         }
                                     }}
                                     onKeyPress={handleKeyPress}
-                                    className="h-12 bg-transparent border-slate-300 dark:border-slate-700 text-center tracking-widest text-lg"
+                                    className="h-12 text-center tracking-widest text-lg"
                                     autoComplete="one-time-code"
                                 />
 
                                 {error && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">
+                                    <p className="text-sm text-red-500 font-medium">
                                         {error}
                                     </p>
                                 )}
 
                                 <Button
-                                    className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white"
+                                    className="w-full h-12"
                                     onClick={handleOtpSubmit}
                                 >
                                     Log In
                                 </Button>
-                                
-                                <button 
-                                    className="w-full text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+
+                                <button
+                                    className="w-full text-sm text-gray-500 hover:text-gray-900 font-medium transition-colors"
                                     onClick={() => {
                                         setStep('email');
                                         setError('');

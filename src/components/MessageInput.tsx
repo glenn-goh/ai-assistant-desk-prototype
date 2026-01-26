@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
-import { Send, Paperclip, Wrench, Search, ImagePlus, Mic, FolderOpen, ScanLine, Shield, ChevronDown } from 'lucide-react';
+import { Send, Paperclip, Wrench, Search, Mic, FolderOpen, ScanLine, Shield, ChevronDown } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import {
@@ -10,7 +10,6 @@ import {
 } from './ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
-import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 
 export type ClassificationType = 'r-sn' | 'cce-sn' | 'cce-sh';
 
@@ -60,8 +59,6 @@ export function MessageInput({
   const [isClassificationOpen, setIsClassificationOpen] = useState(false);
   const [classificationType, setClassificationType] = useState<ClassificationType>(defaultClassification);
   const [typedLength, setTypedLength] = useState(0);
-  const theme = getThemeClasses(colorTheme);
-  const font = getFontClasses(fontStyle);
 
   // Determine if input is disabled (either explicitly or waiting for response)
   const isInputDisabled = disabled;
@@ -176,7 +173,7 @@ export function MessageInput({
   };
 
   return (
-    <div className={`rounded-lg border ${theme.inputBorder} p-2 focus-within:ring-2 focus-within:ring-blue-500/20`}>
+    <div className="rounded-lg border border-gray-300 p-2 focus-within:ring-2 focus-within:ring-gray-500/20 bg-white">
       {/* Text input */}
       <div className="mb-2">
         <Textarea
@@ -185,7 +182,7 @@ export function MessageInput({
           onChange={autoTypeText ? undefined : (e => setInput(e.target.value))}
           onKeyDown={handleTypingKeyDown}
           placeholder={placeholder || (autoTypeText ? "Type to continue..." : isInputDisabled ? "Waiting for response..." : "Message AI Assistant...")}
-          className={`w-full min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent ${font.input} ${isInputDisabled ? 'text-gray-400' : ''}`}
+          className={`w-full min-h-[36px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-gray-900 ${isInputDisabled ? 'text-gray-400' : ''}`}
           rows={1}
           readOnly={!!autoTypeText}
           disabled={isInputDisabled}
@@ -249,15 +246,15 @@ export function MessageInput({
                         e.stopPropagation();
                         toggleLibrary(library.id);
                       }}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'bg-purple-50 dark:bg-purple-900/20' : ''}`}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors ${isSelected ? 'bg-gray-200' : ''}`}
                     >
-                      <FolderOpen className="w-5 h-5 flex-shrink-0" />
+                      <FolderOpen className="w-5 h-5 flex-shrink-0 text-gray-700" />
                       <div className="flex-1 text-left">
-                        <div className="text-xs">{library.name}</div>
-                        <div className="text-[10px] text-muted-foreground">{library.type}</div>
+                        <div className="text-xs text-gray-900">{library.name}</div>
+                        <div className="text-[10px] text-gray-500">{library.type}</div>
                       </div>
                       {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-purple-500" />
+                        <div className="w-2 h-2 rounded-full bg-gray-900" />
                       )}
                     </button>
                   );
@@ -306,12 +303,12 @@ export function MessageInput({
                         e.stopPropagation();
                         toggleTool(tool.id);
                       }}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors ${isSelected ? 'bg-gray-200' : ''}`}
                     >
-                      <Icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="flex-1 text-left text-xs">{tool.name}</span>
+                      <Icon className="w-5 h-5 flex-shrink-0 text-gray-700" />
+                      <span className="flex-1 text-left text-xs text-gray-900">{tool.name}</span>
                       {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-blue-500" />
+                        <div className="w-2 h-2 rounded-full bg-gray-900" />
                       )}
                     </button>
                   );
@@ -326,9 +323,9 @@ export function MessageInput({
                     // TODO: Navigate to AI Common Tools page
                     console.log('Navigate to AI Common Tools');
                   }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors mt-1 border-t border-gray-200 pt-3"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors mt-1 border-t border-gray-300 pt-3"
                 >
-                  <span className="flex-1 text-left text-xs text-blue-600 font-medium">Explore AI Common Tools</span>
+                  <span className="flex-1 text-left text-xs text-gray-700 font-medium underline">Explore AI Common Tools</span>
                 </button>
               </div>
             </DropdownMenuContent>
@@ -376,15 +373,15 @@ export function MessageInput({
                         <DropdownMenuItem
                           key={option.id}
                           onClick={() => setClassificationType(option.id)}
-                          className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''}`}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer ${isSelected ? 'bg-gray-200' : ''}`}
                         >
-                          <Shield className="w-4 h-4 flex-shrink-0" />
+                          <Shield className="w-4 h-4 flex-shrink-0 text-gray-700" />
                           <div className="flex-1">
-                            <div className="text-xs font-medium">{option.label}</div>
-                            <div className="text-[10px] text-muted-foreground">{option.fullName}</div>
+                            <div className="text-xs font-medium text-gray-900">{option.label}</div>
+                            <div className="text-[10px] text-gray-500">{option.fullName}</div>
                           </div>
                           {isSelected && (
-                            <div className="w-2 h-2 rounded-full bg-blue-500" />
+                            <div className="w-2 h-2 rounded-full bg-gray-900" />
                           )}
                         </DropdownMenuItem>
                       );
@@ -399,7 +396,7 @@ export function MessageInput({
             onClick={handleSend}
             disabled={!input.trim() || isInputDisabled}
             size="icon"
-            className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : theme.sendButton}`}
+            className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300' : ''}`}
           >
             <Send className="w-3.5 h-3.5" />
           </Button>
