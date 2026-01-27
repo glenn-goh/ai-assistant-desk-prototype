@@ -413,3 +413,38 @@
   background-color: transparent !important;
   border: none !important;
 }
+
+/* Thinking dots bounce animation */
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-12px);
+  }
+}
+
+/* Text shimmer animation for thinking state */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #404040 0%,
+    #a3a3a3 50%,
+    #404040 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.5s ease-in-out infinite;
+  animation-delay: 0.3s;
+}

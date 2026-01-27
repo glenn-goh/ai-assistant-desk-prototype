@@ -26,6 +26,7 @@ interface MessageInputProps {
   disabled?: boolean;
   showTypingHint?: boolean;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
 export function MessageInput({
@@ -40,7 +41,8 @@ export function MessageInput({
   onChange,
   disabled = false,
   showTypingHint = false,
-  placeholder
+  placeholder,
+  autoFocus = false
 }: MessageInputProps) {
   const [internalInput, setInternalInput] = useState('');
 
@@ -124,12 +126,12 @@ export function MessageInput({
     );
   };
 
-  // Focus input on mount if autoTypeText is present
+  // Focus input on mount if autoTypeText or autoFocus is present
   useEffect(() => {
-    if (autoTypeText) {
+    if (autoTypeText || autoFocus) {
       inputRef.current?.focus();
     }
-  }, [autoTypeText]);
+  }, [autoTypeText, autoFocus]);
 
   // Handle typing animation like ChatSimulator
   const handleTypingKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -173,7 +175,7 @@ export function MessageInput({
   };
 
   return (
-    <div className="rounded-lg border border-gray-300 p-2 focus-within:ring-2 focus-within:ring-gray-500/20 bg-white">
+    <div className="rounded-2xl border border-gray-300 p-2 focus-within:ring-2 focus-within:ring-gray-500/20 bg-white">
       {/* Text input */}
       <div className="mb-2">
         <Textarea
@@ -182,9 +184,8 @@ export function MessageInput({
           onChange={autoTypeText ? undefined : (e => setInput(e.target.value))}
           onKeyDown={handleTypingKeyDown}
           placeholder={placeholder || (autoTypeText ? "Type to continue..." : isInputDisabled ? "Waiting for response..." : "Message AI Assistant...")}
-          className={`w-full min-h-[48px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-gray-900 text-base ${isInputDisabled ? 'text-gray-400' : ''}`}
+          className={`w-full min-h-[64px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-gray-900 text-base ${isInputDisabled ? 'text-gray-400' : ''}`}
           rows={1}
-          readOnly={!!autoTypeText}
           disabled={isInputDisabled}
         />
       </div>

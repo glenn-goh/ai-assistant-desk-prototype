@@ -276,19 +276,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
   const processThinkingResponse = async (response: ThinkingResponse) => {
     const timing = (response.timingMs || 1500) / 1.5; // 1.5x faster
-    
+
     for (let i = 0; i < response.thoughts.length; i++) {
       setCurrentThought(response.thoughts[i]);
-      
-      if (i < response.thoughts.length - 1) {
-        await sleep(timing);
-      } else {
-        // Last thought - keep it visible
-        await sleep(timing);
-        setDisplayedMessages(prev => [...prev, { type: 'thinking', thought: response.thoughts[i] }]);
-        setCurrentThought("");
-      }
+      await sleep(timing);
     }
+    // Save only the last thought to messages (stays visible)
+    if (response.thoughts.length > 0) {
+      setDisplayedMessages(prev => [...prev, { type: 'thinking', thought: response.thoughts[response.thoughts.length - 1] }]);
+    }
+    setCurrentThought("");
   };
 
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -379,7 +376,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
                 {msg.type === 'thinking' && (
                   <div className="flex justify-start items-end gap-2">
-                    <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '16px' }}>
+                    <div className="rounded-lg py-3 max-w-2xl italic text-gray-500" style={{ fontSize: '16px' }}>
                       {msg.thought}
                     </div>
                   </div>
@@ -436,11 +433,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               {/* Active thinking state */}
               {currentThought && (
                 <div className="flex justify-start items-end gap-2">
-                  <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '16px' }}>
-                    <div className="flex-shrink-0">
-                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-pulse`} style={{ animationDuration: '1s' }}></div>
-                    </div>
-                    <span>{currentThought}</span>
+                  <div className="rounded-lg py-3 max-w-2xl italic" style={{ fontSize: '16px' }}>
+                    <span className="shimmer-text">{currentThought}</span>
                   </div>
                 </div>
               )}
@@ -460,11 +454,29 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               {/* Thinking dots */}
               {showThinkingDots && (
                 <div className="flex justify-start items-end gap-2">
-                  <div className="bg-white border border-gray-300 rounded-lg px-4 py-3">
-                    <div className="flex gap-1">
-                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
-                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '75ms' }}></div>
-                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }}></div>
+                  <div className="px-4 py-3">
+                    <div className="flex gap-2 items-end">
+                      <div
+                        className={`w-2.5 h-2.5 ${theme.accent} rounded-full`}
+                        style={{
+                          animation: 'dotBounce 1.4s ease-in-out infinite',
+                          animationDelay: '0ms'
+                        }}
+                      ></div>
+                      <div
+                        className={`w-2.5 h-2.5 ${theme.accent} rounded-full`}
+                        style={{
+                          animation: 'dotBounce 1.4s ease-in-out infinite',
+                          animationDelay: '200ms'
+                        }}
+                      ></div>
+                      <div
+                        className={`w-2.5 h-2.5 ${theme.accent} rounded-full`}
+                        style={{
+                          animation: 'dotBounce 1.4s ease-in-out infinite',
+                          animationDelay: '400ms'
+                        }}
+                      ></div>
                     </div>
                   </div>
                 </div>
@@ -483,6 +495,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               /* Interactive mode - normal input */
               <MessageInput
                 onSend={(message) => onSendMessage?.(message)}
+                autoFocus={true}
               />
             ) : (
               /* Simulator mode - auto-type input */

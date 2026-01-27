@@ -75,7 +75,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
 
           {/* Chat Input Section */}
           <div>
-            <div className="bg-white rounded-lg shadow-sm border border-gray-300">
+            <div className="bg-white rounded-2xl border border-gray-300">
               <MessageInput
                 onSend={(message, classificationType) => {
                   if (onStartChat) {
@@ -88,6 +88,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
                 showClassification={true}
                 value={inputValue}
                 onChange={setInputValue}
+                autoFocus={true}
               />
             </div>
 
