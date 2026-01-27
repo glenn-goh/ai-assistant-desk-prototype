@@ -56,12 +56,29 @@ interface ArtifactResponse {
   interactive?: boolean;
 }
 
+// Interactive mode message type (from App.tsx)
+interface InteractiveMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  hasFile?: boolean;
+  fileName?: string;
+}
+
 interface ChatSimulatorProps {
-  data: ChatSimulation;
+  // Simulator mode props
+  data?: ChatSimulation;
   onFormSubmit?: (formData: any, artifactTitle: string) => void;
   onComplete?: () => void;
   onToggleSidebar?: () => void;
   onBack?: () => void;
+  // Interactive mode props
+  mode?: 'simulator' | 'interactive';
+  interactiveMessages?: InteractiveMessage[];
+  onSendMessage?: (message: string) => void;
+  title?: string;
+  classificationType?: 'rsn' | 'cce-sn' | 'cce-sh';
 }
 
 export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
@@ -69,8 +86,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onFormSubmit,
   onComplete,
   onToggleSidebar,
-  onBack
+  onBack,
+  mode = 'simulator',
+  interactiveMessages = [],
+  onSendMessage,
+  title: interactiveTitle,
+  classificationType,
 }) => {
+  const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -97,10 +120,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   // Auto scroll to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [displayedMessages, currentThought]);
+  }, [displayedMessages, currentThought, interactiveMessages]);
 
-  // Setup form submission handler when artifact changes
+  // Setup form submission handler when artifact changes (simulator only)
   useEffect(() => {
+    if (isInteractive) return;
     if (selectedArtifact && selectedArtifact.interactive) {
       setTimeout(() => {
         const forms = document.querySelectorAll('form');
@@ -108,21 +132,23 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           form.onsubmit = (e) => {
             e.preventDefault();
             const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            handleFormSubmit(data, selectedArtifact.title);
+            const formDataObj = Object.fromEntries(formData);
+            handleFormSubmit(formDataObj, selectedArtifact.title);
           };
         });
       }, 100);
     }
-  }, [selectedArtifact]);
+  }, [selectedArtifact, isInteractive]);
 
-  // Check if conversation is complete
+  // Check if conversation is complete (simulator only)
   useEffect(() => {
+    if (isInteractive) return;
+    if (!data) return;
     if (currentMessageIndex >= data.messages.length && !isComplete) {
       setIsComplete(true);
       onComplete?.();
     }
-  }, [currentMessageIndex, data.messages.length, isComplete, onComplete]);
+  }, [currentMessageIndex, data?.messages?.length, isComplete, onComplete, isInteractive]);
 
   // Scroll output panel to top when artifact changes
   useEffect(() => {
@@ -162,8 +188,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     }
   };
 
-  // Handle message send from MessageInput
+  // Handle message send from MessageInput (simulator only)
   const handleSendMessage = (text: string) => {
+    if (!data) return;
     if (currentMessageIndex >= data.messages.length) return;
 
     const currentMsg = data.messages[currentMessageIndex];
@@ -177,23 +204,25 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     setCurrentMessageIndex(prev => prev + 1);
   };
 
-  // Get the current target text for typing simulation
+  // Get the current target text for typing simulation (simulator only)
   const getCurrentTargetText = () => {
+    if (isInteractive || !data) return undefined;
     if (currentMessageIndex >= data.messages.length) return undefined;
     const currentMsg = data.messages[currentMessageIndex];
     if (currentMsg.role !== 'user') return undefined;
     return (currentMsg.content as UserMessage).text;
   };
 
-  // Process bot messages
+  // Process bot messages (simulator only)
   useEffect(() => {
+    if (isInteractive || !data) return;
     if (currentMessageIndex >= data.messages.length) return;
-    
+
     const currentMsg = data.messages[currentMessageIndex];
-    
+
     if (currentMsg.role === 'user') {
       const userContent = currentMsg.content as UserMessage;
-      
+
       // Check if this is an auto-send message
       if (userContent.autoSend && userContent.text) {
         // Automatically send this message
@@ -213,7 +242,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       const responses = currentMsg.content as BotResponse[];
       processBotResponses(responses);
     }
-  }, [currentMessageIndex]);
+  }, [currentMessageIndex, isInteractive, data]);
 
   const processBotResponses = async (responses: BotResponse[]) => {
     // Show thinking dots
@@ -293,8 +322,18 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             <PanelLeft className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-3 flex-1">
-            <span className="text-sm font-medium text-gray-900">{data.title}</span>
-            <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">C(CE) + SN</span>
+            <span className="text-sm font-medium text-gray-900">
+              {isInteractive ? (interactiveTitle || 'New Chat') : data?.title}
+            </span>
+            {isInteractive ? (
+              classificationType && (
+                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">
+                  {classificationType === 'cce-sn' ? 'C(CE) + SN' : classificationType === 'cce-sh' ? 'C(CE) + SH' : 'RSN'}
+                </span>
+              )
+            ) : (
+              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">C(CE) + SN</span>
+            )}
           </div>
           <button
             onClick={() => setShowOutputPanel(!showOutputPanel)}
@@ -307,103 +346,130 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         {/* Messages */}
         <div className="flex-1 overflow-y-auto px-6 py-4 bg-gray-100">
           <div className="max-w-chat mx-auto space-y-8">
-          {displayedMessages.map((msg, idx) => (
-            <div key={idx}>
-              {msg.role === 'user' && (
-                <div className="flex justify-end items-end gap-2 ml-24 mb-12">
-                  <div className="bg-gray-200 text-black rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                    {msg.text}
-                  </div>
-                </div>
-              )}
-
-              {msg.type === 'thinking' && (
-                <div className="flex justify-start items-end gap-2">
-                  <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '16px' }}>
-                    {msg.thought}
-                  </div>
-                </div>
-              )}
-
-              {msg.type === 'assistantSwitch' && (
-                <div className="flex justify-center">
-                  <div className="flex items-center gap-2 text-xs text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                    <span className="text-gray-500">Switched to</span>
-                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    <span className="font-semibold text-gray-900">{msg.message}</span>
-                  </div>
-                </div>
-              )}
-
-              {msg.type === 'text' && (
-                <div className="flex justify-start items-end gap-2 mb-2">
-                  <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                    {msg.content}
-                  </div>
-                </div>
-              )}
-
-              {msg.type === 'artifact' && (
-                <div className="w-full">
-                  <button
-                    onClick={() => {
-                      setSelectedArtifact(msg.data);
-                      setShowOutputPanel(true);
-                    }}
-                    className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="text-gray-500">
-                        {getFileIcon(msg.data.fileType)}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 text-sm">{msg.data.title}</div>
-                        <div className="text-xs text-gray-500 mt-0.5">{msg.data.description}</div>
-                      </div>
+          {isInteractive ? (
+            /* Interactive mode - render real chat messages */
+            interactiveMessages.map((msg) => (
+              <div key={msg.id}>
+                {msg.role === 'user' ? (
+                  <div className="flex justify-end items-end gap-2 ml-24 mb-12">
+                    <div className="bg-gray-200 text-black rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                      {msg.content}
                     </div>
-                  </button>
+                  </div>
+                ) : (
+                  <div className="flex justify-start items-end gap-2 mb-2">
+                    <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            /* Simulator mode - render scripted messages */
+            displayedMessages.map((msg, idx) => (
+              <div key={idx}>
+                {msg.role === 'user' && (
+                  <div className="flex justify-end items-end gap-2 ml-24 mb-12">
+                    <div className="bg-gray-200 text-black rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                      {msg.text}
+                    </div>
+                  </div>
+                )}
+
+                {msg.type === 'thinking' && (
+                  <div className="flex justify-start items-end gap-2">
+                    <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border}`} style={{ fontSize: '16px' }}>
+                      {msg.thought}
+                    </div>
+                  </div>
+                )}
+
+                {msg.type === 'assistantSwitch' && (
+                  <div className="flex justify-center">
+                    <div className="flex items-center gap-2 text-xs text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
+                      <span className="text-gray-500">Switched to</span>
+                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      <span className="font-semibold text-gray-900">{msg.message}</span>
+                    </div>
+                  </div>
+                )}
+
+                {msg.type === 'text' && (
+                  <div className="flex justify-start items-end gap-2 mb-2">
+                    <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                )}
+
+                {msg.type === 'artifact' && (
+                  <div className="w-full">
+                    <button
+                      onClick={() => {
+                        setSelectedArtifact(msg.data);
+                        setShowOutputPanel(true);
+                      }}
+                      className="w-full bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="text-gray-500">
+                          {getFileIcon(msg.data.fileType)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 text-sm">{msg.data.title}</div>
+                          <div className="text-xs text-gray-500 mt-0.5">{msg.data.description}</div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+
+          {/* Simulator-only states */}
+          {!isInteractive && (
+            <>
+              {/* Active thinking state */}
+              {currentThought && (
+                <div className="flex justify-start items-end gap-2">
+                  <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '16px' }}>
+                    <div className="flex-shrink-0">
+                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-pulse`} style={{ animationDuration: '1s' }}></div>
+                    </div>
+                    <span>{currentThought}</span>
+                  </div>
                 </div>
               )}
-            </div>
-          ))}
 
-          {/* Active thinking state */}
-          {currentThought && (
-            <div className="flex justify-start items-end gap-2">
-              <div className={`${theme.light} ${theme.text} rounded-lg px-4 py-3 max-w-2xl italic border ${theme.border} flex items-center gap-3`} style={{ fontSize: '16px' }}>
-                <div className="flex-shrink-0">
-                  <div className={`w-2 h-2 ${theme.accent} rounded-full animate-pulse`} style={{ animationDuration: '1s' }}></div>
+              {/* Searching assistant loading state */}
+              {searchingAssistant && (
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Searching assistants...</span>
+                  </div>
                 </div>
-                <span>{currentThought}</span>
-              </div>
-            </div>
-          )}
+              )}
 
-          {/* Searching assistant loading state */}
-          {searchingAssistant && (
-            <div className="flex justify-center">
-              <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                <span>Searching assistants...</span>
-              </div>
-            </div>
-          )}
-
-          {/* Thinking dots */}
-          {showThinkingDots && (
-            <div className="flex justify-start items-end gap-2">
-              <div className="bg-white border border-gray-300 rounded-lg px-4 py-3">
-                <div className="flex gap-1">
-                  <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
-                  <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '75ms' }}></div>
-                  <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }}></div>
+              {/* Thinking dots */}
+              {showThinkingDots && (
+                <div className="flex justify-start items-end gap-2">
+                  <div className="bg-white border border-gray-300 rounded-lg px-4 py-3">
+                    <div className="flex gap-1">
+                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '0ms' }}></div>
+                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '75ms' }}></div>
+                      <div className={`w-2 h-2 ${theme.accent} rounded-full animate-bounce`} style={{ animationDelay: '150ms' }}></div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
 
             <div ref={chatEndRef} />
@@ -413,15 +479,25 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         {/* Input Area */}
         <div className="bg-gray-100 px-6 py-4">
           <div className="max-w-chat mx-auto">
-            <MessageInput
-              onSend={handleSendMessage}
-              value={typedText}
-              onChange={setTypedText}
-              autoTypeText={getCurrentTargetText()}
-              disabled={!isTyping}
-            />
-            {isTyping && (
-              <p className="text-xs text-gray-500 mt-2">Press Enter to send the complete message</p>
+            {isInteractive ? (
+              /* Interactive mode - normal input */
+              <MessageInput
+                onSend={(message) => onSendMessage?.(message)}
+              />
+            ) : (
+              /* Simulator mode - auto-type input */
+              <>
+                <MessageInput
+                  onSend={handleSendMessage}
+                  value={typedText}
+                  onChange={setTypedText}
+                  autoTypeText={getCurrentTargetText()}
+                  disabled={!isTyping}
+                />
+                {isTyping && (
+                  <p className="text-xs text-gray-500 mt-2">Press Enter to send the complete message</p>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -459,7 +535,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
           {/* Output Content */}
           <div className="flex-1 overflow-auto" ref={outputContentRef}>
-            {selectedArtifact ? (
+            {isInteractive ? (
+              /* Interactive mode - simple empty state */
+              <div className="h-full flex items-center justify-center">
+                <div className="text-center py-12 text-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm">No output files generated yet</p>
+                  <p className="text-xs mt-1">Files created during the chat will appear here</p>
+                </div>
+              </div>
+            ) : selectedArtifact ? (
               <div className="h-full bg-white">
                 <div className="p-8 max-w-4xl mx-auto">
                   {/* Artifact Header */}

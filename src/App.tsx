@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { ChatArea } from './components/ChatArea';
 import { ChatSidebar } from './components/ChatSidebar';
 import { ExplorePage } from './components/ExplorePage';
 import { StudioPage } from './components/StudioPage';
@@ -196,6 +195,52 @@ export default function App() {
     setActiveChatId('new-rsn');
     setActiveView('home');
     setHomeResetKey(prev => prev + 1);
+  };
+
+  const handleStartChatFromHome = (message: string, classificationType?: 'rsn' | 'cce-sn' | 'cce-sh') => {
+    const newId = Date.now().toString();
+    const userMessage: Message = {
+      id: newId,
+      role: 'user',
+      content: message,
+      timestamp: new Date(),
+    };
+
+    const newChat: Chat = {
+      id: newId,
+      title: message.slice(0, 30),
+      messages: [userMessage],
+      createdAt: new Date(),
+      classificationType: classificationType || 'rsn',
+    };
+
+    const newChats = [newChat, ...chats];
+    setChats(newChats);
+    setActiveChatId(newId);
+    setActiveView('chat');
+
+    // Simulate AI response
+    setTimeout(() => {
+      const responseContent = generateMockResponse(message, undefined, userProfile);
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date(),
+      };
+
+      setChats(prevChats =>
+        prevChats.map(chat => {
+          if (chat.id === newId) {
+            return {
+              ...chat,
+              messages: [...chat.messages, aiMessage],
+            };
+          }
+          return chat;
+        })
+      );
+    }, 500);
   };
 
   const handleNewCCESNChat = () => {
@@ -399,21 +444,25 @@ export default function App() {
       {activeView === 'chat' ? (
         isSimulation && simulationData ? (
           <div className="flex-1 flex flex-col">
-            <ChatSimulatorView 
-              key={activeChatId} 
+            <ChatSimulatorView
+              key={activeChatId}
+              mode="simulator"
               data={simulationData as any}
               onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             />
           </div>
         ) : (
-          <ChatArea
-            chat={activeChat}
-            onSendMessage={handleSendMessage}
-            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
-            colorTheme={colorTheme}
-            fontStyle={fontStyle}
-            userProfile={userProfile}
-          />
+          <div className="flex-1 flex flex-col">
+            <ChatSimulatorView
+              key={activeChatId}
+              mode="interactive"
+              title={activeChat?.title}
+              classificationType={activeChat?.classificationType}
+              interactiveMessages={activeChat?.messages || []}
+              onSendMessage={handleSendMessage}
+              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            />
+          </div>
         )
       ) : activeView === 'explore' ? (
         <ExplorePage
@@ -452,6 +501,7 @@ export default function App() {
           fontStyle={fontStyle}
           onSelectChat={handleSelectChat}
           onNewChat={handleNewChat}
+          onStartChat={handleStartChatFromHome}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           isSidebarOpen={isSidebarOpen}
           userProfile={userProfile}

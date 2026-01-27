@@ -11,6 +11,7 @@ interface HomePageProps {
   isSidebarOpen?: boolean;
   userProfile: import('../App').UserProfile;
   onSelectSimulation?: (simulationId: string) => void;
+  onStartChat?: (message: string, classificationType?: 'rsn' | 'cce-sn' | 'cce-sh') => void;
 }
 
 // Predefined prompts based on user role
@@ -47,7 +48,7 @@ const getPromptSuggestions = (role: string) => {
   }
 };
 
-export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onToggleSidebar, isSidebarOpen, userProfile, onSelectSimulation }: HomePageProps) {
+export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onToggleSidebar, isSidebarOpen, userProfile, onSelectSimulation, onStartChat }: HomePageProps) {
   const [inputValue, setInputValue] = useState('');
 
   const today = new Date();
@@ -77,7 +78,9 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, onTog
             <div className="bg-white rounded-lg shadow-sm border border-gray-300">
               <MessageInput
                 onSend={(message, classificationType) => {
-                  console.log('Quick chat message:', message, 'Classification:', classificationType);
+                  if (onStartChat) {
+                    onStartChat(message, classificationType);
+                  }
                 }}
                 colorTheme={colorTheme}
                 fontStyle={fontStyle}
