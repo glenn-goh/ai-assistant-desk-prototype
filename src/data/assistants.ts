@@ -154,8 +154,8 @@ const allAssistants = {
   // HR Role
   workdayShortlister: {
     id: 'workday-shortlister',
-    name: 'Workday Candidate Shortlister',
-    description: 'Analyze candidate profiles and shortlist top matches for open positions.',
+    name: 'HR Recruitment Assistant',
+    description: 'Analyzes multiple candidate profiles from Workday against job requirements to identify and shortlist the best-fit candidates for open positions.',
     owner: 'AI Assistant Team',
     tags: ['HR', 'Recruitment'],
     icon: Users,
@@ -217,12 +217,12 @@ const allAssistants = {
   parliamentaryQA: {
     id: 'parliamentary-qa',
     name: 'Parliamentary Question Assistant',
-    description: 'Research and synthesize answers to parliamentary questions from official sources.',
+    description: 'Helps draft responses to parliamentary questions with proper formatting, research from official sources, and talking points for Ministers.',
     owner: 'AI Assistant Team',
     tags: ['Parliamentary', 'Research'],
     icon: BookOpen,
     uses: '7.3k',
-    classification: 'C(CE)/SH',
+    classification: 'C(CE)/SN',
     type: 'Official' as const,
     assistantType: 'parliamentary-question',
   },

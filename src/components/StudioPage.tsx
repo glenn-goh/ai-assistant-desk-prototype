@@ -1,4 +1,4 @@
-import { PanelLeft, Plus, Bot, Settings as SettingsIcon, Wand2 } from 'lucide-react';
+import { Plus, Bot, Settings as SettingsIcon, Wand2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -8,12 +8,11 @@ import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 
 interface StudioPageProps {
-  onToggleSidebar: () => void;
   colorTheme: ColorTheme;
   fontStyle: FontStyle;
 }
 
-export function StudioPage({ onToggleSidebar, colorTheme, fontStyle }: StudioPageProps) {
+export function StudioPage({ colorTheme, fontStyle }: StudioPageProps) {
   const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
 
@@ -21,13 +20,6 @@ export function StudioPage({ onToggleSidebar, colorTheme, fontStyle }: StudioPag
     <div className={`flex-1 flex flex-col ${theme.mainBg} ${font.base}`}>
       {/* Header */}
       <div className={`flex items-center gap-2 p-4 border-b ${theme.header}`}>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleSidebar}
-        >
-          <PanelLeft className="w-5 h-5" />
-        </Button>
         <h1 className={theme.title + ' ' + font.title}>Create Your Assistant</h1>
       </div>
 

@@ -1,0 +1,376 @@
+import { useState } from 'react';
+import { ArrowLeft, Folder as FolderIcon, MessageSquare, MoreHorizontal, Trash2, SquarePen, Settings, Upload, FileText, X } from 'lucide-react';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { Separator } from './ui/separator';
+import type { Folder } from '../types/folder';
+import type { Chat } from '../App';
+
+interface FolderPageProps {
+  folder: Folder;
+  chats: Chat[];
+  onBack: () => void;
+  onSelectChat: (chatId: string) => void;
+  onDeleteFolder: (folderId: string) => void;
+  onRemoveChatFromFolder: (folderId: string, chatId: string) => void;
+  onStartNewChatInFolder?: (folderId: string) => void;
+  onUpdateFolder?: (folderId: string, updates: Partial<Folder>) => void;
+}
+
+export function FolderPage({
+  folder,
+  chats,
+  onBack,
+  onSelectChat,
+  onDeleteFolder,
+  onRemoveChatFromFolder,
+  onStartNewChatInFolder,
+  onUpdateFolder,
+}: FolderPageProps) {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [editName, setEditName] = useState(folder.name);
+  const [editInstructions, setEditInstructions] = useState(folder.customInstructions || '');
+  const [memoriesScope, setMemoriesScope] = useState<'folder-only' | 'include-external'>(folder.memoriesScope);
+
+  const folderChats = chats.filter(chat => folder.chatIds.includes(chat.id));
+
+  const handleSaveSettings = () => {
+    if (onUpdateFolder) {
+      onUpdateFolder(folder.id, {
+        name: editName.trim() || folder.name,
+        customInstructions: editInstructions.trim(),
+        memoriesScope,
+      });
+    }
+    setSettingsOpen(false);
+  };
+
+  const handleFileUpload = () => {
+    // Simulated file upload - in real implementation would open file picker
+    const mockFile = {
+      id: Date.now().toString(),
+      name: 'document.pdf',
+      size: 1024 * 100,
+      uploadedAt: new Date(),
+    };
+    if (onUpdateFolder) {
+      onUpdateFolder(folder.id, {
+        files: [...(folder.files || []), mockFile],
+      });
+    }
+  };
+
+  const handleRemoveFile = (fileId: string) => {
+    if (onUpdateFolder) {
+      onUpdateFolder(folder.id, {
+        files: (folder.files || []).filter(f => f.id !== fileId),
+      });
+    }
+  };
+
+  return (
+    <div className="flex-1 flex flex-col bg-gray-100">
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border-b border-gray-200">
+        <button
+          onClick={onBack}
+          className="p-1 rounded-lg hover:bg-gray-200 transition-colors text-gray-600"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-2 flex-1">
+          <FolderIcon className="w-5 h-5 text-gray-600" />
+          <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>
+            {folder.name}
+          </h1>
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onStartNewChatInFolder?.(folder.id)}
+          className="gap-2"
+        >
+          <SquarePen className="w-4 h-4" />
+          New Chat
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <MoreHorizontal className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+            <DropdownMenuItem
+              onClick={() => setSettingsOpen(true)}
+              className="hover:bg-gray-100"
+            >
+              <Settings className="w-4 h-4 mr-1" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => onDeleteFolder(folder.id)}
+              className="text-red-500 hover:bg-gray-100"
+            >
+              <Trash2 className="w-4 h-4 mr-1" />
+              Delete Folder
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Content - Two Column Layout */}
+      <div className="flex-1 overflow-auto flex">
+        {/* Left Column - Chats */}
+        <div className="flex-1 px-4 py-8">
+          <div className="max-w-3xl mx-auto space-y-4">
+            {/* Folder isolation info */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+              <p className="text-sm text-gray-700">
+                Chats within this folder will only reference files, custom instructions, and memories from within this folder.
+              </p>
+            </div>
+
+            {folderChats.length > 0 ? (
+              folderChats.map((chat) => (
+              <div
+                key={chat.id}
+                onClick={() => onSelectChat(chat.id)}
+                className="group flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-gray-200"
+              >
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare className="w-5 h-5 text-gray-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base font-medium text-gray-900 truncate">
+                    {chat.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 truncate">
+                    {chat.messages.length > 0
+                      ? chat.messages[chat.messages.length - 1].content.slice(0, 60) + '...'
+                      : 'No messages yet'}
+                  </p>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onRemoveChatFromFolder(folder.id, chat.id);
+                      }}
+                      className="hover:bg-gray-100"
+                    >
+                      <Trash2 className="w-4 h-4 mr-1" />
+                      Remove from folder
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <FolderIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">This folder is empty</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                Start a new chat or drag existing chats here to organize them
+              </p>
+              <Button onClick={() => onStartNewChatInFolder?.(folder.id)} className="gap-2">
+                <SquarePen className="w-4 h-4" />
+                Start New Chat
+              </Button>
+            </div>
+          )}
+          </div>
+        </div>
+
+        {/* Right Column - Custom Instructions and Files */}
+        <div className="w-80 border-l border-gray-200 bg-white px-4 py-8 space-y-6 overflow-y-auto">
+          {/* Custom Instructions */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-gray-900">Custom instructions</h3>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="text-xs text-gray-600 hover:text-gray-900 underline"
+              >
+                Edit
+              </button>
+            </div>
+            {folder.customInstructions ? (
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="w-full text-left text-sm text-gray-700 bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                <div className="line-clamp-3">
+                  {folder.customInstructions}
+                </div>
+              </button>
+            ) : (
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="w-full text-left text-sm text-gray-500 bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
+              >
+                No custom instructions set. Click to add.
+              </button>
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Files */}
+          <div className="space-y-2">
+            <h3 className="text-sm font-semibold text-gray-900">Files</h3>
+            <div className="space-y-2">
+              {(folder.files || []).length > 0 ? (
+                (folder.files || []).map(file => (
+                  <div key={file.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg group">
+                    <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                    <span className="text-sm text-gray-700 flex-1 truncate">{file.name}</span>
+                    <button
+                      onClick={() => handleRemoveFile(file.id)}
+                      className="p-1 hover:bg-gray-200 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="w-3 h-3 text-gray-500" />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-4">No files uploaded</p>
+              )}
+              <Button variant="outline" size="sm" className="w-full gap-2 mt-2" onClick={handleFileUpload}>
+                <Upload className="w-4 h-4" />
+                Upload File
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Folder Settings Dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="sm:max-w-lg bg-white border-2 border-gray-900">
+          <DialogHeader>
+            <DialogTitle className="text-gray-900">Folder Settings</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Folder Name */}
+            <div className="space-y-2">
+              <Label htmlFor="folder-name" className="text-gray-700">Folder Name</Label>
+              <Input
+                id="folder-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="bg-white border-gray-300"
+              />
+            </div>
+
+            {/* Custom Instructions */}
+            <div className="space-y-2">
+              <Label htmlFor="custom-instructions" className="text-gray-700">Custom Instructions</Label>
+              <Textarea
+                id="custom-instructions"
+                placeholder="Add custom instructions for chats in this folder..."
+                value={editInstructions}
+                onChange={(e) => setEditInstructions(e.target.value)}
+                className="bg-white border-gray-300 min-h-[100px]"
+              />
+              <p className="text-xs text-gray-500">
+                These instructions will apply to all chats within this folder.
+              </p>
+            </div>
+
+            {/* Files */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Files</Label>
+              <div className="border border-gray-200 rounded-lg p-3 space-y-2">
+                {(folder.files || []).length > 0 ? (
+                  (folder.files || []).map(file => (
+                    <div key={file.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-700 flex-1 truncate">{file.name}</span>
+                      <button
+                        onClick={() => handleRemoveFile(file.id)}
+                        className="p-1 hover:bg-gray-200 rounded"
+                      >
+                        <X className="w-3 h-3 text-gray-500" />
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500 text-center py-2">No files uploaded</p>
+                )}
+                <Button variant="outline" size="sm" className="w-full gap-2" onClick={handleFileUpload}>
+                  <Upload className="w-4 h-4" />
+                  Upload File
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500">
+                Files uploaded here will be referenced by chats in this folder.
+              </p>
+            </div>
+
+            {/* Memories Scope */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Memories Scope</Label>
+              <div className="space-y-2">
+                <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="memories-scope"
+                    checked={memoriesScope === 'folder-only'}
+                    onChange={() => setMemoriesScope('folder-only')}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Folder only</div>
+                    <div className="text-xs text-gray-500">
+                      Chats will only reference files and memories from within this folder
+                    </div>
+                  </div>
+                </label>
+                <label className="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                  <input
+                    type="radio"
+                    name="memories-scope"
+                    checked={memoriesScope === 'include-external'}
+                    onChange={() => setMemoriesScope('include-external')}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Include external</div>
+                    <div className="text-xs text-gray-500">
+                      Chats can also reference memories and files from outside this folder
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}

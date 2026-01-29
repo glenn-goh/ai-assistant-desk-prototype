@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
-import { Send, Paperclip, Wrench, Search, Mic, FolderOpen, ScanLine, Shield, ChevronDown } from 'lucide-react';
+import { ArrowUp, Paperclip, SlidersHorizontal, Search, FolderOpen, Shield, ChevronDown, ChevronRight, Globe, Sparkles, PanelRight, Bot, Plus, Check } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import {
@@ -10,6 +10,7 @@ import {
 } from './ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
+import { essentialAssistants, topRatedAssistants, roleBasedAssistants } from '../data/assistants';
 
 export type ClassificationType = 'r-sn' | 'cce-sn' | 'cce-sh';
 
@@ -27,6 +28,8 @@ interface MessageInputProps {
   showTypingHint?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
+  bookmarkedAssistants?: string[];
+  assistantType?: string;
 }
 
 export function MessageInput({
@@ -42,7 +45,9 @@ export function MessageInput({
   disabled = false,
   showTypingHint = false,
   placeholder,
-  autoFocus = false
+  autoFocus = false,
+  bookmarkedAssistants = [],
+  assistantType
 }: MessageInputProps) {
   const [internalInput, setInternalInput] = useState('');
 
@@ -55,6 +60,7 @@ export function MessageInput({
     setInternalInput(newValue);
   };
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [selectedAssistants, setSelectedAssistants] = useState<string[]>([]);
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
   const [isLibraryPopoverOpen, setIsLibraryPopoverOpen] = useState(false);
   const [isToolsPopoverOpen, setIsToolsPopoverOpen] = useState(false);
@@ -70,14 +76,27 @@ export function MessageInput({
   const classificationOptions = [
     { id: 'r-sn' as ClassificationType, label: 'R/SN', fullName: 'Restricted / Sensitive Normal' },
     { id: 'cce-sn' as ClassificationType, label: 'C(CE)/SN', fullName: 'Confidential (Cloud-Eligible) / Sensitive Normal' },
-    { id: 'cce-sh' as ClassificationType, label: 'C(CE)/SH', fullName: 'Confidential (Cloud-Eligible) / Sensitive High' },
   ];
 
   const tools = [
-    { id: 'internet-search', name: 'Internet Search', icon: Search },
-    { id: 'audio-transcription', name: 'Audio Transcription', icon: Mic },
-    { id: 'key-info-extraction', name: 'Key Info Extraction (KIE)', icon: ScanLine },
+    { id: 'web-search', name: 'Web Search', icon: Globe },
+    { id: 'deep-research', name: 'Deep Research', icon: Sparkles },
+    { id: 'canvas', name: 'Canvas', icon: PanelRight },
   ];
+
+  // Get all available assistants
+  const allRoleAssistants = Object.values(roleBasedAssistants).flat();
+  const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
+
+  // Remove duplicates by ID
+  const uniqueAssistants = Array.from(
+    new Map(allAvailableAssistants.map(a => [a.id, a])).values()
+  );
+
+  // Filter to only show bookmarked assistants
+  const assistants = uniqueAssistants
+    .filter(a => bookmarkedAssistants.includes(a.id))
+    .map(a => ({ id: a.id, name: a.name }));
 
   const libraries = [
     { id: 'govtech-branding', name: 'GovTech branding guidelines', type: 'SharePoint' },
@@ -111,10 +130,18 @@ export function MessageInput({
   };
 
   const toggleTool = (toolId: string) => {
-    setSelectedTools(prev => 
-      prev.includes(toolId) 
+    setSelectedTools(prev =>
+      prev.includes(toolId)
         ? prev.filter(id => id !== toolId)
         : [...prev, toolId]
+    );
+  };
+
+  const toggleAssistant = (assistantId: string) => {
+    setSelectedAssistants(prev =>
+      prev.includes(assistantId)
+        ? prev.filter(id => id !== assistantId)
+        : [...prev, assistantId]
     );
   };
 
@@ -183,7 +210,7 @@ export function MessageInput({
           value={input}
           onChange={autoTypeText ? undefined : (e => setInput(e.target.value))}
           onKeyDown={handleTypingKeyDown}
-          placeholder={placeholder || (autoTypeText ? "Type to continue..." : isInputDisabled ? "Waiting for response..." : "Message AI Assistant...")}
+          placeholder={placeholder || (autoTypeText ? "Type to continue..." : isInputDisabled ? "Waiting for response..." : "Ask me anything...")}
           className={`w-full min-h-[64px] max-h-[200px] resize-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 bg-transparent text-gray-900 text-base ${isInputDisabled ? 'text-gray-400' : ''}`}
           rows={1}
           disabled={isInputDisabled}
@@ -199,90 +226,53 @@ export function MessageInput({
             className="hidden"
             onChange={handleFileUpload}
           />
-          <Button
-            onClick={() => fileInputRef.current?.click()}
-            size="icon"
-            variant="ghost"
-            className="h-7 w-7 flex-shrink-0"
-          >
-            <Paperclip className="w-3.5 h-3.5" />
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={() => fileInputRef.current?.click()}
+                  size="icon"
+                  variant="ghost"
+                  disabled={isInputDisabled}
+                  className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add files</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-          {/* Library Button */}
-          <DropdownMenu open={isLibraryPopoverOpen} onOpenChange={setIsLibraryPopoverOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 flex-shrink-0 relative"
-              >
-                <FolderOpen className="w-3.5 h-3.5" />
-                {selectedLibraries.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-purple-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                    {selectedLibraries.length}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-64 p-0 z-50 bg-white dark:bg-gray-900"
-              align="start"
-              side="top"
-              sideOffset={8}
-            >
-              <div className="p-3 border-b bg-white dark:bg-gray-900">
-                <h3 className="font-medium text-xs">Select Libraries</h3>
-                <p className="text-xs text-muted-foreground">Connect this chat to libraries</p>
-              </div>
-              <div className="p-2 bg-white dark:bg-gray-900">
-                {libraries.map((library) => {
-                  const isSelected = selectedLibraries.includes(library.id);
-                  return (
-                    <button
-                      key={library.id}
+          {/* Tools Button - Only show for personal assistant, not custom assistants */}
+          {!assistantType && (
+            <TooltipProvider>
+              <Tooltip>
+                <DropdownMenu open={isInputDisabled ? false : isToolsPopoverOpen} onOpenChange={setIsToolsPopoverOpen}>
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
                       type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        toggleLibrary(library.id);
-                      }}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors ${isSelected ? 'bg-gray-200' : ''}`}
+                      size="icon"
+                      variant="ghost"
+                      disabled={isInputDisabled}
+                      className={`h-7 w-7 flex-shrink-0 relative ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                      <FolderOpen className="w-5 h-5 flex-shrink-0 text-gray-700" />
-                      <div className="flex-1 text-left">
-                        <div className="text-xs text-gray-900">{library.name}</div>
-                        <div className="text-[10px] text-gray-500">{library.type}</div>
-                      </div>
-                      {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-gray-900" />
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      {(selectedTools.length + selectedAssistants.length) > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                          {selectedTools.length + selectedAssistants.length}
+                        </span>
                       )}
-                    </button>
-                  );
-                })}
-              </div>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Tools Button */}
-          <DropdownMenu open={isToolsPopoverOpen} onOpenChange={setIsToolsPopoverOpen}>
-            <DropdownMenuTrigger asChild>
-              <Button
-                type="button"
-                size="icon"
-                variant="ghost"
-                className="h-7 w-7 flex-shrink-0 relative"
-              >
-                <Wrench className="w-3.5 h-3.5" />
-                {selectedTools.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                    {selectedTools.length}
-                  </span>
-                )}
-              </Button>
-            </DropdownMenuTrigger>
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add tools</p>
+                </TooltipContent>
             <DropdownMenuContent
-              className="w-64 p-0 z-50 bg-white dark:bg-gray-900"
+              className="w-64 p-0 z-50 bg-white dark:bg-gray-900 overflow-visible"
               align="start"
               side="top"
               sideOffset={8}
@@ -304,33 +294,88 @@ export function MessageInput({
                         e.stopPropagation();
                         toggleTool(tool.id);
                       }}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors ${isSelected ? 'bg-gray-200' : ''}`}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
                     >
                       <Icon className="w-5 h-5 flex-shrink-0 text-gray-700" />
                       <span className="flex-1 text-left text-xs text-gray-900">{tool.name}</span>
                       {isSelected && (
-                        <div className="w-2 h-2 rounded-full bg-gray-900" />
+                        <Check className="w-4 h-4 text-gray-900" />
                       )}
                     </button>
                   );
                 })}
 
-                {/* Explore AI Common Tools link */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    // TODO: Navigate to AI Common Tools page
-                    console.log('Navigate to AI Common Tools');
-                  }}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors mt-1 border-t border-gray-300 pt-3"
-                >
-                  <span className="flex-1 text-left text-xs text-gray-700 font-medium underline">Explore AI Common Tools</span>
-                </button>
+                {/* Custom Assistants Submenu */}
+                <div className="relative group/assistants mt-1 border-t border-gray-200 pt-1">
+                  <button
+                    type="button"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <Bot className="w-5 h-5 flex-shrink-0 text-gray-700" />
+                    <span className="flex-1 text-left text-xs text-gray-900">Custom Assistants</span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                  {/* Submenu */}
+                  <div className="absolute left-full top-0 ml-1 w-56 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
+                    <div className="p-2">
+                      {assistants.length === 0 ? (
+                        <div className="px-3 py-4 text-center">
+                          <p className="text-xs text-gray-500">
+                            Bookmark a custom assistant for it to appear here
+                          </p>
+                        </div>
+                      ) : (
+                        assistants.map((assistant) => {
+                          const isSelected = selectedAssistants.includes(assistant.id);
+                          return (
+                            <button
+                              key={assistant.id}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleAssistant(assistant.id);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                            >
+                              <span className="flex-1 text-xs text-gray-900">{assistant.name}</span>
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-gray-900" />
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </DropdownMenuContent>
-          </DropdownMenu>
+              </DropdownMenu>
+            </Tooltip>
+          </TooltipProvider>
+          )
+          }
+
+          {/* Library Button - Disabled */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  disabled
+                  className="h-7 w-7 flex-shrink-0 relative opacity-50 cursor-not-allowed"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Coming soon</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="flex items-center gap-1">
@@ -397,15 +442,12 @@ export function MessageInput({
             onClick={handleSend}
             disabled={!input.trim() || isInputDisabled}
             size="icon"
-            className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300' : ''}`}
+            className={`h-7 w-7 flex-shrink-0 rounded-full ${isInputDisabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed border-gray-300' : ''}`}
           >
-            <Send className="w-3.5 h-3.5" />
+            <ArrowUp className="w-3.5 h-3.5" />
           </Button>
         </div>
       </div>
-      {showTypingHint && !isInputDisabled && (
-        <p className="text-xs text-gray-500 mt-2">Press Enter to send the complete message</p>
-      )}
     </div>
   );
 }

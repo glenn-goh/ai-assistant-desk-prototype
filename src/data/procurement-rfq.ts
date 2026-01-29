@@ -479,7 +479,7 @@ export const procurementRfqData = {
             </div>
             <div>
               <p class="font-medium text-sm">Requestor</p>
-              <p class="text-xs text-gray-600">Jayden Tan - Marketing Officer</p>
+              <p class="text-xs text-gray-600">John Doe - Product Manager</p>
             </div>
           </div>
           <span class="text-xs text-emerald-700 font-medium">Submitted</span>

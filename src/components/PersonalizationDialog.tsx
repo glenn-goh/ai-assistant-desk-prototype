@@ -1,4 +1,4 @@
-import { User, Palette, Workflow } from 'lucide-react';
+import { User, Brain, Bell, ArrowLeft, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Label } from './ui/label';
@@ -9,6 +9,7 @@ import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Separator } from './ui/separator';
 import { Checkbox } from './ui/checkbox';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { UserProfile } from '../App';
 import { useState } from 'react';
 
@@ -50,169 +51,157 @@ export function PersonalizationDialog({
   onOpenChange,
 }: PersonalizationDialogProps) {
   const [customInstructions, setCustomInstructions] = useState(userProfile.customInstructions || '');
+  const [aiStyle, setAiStyle] = useState(userProfile.aiStyle || 'Concise');
+  const [otherAiStyle, setOtherAiStyle] = useState('');
+  const [callMeName, setCallMeName] = useState(userProfile.name || '');
+  const [jobRole, setJobRole] = useState(userProfile.role || '');
+  const [otherJobRole, setOtherJobRole] = useState('');
+  const [workActivities, setWorkActivities] = useState<string[]>(userProfile.workActivities || []);
+  const [memoryEnabled, setMemoryEnabled] = useState(true);
+  const [showMemoriesModal, setShowMemoriesModal] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      if (!isOpen) {
+        setShowMemoriesModal(false);
+      }
+      onOpenChange?.(isOpen);
+    }}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>
-            Customize your AI Assistant experience
-          </DialogDescription>
-        </DialogHeader>
+        {showMemoriesModal ? (
+          <>
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowMemoriesModal(false)}
+                  className="p-1 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <DialogTitle>Saved Memories</DialogTitle>
+              </div>
+              <DialogDescription>
+                Things AI Assistant has learned about you
+              </DialogDescription>
+            </DialogHeader>
 
-        <Tabs defaultValue="personalisation" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="personalisation" className="flex items-center gap-2">
-              <Palette className="w-4 h-4" />
-              Theme
+            <div className="space-y-3 mt-4">
+              {/* Sample memories */}
+              {[
+                { id: '1', text: 'Works at GovTech as a Marketing Officer', date: 'Jan 15, 2026' },
+                { id: '2', text: 'Prefers concise, bullet-point responses', date: 'Jan 18, 2026' },
+                { id: '3', text: 'Often works on marketing campaigns and content', date: 'Jan 20, 2026' },
+              ].map((memory) => (
+                <div key={memory.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-900">{memory.text}</p>
+                    <p className="text-xs text-gray-500 mt-1">{memory.date}</p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          // Delete memory logic would go here
+                        }}
+                        className="text-red-500 hover:bg-gray-100"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Remove memory
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <DialogHeader>
+              <DialogTitle>Settings</DialogTitle>
+              <DialogDescription>
+                Customize your AI Assistant experience
+              </DialogDescription>
+            </DialogHeader>
+
+        <Tabs defaultValue="accounts" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="accounts" className="flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Accounts
             </TabsTrigger>
-            <TabsTrigger value="contextualisation" className="flex items-center gap-2">
-              <Workflow className="w-4 h-4" />
-              Contextualisation
+            <TabsTrigger value="memories" className="flex items-center gap-2">
+              <Brain className="w-4 h-4" />
+              Personalisation
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-2">
+              <Bell className="w-4 h-4" />
+              Notifications
             </TabsTrigger>
           </TabsList>
 
-          {/* Theme Tab */}
-          <TabsContent value="personalisation" className="space-y-6 mt-6">
-            {/* Display & Interface */}
+          {/* Accounts Tab */}
+          <TabsContent value="accounts" className="space-y-6 mt-6">
+            {/* Profile Information */}
             <div className="space-y-4">
-              <h3 className="font-semibold">Display & Interface</h3>
-              
-              <div className="space-y-2">
-                <Label htmlFor="color-theme">Color Theme</Label>
-                <Select value={colorTheme} onValueChange={(value) => onColorThemeChange(value as ColorTheme)}>
-                  <SelectTrigger id="color-theme">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="minimal">Minimal</SelectItem>
-                    <SelectItem value="singapore-red">Singapore Red</SelectItem>
-                    <SelectItem value="pastel-pink">Pastel Pink</SelectItem>
-                    <SelectItem value="army-green">Army Green</SelectItem>
-                    <SelectItem value="rainbow">Rainbow</SelectItem>
-                    <SelectItem value="national-day">National Day</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <h3 className="font-semibold">Profile Information</h3>
 
-              <div className="space-y-2">
-                <Label htmlFor="font-style">Font Style</Label>
-                <Select value={fontStyle} onValueChange={(value) => onFontStyleChange(value as FontStyle)}>
-                  <SelectTrigger id="font-style">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="modern">Modern</SelectItem>
-                    <SelectItem value="large">Large (For Seniors)</SelectItem>
-                    <SelectItem value="compact">Compact</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="language">Language Preference</Label>
-                <Select defaultValue="english">
-                  <SelectTrigger id="language">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="english">English</SelectItem>
-                    <SelectItem value="chinese">中文 (Chinese)</SelectItem>
-                    <SelectItem value="malay">Bahasa Melayu (Malay)</SelectItem>
-                    <SelectItem value="tamil">தமிழ் (Tamil)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="display-density">Display Density</Label>
-                <Select defaultValue="comfortable">
-                  <SelectTrigger id="display-density">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="compact">Compact</SelectItem>
-                    <SelectItem value="comfortable">Comfortable</SelectItem>
-                    <SelectItem value="spacious">Spacious</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Accessibility */}
-            <div className="space-y-4">
-              <h3 className="font-semibold">Accessibility</h3>
-              
-              <div className="flex items-center justify-between py-3">
-                <div className="space-y-0.5">
-                  <Label htmlFor="high-contrast" className="text-xs">High Contrast Mode</Label>
-                  <p className="text-muted-foreground text-xs">Increase contrast for better visibility</p>
+              <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center">
+                  <User className="w-8 h-8 text-white" />
                 </div>
-                <Switch id="high-contrast" />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between py-3">
-                <div className="space-y-0.5">
-                  <Label htmlFor="screen-reader" className="text-xs">Screen Reader Support</Label>
-                  <p className="text-muted-foreground text-xs">Optimize for screen readers</p>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">{userProfile.name}</h4>
+                  <p className="text-sm text-gray-500">{userProfile.email}</p>
+                  <p className="text-sm text-gray-500">{userProfile.agency} • {userProfile.role}</p>
                 </div>
-                <Switch id="screen-reader" />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between py-3">
-                <div className="space-y-0.5">
-                  <Label htmlFor="keyboard-shortcuts" className="text-xs">Keyboard Shortcuts</Label>
-                  <p className="text-muted-foreground text-xs">Enable keyboard navigation</p>
-                </div>
-                <Switch id="keyboard-shortcuts" defaultChecked />
-              </div>
-            </div>
-          </TabsContent>
-
-          {/* Contextualisation Tab */}
-          <TabsContent value="contextualisation" className="space-y-6 mt-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="call-you">What should AI Assistant call you?</Label>
-                <Input id="call-you" placeholder="e.g., Sarah, Mr. Tan, Dr. Lee" />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="agency">What is your agency?</Label>
-                <Select defaultValue="">
+                <Label htmlFor="display-name">Display Name</Label>
+                <Input id="display-name" defaultValue={userProfile.name} />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="agency">Agency</Label>
+                <Select
+                  value={userProfile.agency}
+                  onValueChange={(value) => {
+                    onUpdateProfile({
+                      ...userProfile,
+                      agency: value
+                    });
+                  }}
+                >
                   <SelectTrigger id="agency">
                     <SelectValue placeholder="Select your agency" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="moe">Ministry of Education (MOE)</SelectItem>
-                    <SelectItem value="mom">Ministry of Manpower (MOM)</SelectItem>
-                    <SelectItem value="mti">Ministry of Trade and Industry (MTI)</SelectItem>
-                    <SelectItem value="mha">Ministry of Home Affairs (MHA)</SelectItem>
-                    <SelectItem value="mof">Ministry of Finance (MOF)</SelectItem>
-                    <SelectItem value="moh">Ministry of Health (MOH)</SelectItem>
-                    <SelectItem value="minlaw">Ministry of Law (MinLaw)</SelectItem>
-                    <SelectItem value="mnd">Ministry of National Development (MND)</SelectItem>
-                    <SelectItem value="mot">Ministry of Transport (MOT)</SelectItem>
-                    <SelectItem value="pmo">Prime Minister's Office (PMO)</SelectItem>
-                    <SelectItem value="msf">Ministry of Social and Family Development (MSF)</SelectItem>
-                    <SelectItem value="mccy">Ministry of Culture, Community and Youth (MCCY)</SelectItem>
-                    <SelectItem value="mewr">Ministry of Sustainability and the Environment (MSE)</SelectItem>
-                    <SelectItem value="mindef">Ministry of Defence (MINDEF)</SelectItem>
-                    <SelectItem value="mfa">Ministry of Foreign Affairs (MFA)</SelectItem>
-                    <SelectItem value="mci">Ministry of Communications and Information (MCI)</SelectItem>
+                    <SelectItem value="GovTech">GovTech</SelectItem>
+                    <SelectItem value="Ministry of Education (MOE)">Ministry of Education (MOE)</SelectItem>
+                    <SelectItem value="Ministry of Manpower (MOM)">Ministry of Manpower (MOM)</SelectItem>
+                    <SelectItem value="Ministry of Trade and Industry (MTI)">Ministry of Trade and Industry (MTI)</SelectItem>
+                    <SelectItem value="Ministry of Home Affairs (MHA)">Ministry of Home Affairs (MHA)</SelectItem>
+                    <SelectItem value="Ministry of Finance (MOF)">Ministry of Finance (MOF)</SelectItem>
+                    <SelectItem value="Ministry of Health (MOH)">Ministry of Health (MOH)</SelectItem>
+                    <SelectItem value="Ministry of National Development (MND)">Ministry of National Development (MND)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="job-role">What is your job role?</Label>
-                <Select 
-                  value={userProfile.role} 
+                <Label htmlFor="job-role">Job Role</Label>
+                <Select
+                  value={userProfile.role}
                   onValueChange={(value) => {
                     onUpdateProfile({
                       ...userProfile,
@@ -230,130 +219,195 @@ export function PersonalizationDialog({
                   </SelectContent>
                 </Select>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="profile">Describe your profile in a few words.</Label>
-                <Textarea 
-                  id="profile" 
-                  placeholder="e.g., Experienced policy analyst focusing on education reforms with 8 years in public service..."
-                  className="min-h-[80px]"
+            <div className="flex justify-end pt-4">
+              <Button onClick={() => {
+                // Save changes logic would go here
+                onOpenChange?.(false);
+              }}>Save Changes</Button>
+            </div>
+          </TabsContent>
+
+          {/* Personalisation Tab */}
+          <TabsContent value="memories" className="space-y-6 mt-6">
+            {/* AI Personalisation Header */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">AI personalisation</h3>
+            </div>
+
+            {/* Preferred AI Style and Tone */}
+            <div className="space-y-2">
+              <Label htmlFor="ai-style">Preferred AI style and tone</Label>
+              <p className="text-sm text-gray-500">Set the style and tone of how your AI Assistant responds to you.</p>
+              <Select value={aiStyle} onValueChange={setAiStyle}>
+                <SelectTrigger id="ai-style">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Concise">Concise</SelectItem>
+                  <SelectItem value="Professional">Professional</SelectItem>
+                  <SelectItem value="Academic">Academic</SelectItem>
+                  <SelectItem value="Creative">Creative</SelectItem>
+                  <SelectItem value="Others">Others</SelectItem>
+                </SelectContent>
+              </Select>
+              {aiStyle === 'Others' && (
+                <Input
+                  placeholder="Describe your preferred style..."
+                  value={otherAiStyle}
+                  onChange={(e) => setOtherAiStyle(e.target.value)}
+                  className="mt-2"
                 />
-              </div>
+              )}
+            </div>
+
+            {/* Custom Instructions */}
+            <div className="space-y-2">
+              <Label htmlFor="custom-instructions">Custom Instructions</Label>
+              <Textarea
+                id="custom-instructions"
+                placeholder="e.g., Always provide sources, use Singapore English spelling, include relevant policy references..."
+                className="min-h-[100px]"
+                value={customInstructions}
+                onChange={(e) => setCustomInstructions(e.target.value)}
+              />
             </div>
 
             <Separator />
 
-            <div className="space-y-4">
+            {/* About You Section */}
+            <div className="space-y-6">
+              <h3 className="font-semibold">About You</h3>
+
               <div className="space-y-2">
-                <Label htmlFor="work-focus">What is your current work focus?</Label>
-                <Textarea 
-                  id="work-focus" 
-                  placeholder="e.g., Developing digital transformation strategies for public healthcare services..."
-                  className="min-h-[80px]"
+                <Label htmlFor="call-me">What would you like us to call you?</Label>
+                <Input
+                  id="call-me"
+                  value={callMeName}
+                  onChange={(e) => setCallMeName(e.target.value)}
+                  placeholder="Enter your preferred name"
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="primary-job-role">Which best describes your primary job role?</Label>
+                <Select value={jobRole} onValueChange={setJobRole}>
+                  <SelectTrigger id="primary-job-role">
+                    <SelectValue placeholder="Select your job role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="policy-strategy">Policy / Strategy</SelectItem>
+                    <SelectItem value="operations">Operations</SelectItem>
+                    <SelectItem value="hr-people">HR / People</SelectItem>
+                    <SelectItem value="finance-procurement">Finance / Procurement</SelectItem>
+                    <SelectItem value="legal-compliance">Legal / Compliance</SelectItem>
+                    <SelectItem value="communications">Communications</SelectItem>
+                    <SelectItem value="data-tech">Data / Tech</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+                {jobRole === 'other' && (
+                  <Input
+                    placeholder="Describe your job role..."
+                    value={otherJobRole}
+                    onChange={(e) => setOtherJobRole(e.target.value)}
+                    className="mt-2"
+                  />
+                )}
+              </div>
+
               <div className="space-y-3">
-                <Label>What traits should AI Assistant have?</Label>
-                <p className="text-sm text-muted-foreground">Select multiple traits</p>
-                <div className="space-y-3">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-professional" />
-                    <label
-                      htmlFor="trait-professional"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Professional and formal
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-friendly" />
-                    <label
-                      htmlFor="trait-friendly"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Friendly and conversational
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-concise" />
-                    <label
-                      htmlFor="trait-concise"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Concise and to-the-point
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-detailed" />
-                    <label
-                      htmlFor="trait-detailed"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Detailed and thorough
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-creative" />
-                    <label
-                      htmlFor="trait-creative"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Creative and innovative
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-analytical" />
-                    <label
-                      htmlFor="trait-analytical"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Analytical and data-driven
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-empathetic" />
-                    <label
-                      htmlFor="trait-empathetic"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Empathetic and understanding
-                    </label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox id="trait-proactive" />
-                    <label
-                      htmlFor="trait-proactive"
-                      className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                    >
-                      Proactive with suggestions
-                    </label>
-                  </div>
+                <Label>What do you spend most of your time doing?</Label>
+                <div className="space-y-2">
+                  {[
+                    { id: 'drafting', label: 'Drafting documents' },
+                    { id: 'reviewing', label: 'Reviewing / editing' },
+                    { id: 'researching', label: 'Researching / summarising' },
+                    { id: 'briefings', label: 'Preparing briefings / slides' },
+                    { id: 'cases', label: 'Handling cases' },
+                    { id: 'queries', label: 'Responding to queries' },
+                    { id: 'analysis', label: 'Data analysis' },
+                    { id: 'planning', label: 'Planning / coordination' },
+                  ].map((activity) => (
+                    <div key={activity.id} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={activity.id}
+                        checked={workActivities.includes(activity.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setWorkActivities([...workActivities, activity.id]);
+                          } else {
+                            setWorkActivities(workActivities.filter(a => a !== activity.id));
+                          }
+                        }}
+                      />
+                      <Label htmlFor={activity.id} className="text-sm font-normal cursor-pointer">
+                        {activity.label}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
 
             <Separator />
 
+            {/* Memories Section */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="custom-instructions">Any custom instructions</Label>
-                <Textarea 
-                  id="custom-instructions" 
-                  placeholder="e.g., Always provide sources, use Singapore English spelling, include relevant policy references..."
-                  className="min-h-[100px]"
-                  value={customInstructions}
-                  onChange={(e) => setCustomInstructions(e.target.value)}
-                />
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Memories</h3>
+                <Button variant="outline" size="sm" onClick={() => setShowMemoriesModal(true)}>
+                  Manage
+                </Button>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <p className="text-sm text-gray-900">Reference saved memories</p>
+                  <p className="text-xs text-gray-500">AI Assistant save and use memories when responding.</p>
+                </div>
+                <Switch checked={memoryEnabled} onCheckedChange={setMemoryEnabled} />
               </div>
             </div>
 
             <div className="flex justify-end pt-4">
-              <Button>Save Changes</Button>
+              <Button onClick={() => {
+                // Save personalisation changes
+                onUpdateProfile({
+                  ...userProfile,
+                  customInstructions: customInstructions,
+                  name: callMeName,
+                  aiStyle: aiStyle === 'Others' ? otherAiStyle : aiStyle,
+                  workActivities: workActivities,
+                });
+                onOpenChange?.(false);
+              }}>Save Changes</Button>
+            </div>
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-4 mt-6">
+            <div className="flex items-center justify-between py-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="notify-complete" className="text-sm">Task Completion</Label>
+                <p className="text-muted-foreground text-xs">Notify me by email when long-running tasks complete</p>
+              </div>
+              <Switch id="notify-complete" defaultChecked />
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between py-3">
+              <div className="space-y-0.5">
+                <Label htmlFor="email-updates" className="text-sm">Product Updates</Label>
+                <p className="text-muted-foreground text-xs">Receive emails about new features and improvements</p>
+              </div>
+              <Switch id="email-updates" defaultChecked />
             </div>
           </TabsContent>
         </Tabs>
+          </>
+        )}
       </DialogContent>
     </Dialog>
+    </>
   );
 }

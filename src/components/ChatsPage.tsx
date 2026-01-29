@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { PanelLeft, Search, MessageSquare, MoreHorizontal, Trash2 } from 'lucide-react';
-import { Button } from './ui/button';
+import { Search, MessageSquare, MoreHorizontal, Trash2 } from 'lucide-react';
 import { Input } from './ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
@@ -8,7 +7,6 @@ import type { Chat } from '../App';
 import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 
 interface ChatsPageProps {
-  onToggleSidebar: () => void;
   colorTheme: ColorTheme;
   fontStyle: FontStyle;
   chats: Chat[];
@@ -29,7 +27,6 @@ const demoSimulations = [
 ];
 
 export function ChatsPage({
-  onToggleSidebar,
   colorTheme,
   fontStyle,
   chats,
@@ -71,13 +68,6 @@ export function ChatsPage({
     <div className={`flex-1 flex flex-col bg-gray-100 ${font.base}`}>
       {/* Header */}
       <div className="flex items-center gap-2 p-4 bg-gray-100">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onToggleSidebar}
-        >
-          <PanelLeft className="w-5 h-5" />
-        </Button>
         <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>Chats</h1>
       </div>
 

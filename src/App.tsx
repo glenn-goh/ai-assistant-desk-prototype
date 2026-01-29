@@ -9,7 +9,10 @@ import { LoginPage } from './components/LoginPage';
 import { OnboardingPage } from './components/OnboardingPage';
 import { PersonalizationDialog } from './components/PersonalizationDialog';
 import { ChatSimulatorView } from './components/ChatSimulatorView';
+import { FolderPage } from './components/FolderPage';
+import { WalkthroughTour } from './components/WalkthroughTour';
 import { ColorTheme, FontStyle } from './components/PersonalizationDialog';
+import type { Folder } from './types/folder';
 import { featureOverviewData } from './data/feature-overview';
 import { customerSupportData } from './data/customer-support';
 import { feedbackCollectionData } from './data/feedback-collection';
@@ -18,6 +21,7 @@ import { procurementRfqData } from './data/procurement-rfq';
 import { marketingSoftwareAorData } from './data/marketing-software-aor';
 import { pqResponseData } from './data/pq-response-mnd';
 import { pqResponseDataV2 } from './data/pq-response-mnd-v2';
+import { canvasDemoData } from './data/canvas-demo';
 
 export interface Message {
   id: string;
@@ -35,9 +39,10 @@ export interface Chat {
   createdAt: Date;
   assistantType?: string;
   classificationType?: 'rsn' | 'cce-sn' | 'cce-sh';
+  isIncognito?: boolean;
 }
 
-export type View = 'chat' | 'explore' | 'studio' | 'home' | 'library' | 'chats';
+export type View = 'chat' | 'explore' | 'studio' | 'home' | 'library' | 'chats' | 'folder';
 export type Mode = 'desk' | 'studio';
 
 export interface UserProfile {
@@ -49,6 +54,8 @@ export interface UserProfile {
   workFocus?: string;
   customInstructions?: string;
   traits?: string[];
+  aiStyle?: string;
+  workActivities?: string[];
   dataSources?: Array<{
     id: string;
     type: 'sharepoint' | 'local' | 'aws' | 'gdrive';
@@ -61,13 +68,15 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasOnboarded, setHasOnboarded] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    name: 'Jayden Tan',
-    email: 'jayden.tan@tech.gov.sg',
-    role: 'Marketing Officer',
+    name: 'John Doe',
+    email: 'john.doe@tech.gov.sg',
+    role: 'Product Manager',
     agency: 'GovTech'
   });
 
   const [chats, setChats] = useState<Chat[]>([]);
+  const [previewChat, setPreviewChat] = useState<Chat | null>(null);
+  const [incognitoChat, setIncognitoChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState('new-rsn');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [colorTheme, setColorTheme] = useState<ColorTheme>('light');
@@ -76,6 +85,34 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('desk');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [homeResetKey, setHomeResetKey] = useState(0);
+  const [folders, setFolders] = useState<Folder[]>([]);
+  const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
+  const [bookmarkedAssistants, setBookmarkedAssistants] = useState<string[]>([]); // Store assistant IDs
+  const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
+  const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
+  const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
+    return localStorage.getItem('hasSeenWalkthrough') === 'true';
+  });
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // ⇧⌘O - New Chat
+      if (e.shiftKey && e.metaKey && e.key === 'o') {
+        e.preventDefault();
+        handleNewChat();
+      }
+      // ⌘K - Search Chats
+      if (e.metaKey && e.key === 'k') {
+        e.preventDefault();
+        setSearchModalOpen(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Handle browser back button to return to login
   useEffect(() => {
@@ -94,8 +131,12 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, [isAuthenticated]);
 
-  // Derived active chat state handling draft chats
-  const activeChat = activeChatId.startsWith('new-') 
+  // Derived active chat state handling draft chats, preview chats, and incognito chats
+  const activeChat = incognitoChat && activeChatId === incognitoChat.id
+    ? incognitoChat
+    : previewChat && activeChatId === previewChat.id
+    ? previewChat
+    : activeChatId.startsWith('new-')
     ? {
         id: activeChatId,
         title: activeChatId === 'new-cce-sn' ? 'C(CE) Chat' : activeChatId === 'new-cce-sh' ? 'SH Chat' : 'New Chat',
@@ -121,19 +162,54 @@ export default function App() {
       timestamp: new Date(),
     };
 
+    // If this is an incognito chat, update incognito state only
+    if (incognitoChat && activeChatId === incognitoChat.id) {
+      setIncognitoChat({
+        ...incognitoChat,
+        messages: [...incognitoChat.messages, userMessage],
+      });
+      // Don't update currentChats, keep using incognitoChat
+    }
+    // If this is a preview chat, convert it to a real chat
+    else if (activeChatId.startsWith('preview-') && previewChat) {
+      const newId = Date.now().toString();
+      const newChat: Chat = {
+        ...previewChat,
+        id: newId,
+        messages: [...previewChat.messages, userMessage],
+        // Force R/SN classification for saved chats (CCE/SN cannot be saved)
+        classificationType: 'rsn',
+      };
+      currentChats = [newChat, ...chats];
+      setChats(currentChats);
+      setPreviewChat(null); // Clear preview chat
+      setActiveChatId(newId);
+      currentChatId = newId;
+    }
     // If creating a new chat
-    if (activeChatId.startsWith('new-')) {
+    else if (activeChatId.startsWith('new-')) {
       const newId = Date.now().toString();
       const newChat: Chat = {
         ...activeChat,
         id: newId,
         title: content.slice(0, 30),
         messages: [userMessage],
+        // Preserve classification from activeChat
+        classificationType: activeChat.classificationType,
       };
-      currentChats = [newChat, ...chats];
-      setChats(currentChats);
-      setActiveChatId(newId);
-      currentChatId = newId;
+      // Only add to history if not CCE classification
+      const isCCEClassification = activeChat.classificationType === 'cce-sn' || activeChat.classificationType === 'cce-sh';
+      if (isCCEClassification) {
+        // Don't add to chats array, this will be handled as incognito-like
+        setIncognitoChat(newChat);
+        currentChatId = newId;
+        setActiveChatId(newId);
+      } else {
+        currentChats = [newChat, ...chats];
+        setChats(currentChats);
+        setActiveChatId(newId);
+        currentChatId = newId;
+      }
     } else {
       // Update existing chat with user message
       currentChats = chats.map(chat => {
@@ -152,9 +228,11 @@ export default function App() {
 
     // Simulate AI response
     setTimeout(() => {
-      // ... existing response logic needs access to the right chat object or type
-      // Since we might have just created a new chat, we need to check the type from the *new* or *existing* chat
-      const targetChat = currentChats.find(c => c.id === currentChatId);
+      // Check if this is an incognito chat or a regular chat
+      const targetChat = incognitoChat && currentChatId === incognitoChat.id
+        ? incognitoChat
+        : currentChats.find(c => c.id === currentChatId);
+
       if (!targetChat) return;
 
       let responseContent = generateMockResponse(content, targetChat.assistantType, userProfile);
@@ -177,27 +255,49 @@ export default function App() {
         fileName,
       };
 
-      setChats(prevChats =>
-        prevChats.map(chat => {
-          if (chat.id === currentChatId) {
+      // Update incognito chat or regular chats
+      if (incognitoChat && currentChatId === incognitoChat.id) {
+        setIncognitoChat(prev => {
+          if (prev) {
             return {
-              ...chat,
-              messages: [...chat.messages, aiMessage],
+              ...prev,
+              messages: [...prev.messages, aiMessage],
             };
           }
-          return chat;
-        })
-      );
+          return prev;
+        });
+      } else {
+        setChats(prevChats =>
+          prevChats.map(chat => {
+            if (chat.id === currentChatId) {
+              return {
+                ...chat,
+                messages: [...chat.messages, aiMessage],
+              };
+            }
+            return chat;
+          })
+        );
+      }
     }, 500);
   };
 
   const handleNewChat = () => {
+    setPreviewChat(null); // Clear any preview chat
+    setIncognitoChat(null); // Clear any incognito chat
     setActiveChatId('new-rsn');
     setActiveView('home');
     setHomeResetKey(prev => prev + 1);
   };
 
-  const handleStartChatFromHome = (message: string, classificationType?: 'rsn' | 'cce-sn' | 'cce-sh') => {
+  const handleStartChatFromHome = (message: string, classificationType?: 'rsn' | 'cce-sn' | 'cce-sh', isIncognito?: boolean) => {
+    // Check if message includes 'Generate' to trigger canvas simulation
+    if (message.toLowerCase().includes('generate')) {
+      handleSelectSimulation('canvas-demo');
+      return;
+    }
+
+    // Otherwise create a regular chat with simple response
     const newId = Date.now().toString();
     const userMessage: Message = {
       id: newId,
@@ -212,34 +312,55 @@ export default function App() {
       messages: [userMessage],
       createdAt: new Date(),
       classificationType: classificationType || 'rsn',
+      isIncognito: isIncognito || false,
     };
 
-    const newChats = [newChat, ...chats];
-    setChats(newChats);
+    // If incognito OR CCE classification, use incognitoChat state; otherwise add to chat history
+    // CCE/SN and CCE/SH chats cannot be saved to history
+    const isCCEClassification = classificationType === 'cce-sn' || classificationType === 'cce-sh';
+    if (isIncognito || isCCEClassification) {
+      setIncognitoChat(newChat);
+    } else {
+      const newChats = [newChat, ...chats];
+      setChats(newChats);
+    }
     setActiveChatId(newId);
     setActiveView('chat');
 
-    // Simulate AI response
+    // Simulate simple AI response
     setTimeout(() => {
-      const responseContent = generateMockResponse(message, undefined, userProfile);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: responseContent,
+        content: 'This is a simulated response for demonstration purposes.',
         timestamp: new Date(),
       };
 
-      setChats(prevChats =>
-        prevChats.map(chat => {
-          if (chat.id === newId) {
+      if (isIncognito || isCCEClassification) {
+        // Update incognito chat state
+        setIncognitoChat(prev => {
+          if (prev && prev.id === newId) {
             return {
-              ...chat,
-              messages: [...chat.messages, aiMessage],
+              ...prev,
+              messages: [...prev.messages, aiMessage],
             };
           }
-          return chat;
-        })
-      );
+          return prev;
+        });
+      } else {
+        // Update regular chats
+        setChats(prevChats =>
+          prevChats.map(chat => {
+            if (chat.id === newId) {
+              return {
+                ...chat,
+                messages: [...chat.messages, aiMessage],
+              };
+            }
+            return chat;
+          })
+        );
+      }
     }, 500);
   };
 
@@ -251,6 +372,30 @@ export default function App() {
   const handleNewSHChat = () => {
     setActiveChatId('new-cce-sh');
     setActiveView('chat');
+  };
+
+  // Helper function to get starter message for each assistant type
+  const getAssistantStarterMessage = (assistantType: string): string => {
+    const starterMessages: Record<string, string> = {
+      'email-drafter': "I'll help you draft professional emails. What kind of email would you like to write?",
+      'query': "Ask me anything! I can help you find information and answer your questions.",
+      'transcribe': "Upload an audio file to generate meeting minutes.",
+      'deep-research-ai': "I can conduct comprehensive research for you. What topic would you like me to explore?",
+      'powerpoint': "I can help you create icons and pictures for your PowerPoint slides. What would you like me to generate?",
+      'parliamentary': "I'll help you prepare PQ responses and talking points. What do you need assistance with?",
+      'memo': "I can draft inter-agency correspondence for whole-of-government initiatives. What memo do you need?",
+      'social-media-campaign': "I'll help you plan and optimize social media campaigns. What's your campaign about?",
+      'content-calendar': "I can help you organize and schedule content across channels. What's your timeline?",
+      'brand-guidelines': "I'll ensure your content aligns with government branding standards. What do you need to review?",
+      'market-research': "I can analyze market trends and public sentiment. What would you like to research?",
+      'interview-questions': "I'll generate relevant interview questions. What position are you hiring for?",
+      'onboarding-guide': "I can create personalized onboarding plans. Tell me about your new hire.",
+      'performance-review': "I'll help you draft performance reviews and development plans. Who are you reviewing?",
+      'budget': "I can help with budget allocations and financial reports. What's your budget planning needs?",
+      'policy': "I'll help you draft policy papers and cabinet memos. What policy document do you need?",
+      'procurement': "I can generate tender documents and evaluation matrices. What procurement need do you have?",
+    };
+    return starterMessages[assistantType] || "Hello! How can I assist you today?";
   };
 
   const handleStartAssistantChat = (assistantName: string, assistantType: string) => {
@@ -266,53 +411,38 @@ export default function App() {
       return;
     }
 
-    const newChat: Chat = {
+    // Create preview chat with starter message (not added to chat history yet)
+    const previewChatId = `preview-${Date.now()}`;
+    const starterMessage: Message = {
       id: Date.now().toString(),
+      role: 'assistant',
+      content: getAssistantStarterMessage(assistantType),
+      timestamp: new Date(),
+    };
+
+    const newPreviewChat: Chat = {
+      id: previewChatId,
       title: assistantName,
-      messages: [],
+      messages: [starterMessage],
       createdAt: new Date(),
       assistantType,
     };
-    setChats([newChat, ...chats]);
-    setActiveChatId(newChat.id);
+
+    setPreviewChat(newPreviewChat);
+    setActiveChatId(previewChatId);
     setActiveView('chat');
-
-    // Add initial assistant message based on type
-    setTimeout(() => {
-      let initialMessage = '';
-      if (assistantType === 'transcribe') {
-        initialMessage = 'Upload an audio to generate a minutes.';
-      } else if (assistantType === 'powerpoint') {
-        initialMessage = 'I can help you create icons and pictures for your PowerPoint slides. What would you like me to generate?';
-      }
-
-      if (initialMessage) {
-        const aiMessage: Message = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: initialMessage,
-          timestamp: new Date(),
-        };
-
-        setChats(prevChats =>
-          prevChats.map(chat => {
-            if (chat.id === newChat.id) {
-              return {
-                ...chat,
-                messages: [aiMessage],
-              };
-            }
-            return chat;
-          })
-        );
-      }
-    }, 300);
   };
 
   const handleDeleteChat = (chatId: string) => {
     const filteredChats = chats.filter(chat => chat.id !== chatId);
     setChats(filteredChats);
-    
+
+    // Also remove from any folders
+    setFolders(folders.map(f => ({
+      ...f,
+      chatIds: f.chatIds.filter(id => id !== chatId)
+    })));
+
     if (activeChatId === chatId) {
       if (filteredChats.length > 0) {
         setActiveChatId(filteredChats[0].id);
@@ -322,13 +452,30 @@ export default function App() {
     }
   };
 
+  const handleRenameChat = (chatId: string, newTitle: string) => {
+    setChats(chats.map(chat => {
+      if (chat.id === chatId) {
+        return { ...chat, title: newTitle };
+      }
+      return chat;
+    }));
+  };
+
   const handleSelectChat = (chatId: string) => {
+    setPreviewChat(null); // Clear any preview chat
+    setIncognitoChat(null); // Clear any incognito chat
     setActiveChatId(chatId);
     setActiveView('chat');
   };
 
   const handleCompleteOnboarding = () => {
     setHasOnboarded(true);
+    // Auto-start walkthrough on first login
+    if (!hasSeenWalkthrough) {
+      setTimeout(() => {
+        setIsWalkthroughOpen(true);
+      }, 500); // Small delay for smooth transition
+    }
   };
 
   const handleSignOut = () => {
@@ -337,9 +484,9 @@ export default function App() {
     setHasOnboarded(false);
     // Reset to default profile
     setUserProfile({
-      name: 'Jayden Tan',
-      email: 'jayden.tan@tech.gov.sg',
-      role: 'Marketing Officer',
+      name: 'John Doe',
+      email: 'john.doe@tech.gov.sg',
+      role: 'Product Manager',
       agency: 'GovTech'
     });
     // Clear chats
@@ -360,15 +507,105 @@ export default function App() {
   };
 
   const handleSelectSimulation = (simulationId: string) => {
+    // Track that this simulation has been viewed
+    if (!viewedSimulations.includes(simulationId)) {
+      setViewedSimulations([...viewedSimulations, simulationId]);
+    }
     setActiveChatId(`sim-${simulationId}`);
     setActiveView('chat');
   };
 
+  const handleCreateFolder = (name: string) => {
+    const newFolder: Folder = {
+      id: Date.now().toString(),
+      name,
+      createdAt: new Date(),
+      chatIds: [],
+      memoriesScope: 'folder-only',
+    };
+    setFolders([...folders, newFolder]);
+    // Navigate to the newly created folder
+    setActiveFolderId(newFolder.id);
+    setActiveView('folder');
+  };
+
+  const handleToggleBookmark = (assistantId: string) => {
+    setBookmarkedAssistants(prev => {
+      if (prev.includes(assistantId)) {
+        return prev.filter(id => id !== assistantId);
+      } else {
+        return [...prev, assistantId];
+      }
+    });
+  };
+
+  const handleAddChatToFolder = (chatId: string, folderId: string) => {
+    setFolders(folders.map(f => {
+      if (f.id === folderId && !f.chatIds.includes(chatId)) {
+        return { ...f, chatIds: [...f.chatIds, chatId] };
+      }
+      return f;
+    }));
+  };
+
+  const handleStartNewChatInFolder = (folderId: string) => {
+    const newId = Date.now().toString();
+    const newChat: Chat = {
+      id: newId,
+      title: 'New Chat',
+      messages: [],
+      createdAt: new Date(),
+    };
+    setChats([newChat, ...chats]);
+    // Add chat to folder
+    setFolders(folders.map(f => {
+      if (f.id === folderId) {
+        return { ...f, chatIds: [...f.chatIds, newId] };
+      }
+      return f;
+    }));
+    setActiveChatId(newId);
+    setActiveView('chat');
+  };
+
+  const handleUpdateFolder = (folderId: string, updates: Partial<Folder>) => {
+    setFolders(folders.map(f => {
+      if (f.id === folderId) {
+        return { ...f, ...updates };
+      }
+      return f;
+    }));
+  };
+
+  const handleSelectFolder = (folderId: string) => {
+    setActiveFolderId(folderId);
+    setActiveView('folder');
+  };
+
+  const handleDeleteFolder = (folderId: string) => {
+    setFolders(folders.filter(f => f.id !== folderId));
+    if (activeFolderId === folderId) {
+      setActiveFolderId(null);
+      setActiveView('home');
+    }
+  };
+
+  const handleRemoveChatFromFolder = (folderId: string, chatId: string) => {
+    setFolders(folders.map(f => {
+      if (f.id === folderId) {
+        return { ...f, chatIds: f.chatIds.filter(id => id !== chatId) };
+      }
+      return f;
+    }));
+  };
+
+  const activeFolder = activeFolderId ? folders.find(f => f.id === activeFolderId) : null;
+
   // Check if current view is a simulation
   const isSimulation = activeChatId.startsWith('sim-');
-  const simulationData = isSimulation 
-    ? activeChatId === 'sim-feature-overview' 
-      ? featureOverviewData 
+  const simulationData = isSimulation
+    ? activeChatId === 'sim-feature-overview'
+      ? featureOverviewData
       : activeChatId === 'sim-customer-support'
       ? customerSupportData
       : activeChatId === 'sim-feedback-collection'
@@ -383,6 +620,8 @@ export default function App() {
       ? pqResponseData
       : activeChatId === 'sim-pq-response-mnd-v2'
       ? pqResponseDataV2
+      : activeChatId === 'sim-canvas-demo'
+      ? canvasDemoData
       : null
     : null;
 
@@ -406,7 +645,7 @@ export default function App() {
     <div className="flex h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-950 dark:to-blue-950">
       <ChatSidebar
         isOpen={shouldShowSidebar}
-        onClose={() => setIsSidebarOpen(false)}
+        onClose={() => setIsSidebarOpen(!isSidebarOpen)}
         chats={chats}
         activeChatId={activeChatId}
         onSelectChat={handleSelectChat}
@@ -414,6 +653,7 @@ export default function App() {
         onNewCCESNChat={handleNewCCESNChat}
         onNewSHChat={handleNewSHChat}
         onDeleteChat={handleDeleteChat}
+        onRenameChat={handleRenameChat}
         colorTheme={colorTheme}
         fontStyle={fontStyle}
         onColorThemeChange={setColorTheme}
@@ -440,7 +680,17 @@ export default function App() {
         userProfile={userProfile}
         onSignOut={handleSignOut}
         onSelectSimulation={handleSelectSimulation}
+        folders={folders}
+        onCreateFolder={handleCreateFolder}
+        onSelectFolder={handleSelectFolder}
+        onStartAssistantChat={handleStartAssistantChat}
+        onAddChatToFolder={handleAddChatToFolder}
+        searchModalOpen={searchModalOpen}
+        onSearchModalChange={setSearchModalOpen}
+        onWalkthroughStart={() => setIsWalkthroughOpen(true)}
+        viewedSimulations={viewedSimulations}
       />
+
       {activeView === 'chat' ? (
         isSimulation && simulationData ? (
           <div className="flex-1 flex flex-col">
@@ -448,7 +698,6 @@ export default function App() {
               key={activeChatId}
               mode="simulator"
               data={simulationData as any}
-              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             />
           </div>
         ) : (
@@ -460,39 +709,55 @@ export default function App() {
               classificationType={activeChat?.classificationType}
               interactiveMessages={activeChat?.messages || []}
               onSendMessage={handleSendMessage}
-              onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+              chatId={activeChat?.id}
+              onRenameChat={handleRenameChat}
+              isNewChat={activeChatId.startsWith('new-')}
+              isIncognito={activeChat?.isIncognito}
+              folders={folders}
+              onMoveToFolder={handleAddChatToFolder}
+              bookmarkedAssistants={bookmarkedAssistants}
+              assistantType={activeChat?.assistantType}
             />
           </div>
         )
       ) : activeView === 'explore' ? (
         <ExplorePage
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           colorTheme={colorTheme}
           fontStyle={fontStyle}
           onStartAssistantChat={handleStartAssistantChat}
           userRole={userProfile?.role}
+          bookmarkedAssistants={bookmarkedAssistants}
+          onToggleBookmark={handleToggleBookmark}
         />
       ) : activeView === 'studio' ? (
         <StudioPage
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           colorTheme={colorTheme}
           fontStyle={fontStyle}
         />
       ) : activeView === 'library' ? (
         <LibraryPage
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           colorTheme={colorTheme}
           fontStyle={fontStyle}
         />
       ) : activeView === 'chats' ? (
         <ChatsPage
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           colorTheme={colorTheme}
           fontStyle={fontStyle}
           chats={chats}
           onSelectChat={handleSelectChat}
           onDeleteChat={handleDeleteChat}
           onSelectSimulation={handleSelectSimulation}
+        />
+      ) : activeView === 'folder' && activeFolder ? (
+        <FolderPage
+          folder={activeFolder}
+          chats={chats}
+          onBack={() => setActiveView('home')}
+          onSelectChat={handleSelectChat}
+          onDeleteFolder={handleDeleteFolder}
+          onRemoveChatFromFolder={handleRemoveChatFromFolder}
+          onStartNewChatInFolder={handleStartNewChatInFolder}
+          onUpdateFolder={handleUpdateFolder}
         />
       ) : (
         <HomePage
@@ -502,10 +767,10 @@ export default function App() {
           onSelectChat={handleSelectChat}
           onNewChat={handleNewChat}
           onStartChat={handleStartChatFromHome}
-          onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
           isSidebarOpen={isSidebarOpen}
           userProfile={userProfile}
           onSelectSimulation={handleSelectSimulation}
+          bookmarkedAssistants={bookmarkedAssistants}
         />
       )}
       
@@ -518,6 +783,11 @@ export default function App() {
         onUpdateProfile={setUserProfile}
         open={isSettingsOpen}
         onOpenChange={setIsSettingsOpen}
+      />
+
+      <WalkthroughTour
+        isOpen={isWalkthroughOpen}
+        onClose={() => setIsWalkthroughOpen(false)}
       />
     </div>
   );

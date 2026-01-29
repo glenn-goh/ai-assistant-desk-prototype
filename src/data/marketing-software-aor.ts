@@ -718,8 +718,8 @@ export const marketingSoftwareAorData = {
     
     <div class="mt-4 pt-4 border-t border-gray-300">
       <p>Best regards,</p>
-      <p class="font-semibold">Jayden Tan</p>
-      <p>Marketing Officer</p>
+      <p class="font-semibold">John Doe</p>
+      <p>Product Manager</p>
       <p>Public Communications & Outreach Department</p>
       <p>Government Technology Agency</p>
       <p>jayden.tan@tech.gov.sg | +65 6211 2345</p>
