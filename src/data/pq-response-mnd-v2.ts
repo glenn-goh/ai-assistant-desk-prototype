@@ -8,16 +8,6 @@ export const pqResponseDataV2 = {
       role: "bot" as const,
       content: [
         {
-          type: "thinking" as const,
-          thoughts: [
-            "Initializing Parliamentary Question Assistant...",
-            "Loading PQ response templates and guidelines...",
-            "Connecting to Hansard database for past PQ references...",
-            "Preparing workflow for efficient PQ drafting..."
-          ],
-          timingMs: 2000
-        },
-        {
           type: "text" as const,
           content: "Good morning! 👋\n\nWelcome to the PQ AI Assistant. I'm here to help you draft Parliamentary Question responses efficiently.\n\nDo you have the Q&A text ready, or would you like to start from scratch?"
         }
@@ -32,6 +22,18 @@ export const pqResponseDataV2 = {
     {
       role: "bot" as const,
       content: [
+        {
+          type: "thinking" as const,
+          thought: "Analyzing user's request and preparing PQ workflow...",
+          reasoning: [
+            "Understanding user's confirmation that they have PQ text ready...",
+            "Loading Parliamentary Question response templates...",
+            "Preparing PQ input form with required fields...",
+            "Configuring workflow for MND ministry responses...",
+            "Setting up Hansard database connection for past PQ references..."
+          ],
+          timingMs: 3000
+        },
         {
           type: "text" as const,
           content: "Great! Please paste your PQ text below, and I'll help you draft a comprehensive response."

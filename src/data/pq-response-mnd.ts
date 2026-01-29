@@ -8,16 +8,6 @@ export const pqResponseData = {
       role: "bot" as const,
       content: [
         {
-          type: "thinking" as const,
-          thoughts: [
-            "Initializing Parliamentary Question Assistant...",
-            "Loading PQ response templates and guidelines...",
-            "Connecting to Hansard database for past PQ references...",
-            "Preparing workflow for efficient PQ drafting..."
-          ],
-          timingMs: 2000
-        },
-        {
           type: "text" as const,
           content: "Good morning, Sarah! 👋\n\nWelcome! I'm your Parliamentary Question Assistant, here to help you with your PQ response drafting.\n\nWhat would you like help with today?"
         }
@@ -32,6 +22,18 @@ export const pqResponseData = {
     {
       role: "bot" as const,
       content: [
+        {
+          type: "thinking" as const,
+          thought: "Analyzing Parliamentary Question and preparing research strategy...",
+          reasoning: [
+            "Understanding the two-part PQ on BTO waiting times...",
+            "Identifying key research requirements: statistics and policy measures...",
+            "Preparing to search Hansard database for past similar PQs...",
+            "Planning comprehensive research across multiple sources...",
+            "Setting up data retrieval from internal MND knowledge base..."
+          ],
+          timingMs: 3500
+        },
         {
           type: "text" as const,
           content: "Got it. This is a two-part question on BTO waiting times and policy measures. Let me start by doing comprehensive research across multiple sources to help you draft a strong response. This will take a few minutes.\n\nI'll search:\n1. Past similar PQs from Hansard\n2. Your department's internal knowledge base\n3. Recent news coverage and ministerial statements on housing policy\n4. Relevant statistics on BTO waiting times\n\nLet's begin:"

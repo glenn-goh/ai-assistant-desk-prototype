@@ -16,14 +16,16 @@ export const procurementRfqData = {
       content: [
         {
           type: "thinking" as const,
-          thoughts: [
-            "Initializing Procurement Assistant...",
-            "Analyzing procurement request for creative software...",
-            "Loading RFQ templates and procurement guidelines...",
-            "Checking vendor database and compliance requirements...",
-            "Preparing form for quotation request..."
+          thought: "Analyzing procurement request for creative software...",
+          reasoning: [
+            "Understanding user's request to create RFQ for creative software...",
+            "Identifying procurement type: software licenses for team...",
+            "Loading relevant RFQ templates and government procurement guidelines...",
+            "Checking vendor database for qualified creative software suppliers...",
+            "Preparing standardized quotation request form...",
+            "Setting up compliance requirements and evaluation criteria..."
           ],
-          timingMs: 2200
+          timingMs: 3500
         },
         {
           type: "text" as const,
