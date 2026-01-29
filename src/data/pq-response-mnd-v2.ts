@@ -123,13 +123,15 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Analyzing PQ format and structure...",
-            "Identifying question components: (a) and (b)...",
-            "Checking classification requirements...",
-            "Determining research scope..."
+          thought: "Analyzing PQ structure and requirements...",
+          reasoning: [
+            "Processing submitted Parliamentary Question details...",
+            "Analyzing PQ format and identifying question components (a) and (b)...",
+            "Checking classification requirements and ministry alignment...",
+            "Determining research scope and data requirements...",
+            "Planning comprehensive search strategy across databases..."
           ],
-          timingMs: 2000
+          timingMs: 3000
         },
         {
           type: "text" as const,
@@ -152,14 +154,16 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Searching Hansard database for BTO-related PQs...",
-            "Filtering by ministry (MND) and topic (housing)...",
-            "Analyzing past ministerial responses...",
-            "Cross-referencing policy positions...",
-            "Identifying response patterns and language..."
+          thought: "Searching Hansard database for similar past PQs...",
+          reasoning: [
+            "Querying Hansard database for BTO-related Parliamentary Questions...",
+            "Filtering results by ministry (MND) and topic (housing policy)...",
+            "Analyzing past ministerial responses and language patterns...",
+            "Cross-referencing with current policy positions...",
+            "Identifying consistent response frameworks...",
+            "Compiling relevant precedents and statistical data..."
           ],
-          timingMs: 3000
+          timingMs: 3500
         },
         {
           type: "assistantSwitch" as const,
@@ -317,17 +321,18 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Loading MND PQ response template...",
-            "Structuring two-part answer format...",
-            "Incorporating verified statistics (3.9 years average)...",
-            "Aligning language with past ministerial responses...",
-            "Ensuring empathetic tone for waiting time concerns...",
-            "Including all four policy measures...",
-            "Cross-checking against internal guidelines...",
-            "Formatting for parliamentary submission..."
+          thought: "Drafting comprehensive PQ response...",
+          reasoning: [
+            "Loading MND Parliamentary Question response template...",
+            "Structuring two-part answer format for parts (a) and (b)...",
+            "Incorporating verified statistics (3.9 years average waiting time)...",
+            "Aligning language and tone with past ministerial responses...",
+            "Ensuring empathetic acknowledgment of waiting time concerns...",
+            "Including all four policy measures with proper justification...",
+            "Cross-checking content against internal MND guidelines...",
+            "Formatting document for official parliamentary submission..."
           ],
-          timingMs: 2500
+          timingMs: 3500
         },
         {
           type: "text" as const,
@@ -503,16 +508,17 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Generating final PQ response document (.docx)...",
-            "Creating cover note for director...",
-            "Compiling Annex A: Past PQ references with Hansard links...",
-            "Compiling Annex B: Statistical documentation...",
-            "Creating Annex C: Policy alignment checklist...",
-            "Formatting all documents to MND standards...",
-            "Preparing submission package..."
+          thought: "Preparing complete submission package...",
+          reasoning: [
+            "Generating final PQ response document in .docx format...",
+            "Creating professional cover note for director review...",
+            "Compiling Annex A: Past PQ references with Hansard database links...",
+            "Compiling Annex B: Statistical documentation with source verification...",
+            "Creating Annex C: Policy alignment checklist for compliance...",
+            "Formatting all documents according to MND standards...",
+            "Packaging all components into submission-ready bundle..."
           ],
-          timingMs: 2000
+          timingMs: 3500
         },
         {
           type: "artifact" as const,
@@ -669,12 +675,14 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Composing professional email...",
-            "Summarizing key points for director...",
-            "Preparing attachment list..."
+          thought: "Composing professional submission email...",
+          reasoning: [
+            "Drafting professional email for director submission...",
+            "Summarizing key PQ points and recommendations...",
+            "Preparing attachment list with all supporting documents...",
+            "Formatting email according to ministry communication standards..."
           ],
-          timingMs: 1200
+          timingMs: 2500
         },
         {
           type: "text" as const,
@@ -784,12 +792,14 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Drafting concise cover email...",
-            "Moving details to attachments...",
-            "Preparing brief professional message..."
+          thought: "Revising to create concise email...",
+          reasoning: [
+            "Analyzing user feedback to simplify email length...",
+            "Drafting brief, professional cover email...",
+            "Moving detailed information to attached documents...",
+            "Ensuring key points remain visible while reducing verbosity..."
           ],
-          timingMs: 1000
+          timingMs: 2500
         },
         {
           type: "artifact" as const,
@@ -867,13 +877,15 @@ export const pqResponseDataV2 = {
         },
         {
           type: "thinking" as const,
-          thoughts: [
-            "Attaching all 5 documents (349 KB total)...",
-            "Verifying recipients: michael.tan@mnd.gov.sg, rachel.lim@mnd.gov.sg...",
-            "Formatting professional email...",
-            "Sending email..."
+          thought: "Sending PQ submission email...",
+          reasoning: [
+            "Attaching all 5 documents to email (349 KB total size)...",
+            "Verifying recipient addresses: michael.tan@mnd.gov.sg, rachel.lim@mnd.gov.sg...",
+            "Formatting professional email with proper ministry protocols...",
+            "Processing email send request...",
+            "Confirming successful delivery..."
           ],
-          timingMs: 1500
+          timingMs: 3000
         },
         {
           type: "text" as const,
