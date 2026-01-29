@@ -162,7 +162,7 @@ export function PersonalizationDialog({
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">{userProfile.name}</h4>
                   <p className="text-sm text-gray-500">{userProfile.email}</p>
-                  <p className="text-sm text-gray-500">{userProfile.agency} • {userProfile.role}</p>
+                  <p className="text-sm text-gray-500">{userProfile.agency}</p>
                 </div>
               </div>
 
@@ -194,28 +194,6 @@ export function PersonalizationDialog({
                     <SelectItem value="Ministry of Finance (MOF)">Ministry of Finance (MOF)</SelectItem>
                     <SelectItem value="Ministry of Health (MOH)">Ministry of Health (MOH)</SelectItem>
                     <SelectItem value="Ministry of National Development (MND)">Ministry of National Development (MND)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="job-role">Job Role</Label>
-                <Select
-                  value={userProfile.role}
-                  onValueChange={(value) => {
-                    onUpdateProfile({
-                      ...userProfile,
-                      role: value
-                    });
-                  }}
-                >
-                  <SelectTrigger id="job-role">
-                    <SelectValue placeholder="Select your job role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {JOB_ROLES.map(role => (
-                      <SelectItem key={role} value={role}>{role}</SelectItem>
-                    ))}
                   </SelectContent>
                 </Select>
               </div>
