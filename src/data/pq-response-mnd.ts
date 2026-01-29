@@ -8,6 +8,16 @@ export const pqResponseData = {
       role: "bot" as const,
       content: [
         {
+          type: "thinking" as const,
+          thoughts: [
+            "Initializing Parliamentary Question Assistant...",
+            "Loading PQ response templates and guidelines...",
+            "Connecting to Hansard database for past PQ references...",
+            "Preparing workflow for efficient PQ drafting..."
+          ],
+          timingMs: 2000
+        },
+        {
           type: "text" as const,
           content: "Good morning, Sarah! 👋\n\nWelcome! I'm your Parliamentary Question Assistant, here to help you with your PQ response drafting.\n\nWhat would you like help with today?"
         }
