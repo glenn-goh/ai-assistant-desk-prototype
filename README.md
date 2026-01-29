@@ -12,7 +12,7 @@ A lo-fi wireframe prototype for an AI Assistant Desk application built with Reac
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/witxhhaven/ai-assistant-desk-prototype.git
+git clone https://github.com/glenn-goh/ai-assistant-desk-prototype.git
 cd ai-assistant-desk-prototype
 ```
 

@@ -556,8 +556,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 Temporary
               </span>
             )}
-            {/* Ellipsis Menu - only show for existing chats (not new chats) */}
-            {isInteractive && !isNewChat && chatId && (
+            {/* Ellipsis Menu - only show for existing chats (not new chats) and non-incognito */}
+            {isInteractive && !isNewChat && chatId && !isIncognito && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700">
