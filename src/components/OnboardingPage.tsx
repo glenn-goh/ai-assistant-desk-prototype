@@ -78,60 +78,11 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-2xl shadow-lg border-gray-300 bg-white">
         <CardContent className="p-8">
-          {/* Step 1: AI Style and Tone */}
+          {/* Step 1: Personal Information */}
           {currentStep === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
               <div>
                 <p className="text-xs text-gray-500 mb-2">Step 1 of 2</p>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Choose Your AI Style
-                </h2>
-                <p className="text-gray-500">
-                  Select how you'd like your AI Assistant to communicate with you
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {AI_STYLES.map((style) => (
-                  <button
-                    key={style.id}
-                    onClick={() => setAiStyle(style.id)}
-                    className={cn(
-                      "relative p-4 rounded-lg border-2 text-left transition-all",
-                      aiStyle === style.id
-                        ? "border-gray-900 bg-gray-50"
-                        : "border-gray-300 hover:border-gray-400"
-                    )}
-                  >
-                    {aiStyle === style.id && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
-                    <div className="font-semibold text-gray-900 mb-1">{style.label}</div>
-                    <div className="text-xs text-gray-500">{style.description}</div>
-                  </button>
-                ))}
-              </div>
-
-              {aiStyle === 'Others' && (
-                <div className="mt-4">
-                  <Input
-                    placeholder="Describe your preferred style..."
-                    value={otherAiStyle}
-                    onChange={(e) => setOtherAiStyle(e.target.value)}
-                    className="bg-white border-gray-300"
-                  />
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 2: Personal Information */}
-          {currentStep === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <div>
-                <p className="text-xs text-gray-500 mb-2">Step 2 of 2</p>
                 <h2 className="text-2xl font-semibold text-gray-900 mb-2">
                   Tell Us About Yourself
                 </h2>
@@ -222,6 +173,55 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                   </div>
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* Step 2: AI Style and Tone */}
+          {currentStep === 2 && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div>
+                <p className="text-xs text-gray-500 mb-2">Step 2 of 2</p>
+                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+                  Choose Your AI Style
+                </h2>
+                <p className="text-gray-500">
+                  Select how you'd like your AI Assistant to communicate with you
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                {AI_STYLES.map((style) => (
+                  <button
+                    key={style.id}
+                    onClick={() => setAiStyle(style.id)}
+                    className={cn(
+                      "relative p-4 rounded-lg border-2 text-left transition-all",
+                      aiStyle === style.id
+                        ? "border-gray-900 bg-gray-50"
+                        : "border-gray-300 hover:border-gray-400"
+                    )}
+                  >
+                    {aiStyle === style.id && (
+                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                    <div className="font-semibold text-gray-900 mb-1">{style.label}</div>
+                    <div className="text-xs text-gray-500">{style.description}</div>
+                  </button>
+                ))}
+              </div>
+
+              {aiStyle === 'Others' && (
+                <div className="mt-4">
+                  <Input
+                    placeholder="Describe your preferred style..."
+                    value={otherAiStyle}
+                    onChange={(e) => setOtherAiStyle(e.target.value)}
+                    className="bg-white border-gray-300"
+                  />
+                </div>
+              )}
             </div>
           )}
         </CardContent>

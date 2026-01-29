@@ -470,12 +470,10 @@ export default function App() {
 
   const handleCompleteOnboarding = () => {
     setHasOnboarded(true);
-    // Auto-start walkthrough on first login
-    if (!hasSeenWalkthrough) {
-      setTimeout(() => {
-        setIsWalkthroughOpen(true);
-      }, 500); // Small delay for smooth transition
-    }
+    // Always start walkthrough after completing personalisation quiz
+    setTimeout(() => {
+      setIsWalkthroughOpen(true);
+    }, 500); // Small delay for smooth transition
   };
 
   const handleSignOut = () => {
