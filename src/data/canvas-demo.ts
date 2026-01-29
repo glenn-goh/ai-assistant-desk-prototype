@@ -23,6 +23,7 @@ export const canvasDemoData = {
             "Breaking down the components needed for a government digital service launch plan...",
             "Considering stakeholder engagement, timeline, and governance requirements...",
             "Structuring the plan into clear, actionable sections...",
+            "Calling Canvas tool to prepare document workspace...",
             "Preparing to create a comprehensive yet concise 1-pager document..."
           ],
           timingMs: 4500

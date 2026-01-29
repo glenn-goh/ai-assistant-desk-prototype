@@ -173,10 +173,17 @@ export default function App() {
     // If this is a preview chat, convert it to a real chat
     else if (activeChatId.startsWith('preview-') && previewChat) {
       const newId = Date.now().toString();
+      // Add starter message first, then user message
+      const starterMessage: Message = {
+        id: (Date.now() - 1).toString(),
+        role: 'assistant',
+        content: getAssistantStarterMessage(previewChat.assistantType || ''),
+        timestamp: new Date(),
+      };
       const newChat: Chat = {
         ...previewChat,
         id: newId,
-        messages: [...previewChat.messages, userMessage],
+        messages: [starterMessage, userMessage],
         // Force R/SN classification for saved chats (CCE/SN cannot be saved)
         classificationType: 'rsn',
       };
@@ -411,19 +418,13 @@ export default function App() {
       return;
     }
 
-    // Create preview chat with starter message (not added to chat history yet)
+    // Create preview chat with NO messages initially (starter message will be added when user sends first message)
     const previewChatId = `preview-${Date.now()}`;
-    const starterMessage: Message = {
-      id: Date.now().toString(),
-      role: 'assistant',
-      content: getAssistantStarterMessage(assistantType),
-      timestamp: new Date(),
-    };
 
     const newPreviewChat: Chat = {
       id: previewChatId,
       title: assistantName,
-      messages: [starterMessage],
+      messages: [],
       createdAt: new Date(),
       assistantType,
     };

@@ -17,11 +17,13 @@ export const procurementRfqData = {
         {
           type: "thinking" as const,
           thoughts: [
-            "Understanding procurement request...",
-            "Preparing RFQ template...",
-            "Checking procurement guidelines..."
+            "Initializing Procurement Assistant...",
+            "Analyzing procurement request for creative software...",
+            "Loading RFQ templates and procurement guidelines...",
+            "Checking vendor database and compliance requirements...",
+            "Preparing form for quotation request..."
           ],
-          timingMs: 1200
+          timingMs: 2200
         },
         {
           type: "text" as const,
