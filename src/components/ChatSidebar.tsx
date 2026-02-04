@@ -10,7 +10,7 @@ import { CreateFolderDialog } from './CreateFolderDialog';
 import type { Chat, View } from '../App';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import type { Folder as FolderType } from '../types/folder';
-import { getAssistantsForRole, roleBasedAssistants } from '../data/assistants';
+import { getAssistantsForRole, roleBasedAssistants, topRatedAssistants, essentialAssistants } from '../data/assistants';
 
 interface ChatSidebarProps {
   isOpen: boolean;
@@ -48,6 +48,7 @@ interface ChatSidebarProps {
   onSearchModalChange?: (open: boolean) => void;
   onWalkthroughStart?: () => void;
   viewedSimulations?: string[];
+  bookmarkedAssistants?: string[];
 }
 
 export function ChatSidebar({
@@ -86,6 +87,7 @@ export function ChatSidebar({
   onSearchModalChange,
   onWalkthroughStart,
   viewedSimulations = [],
+  bookmarkedAssistants = [],
 }: ChatSidebarProps) {
   const [recentChatsOpen, setRecentChatsOpen] = useState(true);
   const [customAssistantsOpen, setCustomAssistantsOpen] = useState(false);
@@ -96,17 +98,23 @@ export function ChatSidebar({
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editChatName, setEditChatName] = useState('');
 
-  // Get specific assistants: PQ and HR (deduplicated)
+  // Get bookmarked assistants
   const allRoleAssistants = Object.values(roleBasedAssistants).flat();
-  const filteredAssistants = allRoleAssistants.filter(
-    assistant =>
-      assistant.assistantType === 'parliamentary-question' ||
-      assistant.assistantType === 'workday-shortlister'
+  const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
+  const uniqueAssistants = Array.from(
+    new Map(allAvailableAssistants.map(a => [a.id, a])).values()
   );
-  // Remove duplicates based on ID
-  const recommendedAssistants = Array.from(
-    new Map(filteredAssistants.map(a => [a.id, a])).values()
-  );
+
+  // If there are bookmarked assistants, use those; otherwise use default PQ and HR
+  const recommendedAssistants = bookmarkedAssistants.length > 0
+    ? bookmarkedAssistants
+        .map(id => uniqueAssistants.find(a => a.id === id))
+        .filter((a): a is import('../data/assistants').Assistant => a !== undefined)
+    : uniqueAssistants.filter(
+        assistant =>
+          assistant.assistantType === 'parliamentary-question' ||
+          assistant.assistantType === 'workday-shortlister'
+      );
 
   const handleDragStart = (e: React.DragEvent, chatId: string) => {
     e.dataTransfer.setData('chatId', chatId);
@@ -583,9 +591,12 @@ export function ChatSidebar({
                               .filter(chat => !folders?.some(folder => folder.chatIds.includes(chat.id)))
                               .length === 0 && (
                           <div className="px-2 py-4 text-center">
-                            <p className="text-sm text-gray-500">
-                              Start a new chat to begin
-                            </p>
+                            <div className="flex flex-col items-center gap-2">
+                              <SquarePen className="w-4 h-4 text-gray-400" />
+                              <p className="text-sm text-gray-500">
+                                Start a new chat to begin
+                              </p>
+                            </div>
                           </div>
                         )}
                       </div>

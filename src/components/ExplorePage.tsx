@@ -109,7 +109,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
           {/* Classification */}
           <div className="flex items-center text-xs text-gray-500">
             <Database className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-            <span className="truncate">{getClassificationText(assistant.classification)}</span>
+            <span className="truncate">{assistant.classification.replace('C(CE)/SN', 'CCE/SN')}</span>
           </div>
         </CardContent>
       </Card>
@@ -127,7 +127,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
           {/* Assistants Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAssistants.map(renderAssistantCard)}
           </div>
         </div>

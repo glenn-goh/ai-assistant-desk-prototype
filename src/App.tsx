@@ -716,6 +716,7 @@ export default function App() {
           setIsWalkthroughOpen(true);
         }}
         viewedSimulations={viewedSimulations}
+        bookmarkedAssistants={bookmarkedAssistants}
       />
 
       {activeView === 'chat' ? (
