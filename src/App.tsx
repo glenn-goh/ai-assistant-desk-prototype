@@ -11,8 +11,11 @@ import { PersonalizationDialog } from './components/PersonalizationDialog';
 import { ChatSimulatorView } from './components/ChatSimulatorView';
 import { FolderPage } from './components/FolderPage';
 import { WalkthroughTour } from './components/WalkthroughTour';
+import { SwapBookmarkModal } from './components/SwapBookmarkModal';
 import { ColorTheme, FontStyle } from './components/PersonalizationDialog';
 import type { Folder } from './types/folder';
+import type { Assistant } from './data/assistants';
+import { topRatedAssistants, essentialAssistants, roleBasedAssistants } from './data/assistants';
 import { featureOverviewData } from './data/feature-overview';
 import { customerSupportData } from './data/customer-support';
 import { feedbackCollectionData } from './data/feedback-collection';
@@ -91,6 +94,8 @@ export default function App() {
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
+  const [swapBookmarkModalOpen, setSwapBookmarkModalOpen] = useState(false);
+  const [pendingBookmarkAssistantId, setPendingBookmarkAssistantId] = useState<string | null>(null);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem('hasSeenWalkthrough') === 'true';
   });
@@ -531,11 +536,27 @@ export default function App() {
   const handleToggleBookmark = (assistantId: string) => {
     setBookmarkedAssistants(prev => {
       if (prev.includes(assistantId)) {
+        // Unbookmark
         return prev.filter(id => id !== assistantId);
       } else {
+        // Check if already at limit
+        if (prev.length >= 3) {
+          // Open swap modal
+          setPendingBookmarkAssistantId(assistantId);
+          setSwapBookmarkModalOpen(true);
+          return prev; // Don't add yet
+        }
+        // Add bookmark
         return [...prev, assistantId];
       }
     });
+  };
+
+  const handleSwapBookmark = (oldAssistantId: string, newAssistantId: string) => {
+    setBookmarkedAssistants(prev => {
+      return prev.map(id => id === oldAssistantId ? newAssistantId : id);
+    });
+    setPendingBookmarkAssistantId(null);
   };
 
   const handleAddChatToFolder = (chatId: string, folderId: string) => {
@@ -686,7 +707,14 @@ export default function App() {
         onAddChatToFolder={handleAddChatToFolder}
         searchModalOpen={searchModalOpen}
         onSearchModalChange={setSearchModalOpen}
-        onWalkthroughStart={() => setIsWalkthroughOpen(true)}
+        onWalkthroughStart={() => {
+          if (activeView !== 'home') {
+            setActiveView('home');
+            setActiveChatId('new-rsn');
+            setHomeResetKey(prev => prev + 1);
+          }
+          setIsWalkthroughOpen(true);
+        }}
         viewedSimulations={viewedSimulations}
       />
 
@@ -787,6 +815,31 @@ export default function App() {
       <WalkthroughTour
         isOpen={isWalkthroughOpen}
         onClose={() => setIsWalkthroughOpen(false)}
+      />
+
+      <SwapBookmarkModal
+        open={swapBookmarkModalOpen}
+        onOpenChange={setSwapBookmarkModalOpen}
+        newAssistant={(() => {
+          if (!pendingBookmarkAssistantId) return null;
+          const allRoleAssistants = Object.values(roleBasedAssistants).flat();
+          const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
+          const uniqueAssistants = Array.from(
+            new Map(allAvailableAssistants.map(a => [a.id, a])).values()
+          );
+          return uniqueAssistants.find(a => a.id === pendingBookmarkAssistantId) || null;
+        })()}
+        bookmarkedAssistants={(() => {
+          const allRoleAssistants = Object.values(roleBasedAssistants).flat();
+          const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
+          const uniqueAssistants = Array.from(
+            new Map(allAvailableAssistants.map(a => [a.id, a])).values()
+          );
+          return bookmarkedAssistants
+            .map(id => uniqueAssistants.find(a => a.id === id))
+            .filter((a): a is Assistant => a !== undefined);
+        })()}
+        onSwap={handleSwapBookmark}
       />
     </div>
   );

@@ -14,7 +14,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             role: 'Product Manager',
             agency: 'GovTech'
         };
-        onLogin(defaultProfile, false);
+        onLogin(defaultProfile, true);
     };
 
     return (
@@ -26,7 +26,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                             Welcome to the
                         </p>
                         <h1 className="text-gray-900 text-2xl font-bold leading-tight">
-                            AI Assistant Desk
+                            AI Assistant Desk (MVP)
                         </h1>
                     </div>
 

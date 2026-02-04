@@ -80,8 +80,6 @@ export function MessageInput({
 
   const tools = [
     { id: 'web-search', name: 'Web Search', icon: Globe },
-    { id: 'deep-research', name: 'Deep Research', icon: Sparkles },
-    { id: 'canvas', name: 'Canvas', icon: PanelRight },
   ];
 
   // Get all available assistants
@@ -236,7 +234,7 @@ export function MessageInput({
                   disabled={isInputDisabled}
                   className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Plus className="w-4 h-4" />
+                  <Paperclip className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -279,7 +277,7 @@ export function MessageInput({
             >
               <div className="p-3 border-b bg-white dark:bg-gray-900">
                 <h3 className="font-medium text-xs">Available Tools</h3>
-                <p className="text-xs text-muted-foreground">Select tools to enable</p>
+                <p className="text-xs text-muted-foreground">Select tools you would like the assistant to use if needed.</p>
               </div>
               <div className="p-2 bg-white dark:bg-gray-900">
                 {tools.map((tool) => {
@@ -356,26 +354,6 @@ export function MessageInput({
           </TooltipProvider>
           )
           }
-
-          {/* Library Button - Disabled */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="icon"
-                  variant="ghost"
-                  disabled
-                  className="h-7 w-7 flex-shrink-0 relative opacity-50 cursor-not-allowed"
-                >
-                  <FolderOpen className="w-3.5 h-3.5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Coming soon</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
 
         <div className="flex items-center gap-1">

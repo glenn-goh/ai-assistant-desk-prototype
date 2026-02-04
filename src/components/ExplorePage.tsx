@@ -44,20 +44,13 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
 
-  // Filter to show only PQ Assistant and HR Recruitment Assistant
   // Gather all assistants from all sources
   const allRoleAssistants = Object.values(roleBasedAssistants).flat();
   const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
 
   // Remove duplicates based on id
-  const uniqueAssistants = Array.from(
+  const filteredAssistants = Array.from(
     new Map(allAvailableAssistants.map(a => [a.id, a])).values()
-  );
-
-  const filteredAssistants = uniqueAssistants.filter(
-    assistant =>
-      assistant.assistantType === 'parliamentary-question' ||
-      assistant.assistantType === 'workday-shortlister'
   );
 
   // Component to render assistant cards - simplified
@@ -134,7 +127,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 py-8 space-y-12">
           {/* Assistants Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredAssistants.map(renderAssistantCard)}
           </div>
         </div>

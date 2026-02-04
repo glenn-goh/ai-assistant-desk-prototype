@@ -223,21 +223,6 @@ export function ChatSidebar({
             </Tooltip>
           </TooltipProvider>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => onSearchModalChange(true)}
-                  className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-700"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Search Chats (⌘K)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
 
         {/* Settings at bottom */}
@@ -328,37 +313,6 @@ export function ChatSidebar({
                       </TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
-
-                  {/* Search Chats with shortcut on hover */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          onClick={() => onSearchModalChange(true)}
-                          className="w-full justify-start gap-2 px-2 h-9 text-sm group"
-                          variant="ghost"
-                        >
-                          <Search className="w-4 h-4" />
-                          <span className="flex-1 text-left">Search Chats</span>
-                          <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">⌘K</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        <p>Search all chats (⌘K)</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-
-                  {/* Library Tab - Coming Soon */}
-                  <Button
-                    disabled
-                    className="w-full justify-start gap-2 px-2 h-9 text-sm opacity-50 cursor-not-allowed"
-                    variant="ghost"
-                  >
-                    <FolderOpen className="w-4 h-4" />
-                    <span className="flex-1 text-left">Library</span>
-                    <span className="text-xs text-gray-400">(Coming soon)</span>
-                  </Button>
 
                   {/* Custom Assistants Section */}
                   <Collapsible open={customAssistantsOpen} onOpenChange={setCustomAssistantsOpen} className="mt-3" data-tour="custom-assistants">
@@ -622,6 +576,18 @@ export function ChatSidebar({
                             </div>
                           );
                         })}
+
+                        {/* Empty state placeholder */}
+                        {viewedSimulations.length === 0 &&
+                         chats.filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
+                              .filter(chat => !folders?.some(folder => folder.chatIds.includes(chat.id)))
+                              .length === 0 && (
+                          <div className="px-2 py-4 text-center">
+                            <p className="text-sm text-gray-500">
+                              Start a new chat to begin
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
@@ -657,7 +623,6 @@ export function ChatSidebar({
             <div className="w-7 h-7 rounded-full bg-gray-600 flex-shrink-0" />
             <div className="text-left overflow-hidden">
               <div className="text-sm font-medium text-gray-900">{userProfile.name}</div>
-              <div className="text-xs text-gray-500">{userProfile.role}</div>
             </div>
           </div>
           <DropdownMenu>
