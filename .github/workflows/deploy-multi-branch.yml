@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - MVP
 
 permissions:
   contents: read
