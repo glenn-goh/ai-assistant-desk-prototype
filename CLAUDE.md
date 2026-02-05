@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build Commands
 
 ```bash
-npm run dev    # Start development server (http://localhost:5173)
+npm run dev    # Start development server (http://localhost:3000, auto-opens browser)
 npm run build  # Build for production (outputs to build/)
 ```
 
@@ -13,26 +13,40 @@ No test or lint commands are configured.
 
 ## Architecture Overview
 
-This is a React + TypeScript prototype for an AI Assistant Desk application using Vite and Tailwind CSS 4. It follows a lo-fi wireframe aesthetic with grayscale colors.
+React + TypeScript prototype for an AI Assistant Desk application using Vite, Tailwind CSS 4, and Radix UI primitives. Lo-fi wireframe aesthetic with grayscale colors.
+
+**Path alias:** `@` maps to `./src` (configured in vite.config.ts and tsconfig).
+**Base path:** `/ai-assistant-desk-prototype/mvp/` (for GitHub Pages deployment).
 
 ### Core Application Flow
 
-**App.tsx** is the main orchestrator containing:
-- Authentication state (`isAuthenticated`) → shows `LoginPage` when false
-- Onboarding state (`hasOnboarded`) → shows `OnboardingPage` after login
-- Main app with sidebar + content area after onboarding
+**App.tsx** is the main orchestrator containing all top-level state:
+- Authentication (`isAuthenticated`) → `LoginPage`
+- Onboarding (`hasOnboarded`) → `OnboardingPage`
+- Main app with sidebar + content area
 
 **Views** controlled by `activeView` state:
-- `home` → `HomePage` (default landing with quick chat input)
-- `chat` → `ChatSimulatorView` (handles both simulations and real chats)
-- `explore` → `ExplorePage` (browse available assistants)
-- `studio` → `StudioPage` (create custom assistants)
-- `library` → `LibraryPage` (saved resources)
-- `chats` → `ChatsPage` (chat history)
+- `home` → `HomePage` | `chat` → `ChatSimulatorView` | `explore` → `ExplorePage`
+- `studio` → `StudioPage` | `library` → `LibraryPage` | `chats` → `ChatsPage` | `folder` → folder view
 
-**Modes** controlled by `mode` state:
-- `desk` - Normal chat/usage mode
-- `studio` - Assistant creation mode
+**Modes:** `desk` (normal chat) | `studio` (assistant creation)
+
+### Chat Classification System
+
+Three-tier classification drives chat persistence behavior:
+- **RSN** (Restricted/Sensitive, Non-Classified): Default, chats are saved to history
+- **CCE-SN** (Confidential CE, Sensitive, Non-Classified): Cannot be saved, uses `incognitoChat` state
+- **CCE-SH** (Confidential CE, Sensitive, Highly Sensitive): Cannot be saved, uses `incognitoChat` state
+
+### Chat Lifecycle
+
+Chats transition through states managed in App.tsx:
+1. **Draft** (`activeChatId.startsWith('new-')`) — No messages, no history entry
+2. **Preview** (`activeChatId.startsWith('preview-')`) — Created when starting an assistant chat from explore page, converts to real chat on first user message
+3. **Real Chat** — Added to `chats` array (only if not CCE classification)
+4. **Incognito Chat** — For CCE classifications, stored in separate `incognitoChat` state, never persisted
+
+Active chat is derived with priority: incognito > preview > new draft > regular chats.
 
 ### ChatSimulatorView Dual-Mode Component
 
@@ -48,40 +62,38 @@ This is a React + TypeScript prototype for an AI Assistant Desk application usin
 - Real free-form chat with message history
 - Same UI styling as simulator
 
-### Data Types
+### Simulation Data Format
 
-**Chat/Message** (defined in App.tsx):
+Pre-scripted conversation flows in `src/data/`. Bot responses can be:
+- `ThinkingResponse` — `{type: "thinking", thought?, reasoning?: string[], timingMs?}`
+- `TextResponse` — `{type: "text", content: string, delayMs?}`
+- `ArtifactResponse` — `{type: "artifact", title, fileType, description, content, delayMs?, interactive?}`
+- `AssistantSwitchResponse` — `{type: "assistantSwitch", message: string}`
+
+### Key Data Types (defined in App.tsx)
+
 ```typescript
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: Date;
-  hasFile?: boolean;
-  fileName?: string;
-}
-
-interface Chat {
-  id: string;
-  title: string;
-  messages: Message[];
-  createdAt: Date;
-  assistantType?: string;
-  classificationType?: 'rsn' | 'cce-sn' | 'cce-sh';
-}
+interface Message { id, role: 'user' | 'assistant', content, timestamp, hasFile?, fileName? }
+interface Chat { id, title, messages: Message[], createdAt, assistantType?, classificationType?, isIncognito? }
+interface Folder { id, name, createdAt, chatIds: string[], customInstructions?, files?, memoriesScope }
+interface UserProfile { name, email, role, agency, profileDescription?, workFocus?, customInstructions?, traits?, aiStyle?, workActivities?, dataSources? }
 ```
-
-**Simulation data** (in `src/data/`):
-- Pre-scripted conversation flows with thinking states, text responses, and artifacts
-- Bot responses can be: `ThinkingResponse`, `TextResponse`, `ArtifactResponse`, `AssistantSwitchResponse`
 
 ### Styling
 
-Uses lo-fi grayscale aesthetic:
-- Background: `bg-gray-100`
-- User messages: `bg-gray-200` bubbles, right-aligned
-- Assistant messages: Plain text, left-aligned, no bubble
+Lo-fi grayscale aesthetic with CSS variables defined in `src/styles/globals.css`:
+- 5-color grayscale palette: Gray-100 (lightest) through Gray-900 (darkest), plus red for errors
+- User messages: `bg-gray-100` bubbles, right-aligned. Assistant messages: plain text, left-aligned
 - 16px font size with 1.7 line-height for messages
-- `max-w-chat` custom class for content width
+- `max-w-chat` custom utility for chat content width constraint
+- `.prose-lofi` class for artifact content with grayscale color overrides
+- Dark mode support via `.dark` class selector
+- Custom animations: `@dotBounce` (thinking indicator), `@shimmer` (thinking text effect)
+- Radix UI primitives in `src/components/ui/` for accessible components
 
-Radix UI primitives in `src/components/ui/` for accessible components.
+### State Patterns
+
+- No router — all navigation via `activeView` state in App.tsx
+- `ChatSidebar` receives 40+ props from App.tsx for chat/folder/navigation operations
+- Feature tracking: `viewedSimulations`, `hasSeenWalkthrough` (persisted to localStorage)
+- Bookmark system: max 3 bookmarked assistants with swap modal on overflow
