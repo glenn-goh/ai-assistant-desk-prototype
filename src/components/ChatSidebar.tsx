@@ -440,7 +440,7 @@ export function ChatSidebar({
                         {/* Demo Simulations - Show only if viewed */}
                         {[
                           { id: 'hr-candidate-shortlisting', title: 'HR Candidate Shortlisting', classification: 'rsn' as const },
-                          { id: 'pq-response-mnd', title: 'PQ Response - MND Housing', classification: 'rsn' as const },
+                          { id: 'pq-response-mnd-v2', title: 'PQ Response - MND Housing', classification: 'rsn' as const },
                           { id: 'canvas-demo', title: 'Canvas Generation Demo', classification: 'rsn' as const },
                         ].filter(sim => viewedSimulations.includes(sim.id)).map(sim => {
                           const displayTitle = sim.title.length > 24 ? sim.title.substring(0, 24) + '...' : sim.title;

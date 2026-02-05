@@ -25,7 +25,6 @@ import { feedbackCollectionData } from './data/feedback-collection';
 import { hrCandidateShortlistingData } from './data/hr-candidate-shortlisting';
 import { procurementRfqData } from './data/procurement-rfq';
 import { marketingSoftwareAorData } from './data/marketing-software-aor';
-import { pqResponseData } from './data/pq-response-mnd';
 import { pqResponseDataV2 } from './data/pq-response-mnd-v2';
 import { canvasDemoData } from './data/canvas-demo';
 
@@ -434,7 +433,7 @@ export default function App() {
 
     // Check if this is the Parliamentary Question Assistant - trigger simulation instead
     if (assistantType === 'parliamentary-question') {
-      handleSelectSimulation('pq-response-mnd');
+      handleSelectSimulation('pq-response-mnd-v2');
       return;
     }
 
@@ -673,8 +672,6 @@ export default function App() {
       ? procurementRfqData
       : activeChatId === 'sim-marketing-software-aor'
       ? marketingSoftwareAorData
-      : activeChatId === 'sim-pq-response-mnd'
-      ? pqResponseData
       : activeChatId === 'sim-pq-response-mnd-v2'
       ? pqResponseDataV2
       : activeChatId === 'sim-canvas-demo'
