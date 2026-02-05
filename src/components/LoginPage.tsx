@@ -60,21 +60,21 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             {/* Error/Maintenance Page Links */}
             <div className="absolute bottom-4 left-4 flex gap-3">
                 <a
-                    href="/#/404"
+                    href="#/404"
                     className="text-gray-300 hover:text-gray-500 underline transition-colors"
                     style={{ fontSize: '8px' }}
                 >
                     404
                 </a>
                 <a
-                    href="/#/500"
+                    href="#/500"
                     className="text-gray-300 hover:text-gray-500 underline transition-colors"
                     style={{ fontSize: '8px' }}
                 >
                     500
                 </a>
                 <a
-                    href="/#/maintenance"
+                    href="#/maintenance"
                     className="text-gray-300 hover:text-gray-500 underline transition-colors"
                     style={{ fontSize: '8px' }}
                 >
