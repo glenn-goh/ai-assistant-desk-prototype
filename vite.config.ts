@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
-  base: '/ai-assistant-desk-prototype/',
+  base: '/ai-assistant-desk-prototype/mvp/',
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

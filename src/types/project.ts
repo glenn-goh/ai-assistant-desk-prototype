@@ -1,16 +1,16 @@
-export interface FolderFile {
+export interface ProjectFile {
   id: string;
   name: string;
   size: number;
   uploadedAt: Date;
 }
 
-export interface Folder {
+export interface Project {
   id: string;
   name: string;
   createdAt: Date;
   chatIds: string[];
   customInstructions?: string;
-  files?: FolderFile[];
-  memoriesScope: 'folder-only' | 'include-external';
+  files?: ProjectFile[];
+  memoriesScope: 'project-only' | 'include-external';
 }

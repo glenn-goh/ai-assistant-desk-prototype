@@ -134,7 +134,7 @@ export function PersonalizationDialog({
             </DialogHeader>
 
         <Tabs defaultValue="accounts" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="accounts" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Accounts
@@ -142,10 +142,6 @@ export function PersonalizationDialog({
             <TabsTrigger value="memories" className="flex items-center gap-2">
               <Brain className="w-4 h-4" />
               Personalisation
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
-              <Bell className="w-4 h-4" />
-              Notifications
             </TabsTrigger>
           </TabsList>
 
@@ -162,46 +158,33 @@ export function PersonalizationDialog({
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">{userProfile.name}</h4>
                   <p className="text-sm text-gray-500">{userProfile.email}</p>
-                  <p className="text-sm text-gray-500">{userProfile.agency}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="display-name">Display Name</Label>
-                <Input id="display-name" defaultValue={userProfile.name} />
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={callMeName}
+                  onChange={(e) => setCallMeName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="bg-white"
+                />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="agency">Agency</Label>
-                <Select
-                  value={userProfile.agency}
-                  onValueChange={(value) => {
-                    onUpdateProfile({
-                      ...userProfile,
-                      agency: value
-                    });
-                  }}
-                >
-                  <SelectTrigger id="agency">
-                    <SelectValue placeholder="Select your agency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="GovTech">GovTech</SelectItem>
-                    <SelectItem value="Ministry of Education (MOE)">Ministry of Education (MOE)</SelectItem>
-                    <SelectItem value="Ministry of Manpower (MOM)">Ministry of Manpower (MOM)</SelectItem>
-                    <SelectItem value="Ministry of Trade and Industry (MTI)">Ministry of Trade and Industry (MTI)</SelectItem>
-                    <SelectItem value="Ministry of Home Affairs (MHA)">Ministry of Home Affairs (MHA)</SelectItem>
-                    <SelectItem value="Ministry of Finance (MOF)">Ministry of Finance (MOF)</SelectItem>
-                    <SelectItem value="Ministry of Health (MOH)">Ministry of Health (MOH)</SelectItem>
-                    <SelectItem value="Ministry of National Development (MND)">Ministry of National Development (MND)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" value={userProfile.email} disabled className="bg-gray-100 cursor-not-allowed" />
               </div>
             </div>
 
             <div className="flex justify-end pt-4">
               <Button onClick={() => {
-                // Save changes logic would go here
+                // Save changes logic - update name
+                onUpdateProfile({
+                  ...userProfile,
+                  name: callMeName.trim() || userProfile.name,
+                });
                 onOpenChange?.(false);
               }}>Save Changes</Button>
             </div>
@@ -254,83 +237,6 @@ export function PersonalizationDialog({
 
             <Separator />
 
-            {/* About You Section */}
-            <div className="space-y-6">
-              <h3 className="font-semibold">About You</h3>
-
-              <div className="space-y-2">
-                <Label htmlFor="call-me">What would you like us to call you?</Label>
-                <Input
-                  id="call-me"
-                  value={callMeName}
-                  onChange={(e) => setCallMeName(e.target.value)}
-                  placeholder="Enter your preferred name"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="primary-job-role">Which best describes your primary job role?</Label>
-                <Select value={jobRole} onValueChange={setJobRole}>
-                  <SelectTrigger id="primary-job-role">
-                    <SelectValue placeholder="Select your job role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="policy-strategy">Policy / Strategy</SelectItem>
-                    <SelectItem value="operations">Operations</SelectItem>
-                    <SelectItem value="hr-people">HR / People</SelectItem>
-                    <SelectItem value="finance-procurement">Finance / Procurement</SelectItem>
-                    <SelectItem value="legal-compliance">Legal / Compliance</SelectItem>
-                    <SelectItem value="communications">Communications</SelectItem>
-                    <SelectItem value="data-tech">Data / Tech</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-                {jobRole === 'other' && (
-                  <Input
-                    placeholder="Describe your job role..."
-                    value={otherJobRole}
-                    onChange={(e) => setOtherJobRole(e.target.value)}
-                    className="mt-2"
-                  />
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <Label>What do you spend most of your time doing?</Label>
-                <div className="space-y-2">
-                  {[
-                    { id: 'drafting', label: 'Drafting documents' },
-                    { id: 'reviewing', label: 'Reviewing / editing' },
-                    { id: 'researching', label: 'Researching / summarising' },
-                    { id: 'briefings', label: 'Preparing briefings / slides' },
-                    { id: 'cases', label: 'Handling cases' },
-                    { id: 'queries', label: 'Responding to queries' },
-                    { id: 'analysis', label: 'Data analysis' },
-                    { id: 'planning', label: 'Planning / coordination' },
-                  ].map((activity) => (
-                    <div key={activity.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={activity.id}
-                        checked={workActivities.includes(activity.id)}
-                        onCheckedChange={(checked) => {
-                          if (checked) {
-                            setWorkActivities([...workActivities, activity.id]);
-                          } else {
-                            setWorkActivities(workActivities.filter(a => a !== activity.id));
-                          }
-                        }}
-                      />
-                      <Label htmlFor={activity.id} className="text-sm font-normal cursor-pointer">
-                        {activity.label}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
             {/* Memories Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -360,25 +266,6 @@ export function PersonalizationDialog({
                 });
                 onOpenChange?.(false);
               }}>Save Changes</Button>
-            </div>
-          </TabsContent>
-
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="space-y-4 mt-6">
-            <div className="flex items-center justify-between py-3">
-              <div className="space-y-0.5">
-                <Label htmlFor="notify-complete" className="text-sm">Task Completion</Label>
-                <p className="text-muted-foreground text-xs">Notify me by email when long-running tasks complete</p>
-              </div>
-              <Switch id="notify-complete" defaultChecked />
-            </div>
-            <Separator />
-            <div className="flex items-center justify-between py-3">
-              <div className="space-y-0.5">
-                <Label htmlFor="email-updates" className="text-sm">Product Updates</Label>
-                <p className="text-muted-foreground text-xs">Receive emails about new features and improvements</p>
-              </div>
-              <Switch id="email-updates" defaultChecked />
             </div>
           </TabsContent>
         </Tabs>
