@@ -360,9 +360,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       } else if (response.type === 'artifact') {
         await sleep(response.delayMs ? response.delayMs / 1.5 : 667); // 1.5x faster: default was 1000
         setDisplayedMessages(prev => [...prev, { type: 'artifact', data: response }]);
-        // Auto-open canvas when artifact is displayed
-        setSelectedArtifact(response);
-        setShowOutputPanel(true);
+        // Only auto-open and select artifact when panel is not already open
+        // If panel is open, keep showing the user's current selection
+        setShowOutputPanel(prev => {
+          if (!prev) {
+            setSelectedArtifact(response);
+          }
+          return true;
+        });
       }
     }
 
