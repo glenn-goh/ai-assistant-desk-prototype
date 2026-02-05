@@ -22,7 +22,7 @@ export function Error500Page({ onBackToLogin }: Error500PageProps) {
 
           <Button
             className="w-full h-12"
-            onClick={onBackToLogin || (() => window.location.href = '/')}
+            onClick={onBackToLogin || (() => window.location.hash = '')}
           >
             Back to Home
           </Button>

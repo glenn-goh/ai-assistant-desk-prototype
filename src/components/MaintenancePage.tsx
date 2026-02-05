@@ -23,9 +23,9 @@ export function MaintenancePage({ onBackToLogin }: MaintenancePageProps) {
 
           <Button
             className="w-full h-12"
-            onClick={onBackToLogin || (() => window.location.href = '/')}
+            onClick={onBackToLogin || (() => window.location.hash = '')}
           >
-            Refresh Page
+            Back to Home
           </Button>
         </CardContent>
       </Card>
