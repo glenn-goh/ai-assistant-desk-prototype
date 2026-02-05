@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileText, Code, BarChart3, ClipboardList, X, PanelRight, ArrowLeft, ChevronDown, ChevronRight, Copy, Download, Check, Undo2, Redo2, Pencil, EyeOff, ThumbsUp, ThumbsDown, MoreHorizontal, FolderPlus } from 'lucide-react';
+import { FileText, X, ArrowLeft, Copy, Download, Check, Undo2, Redo2, EyeOff, MoreHorizontal, FolderPlus } from 'lucide-react';
 import { MessageInput } from './MessageInput';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
 import { Button } from './ui/button';
@@ -7,6 +7,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
 import type { Folder } from '../types/folder';
 import { IncognitoIcon } from './IncognitoIcon';
+import { MessageActions } from './chat/MessageActions';
+import { ReasoningBlock } from './chat/ReasoningBlock';
+import { TextResponseBlock } from './chat/TextResponseBlock';
+import { AssistantSwitchBadge } from './chat/AssistantSwitchBadge';
+import { ArtifactCard, getFileIcon } from './chat/ArtifactCard';
+import { SkeletonLoader } from './chat/SkeletonLoader';
+import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
 
 // Type definitions
 interface ChatSimulation {
@@ -39,7 +46,8 @@ interface ThinkingResponse {
   type: "thinking";
   thoughts: string[];
   timingMs?: number;
-  reasoning?: string[]; // Detailed reasoning steps for expandable view
+  reasoning?: Array<string | { text: string; icon: string }>; // Detailed reasoning steps for expandable view
+  doneSummary?: string; // Summary shown when reasoning is done
 }
 
 interface AssistantSwitchResponse {
@@ -134,7 +142,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [isTyping, setIsTyping] = useState(false);
   const [typedText, setTypedText] = useState("");
   const [currentThought, setCurrentThought] = useState("");
-  const [currentReasoning, setCurrentReasoning] = useState<string[]>([]);
+  const [currentReasoning, setCurrentReasoning] = useState<Array<string | { text: string; icon: string }>>([]);
   const [showThinkingDots, setShowThinkingDots] = useState(false);
   const [selectedArtifact, setSelectedArtifact] = useState<ArtifactResponse | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -380,7 +388,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     setDisplayedMessages(prev => [...prev, {
       type: 'thinking',
       thought: response.thought || '',
-      reasoning: reasoning
+      reasoning: reasoning,
+      doneSummary: response.doneSummary
     }]);
 
     setCurrentThought("");
@@ -388,21 +397,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   };
 
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-  const getFileIcon = (fileType: string) => {
-    switch (fileType.toLowerCase()) {
-      case 'document':
-        return <FileText className="w-5 h-5" />;
-      case 'code':
-        return <Code className="w-5 h-5" />;
-      case 'chart':
-        return <BarChart3 className="w-5 h-5" />;
-      case 'form':
-        return <ClipboardList className="w-5 h-5" />;
-      default:
-        return <FileText className="w-5 h-5" />;
-    }
-  };
 
   const toggleThinkingExpanded = (idx: number) => {
     setExpandedThinkingIds(prev => {
@@ -685,58 +679,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                           </div>
                         </div>
                       ) : (
-                  <div className="flex flex-col gap-1 mb-2">
-                    <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                      {msg.content}
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleCopyMessage(msg.id, msg.content)}
-                              className="p-1.5 hover:bg-gray-100 rounded"
-                            >
-                              {copiedMessageId === msg.id ? (
-                                <Check className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Copy className="w-4 h-4 text-gray-400" />
-                              )}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{copiedMessageId === msg.id ? 'Copied' : 'Copy'}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleFeedback(msg.id, 'up')}
-                              className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[msg.id] === 'up' ? 'text-green-600' : 'text-gray-400'}`}
-                            >
-                              <ThumbsUp className="w-4 h-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Good response</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleFeedback(msg.id, 'down')}
-                              className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[msg.id] === 'down' ? 'text-red-600' : 'text-gray-400'}`}
-                            >
-                              <ThumbsDown className="w-4 h-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Bad response</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
+                        <TextResponseBlock
+                          messageId={msg.id}
+                          content={msg.content}
+                          copiedMessageId={copiedMessageId}
+                          feedbackState={feedbackMessageId}
+                          onCopy={handleCopyMessage}
+                          onFeedback={handleFeedback}
+                        />
                 )}
                     </div>
                   ))}
@@ -746,39 +696,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     <div ref={assistantContentRef} className="space-y-8">
                       {messagesAfterLastUser.map((msg) => (
                         <div key={msg.id} className="group">
-                          <div className="flex flex-col gap-1 mb-2">
-                            <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                              {msg.content}
-                            </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button onClick={() => handleCopyMessage(msg.id, msg.content)} className="p-1.5 hover:bg-gray-100 rounded">
-                                      {copiedMessageId === msg.id ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>{copiedMessageId === msg.id ? 'Copied' : 'Copy'}</p></TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button onClick={() => handleFeedback(msg.id, 'up')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[msg.id] === 'up' ? 'text-green-600' : 'text-gray-400'}`}>
-                                      <ThumbsUp className="w-4 h-4" />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Good response</p></TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button onClick={() => handleFeedback(msg.id, 'down')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[msg.id] === 'down' ? 'text-red-600' : 'text-gray-400'}`}>
-                                      <ThumbsDown className="w-4 h-4" />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Bad response</p></TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </div>
+                          <TextResponseBlock
+                            messageId={msg.id}
+                            content={msg.content}
+                            copiedMessageId={copiedMessageId}
+                            feedbackState={feedbackMessageId}
+                            onCopy={handleCopyMessage}
+                            onFeedback={handleFeedback}
+                          />
                         </div>
                       ))}
                     </div>
@@ -820,123 +745,40 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 )}
 
                 {msg.type === 'thinking' && (
-                  <div className="flex flex-col gap-1 mb-4 p-3 bg-white rounded-lg border border-gray-200">
-                    {/* Expandable thinking header - entire row clickable */}
-                    <button
-                      onClick={() => toggleThinkingExpanded(idx)}
-                      className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
-                    >
-                      <span className="text-sm font-medium text-gray-600">Reasoning</span>
-                      <div className="text-gray-600">
-                        {expandedThinkingIds.has(idx) ? (
-                          <ChevronDown className="w-4 h-4" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4" />
-                        )}
-                      </div>
-                    </button>
-
-                    {/* Expanded reasoning content */}
-                    {expandedThinkingIds.has(idx) && msg.reasoning && (
-                      <div className="mt-2 space-y-2">
-                        {msg.reasoning.map((step: string, stepIdx: number) => (
-                          <div key={stepIdx} className="flex items-start gap-2 text-sm text-gray-600">
-                            <span className="text-gray-400 font-mono text-xs mt-0.5">{stepIdx + 1}.</span>
-                            <span>{step}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  <ReasoningBlock
+                    id={idx}
+                    reasoning={msg.reasoning || []}
+                    doneSummary={msg.doneSummary}
+                    isExpanded={expandedThinkingIds.has(idx)}
+                    onToggle={toggleThinkingExpanded}
+                  />
                 )}
 
                 {msg.type === 'assistantSwitch' && (
-                  <div className="flex justify-center">
-                    <div className="flex items-center gap-2 text-xs text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                      <span className="text-gray-500">Switched to</span>
-                      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      <span className="font-semibold text-gray-900">{msg.message}</span>
-                    </div>
-                  </div>
+                  <AssistantSwitchBadge message={msg.message} />
                 )}
 
                 {msg.type === 'text' && (
-                  <div className="flex flex-col gap-1 mb-2">
-                    <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                      {msg.content}
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleCopyMessage(`sim-text-${idx}`, msg.content)}
-                              className="p-1.5 hover:bg-gray-100 rounded"
-                            >
-                              {copiedMessageId === `sim-text-${idx}` ? (
-                                <Check className="w-4 h-4 text-green-600" />
-                              ) : (
-                                <Copy className="w-4 h-4 text-gray-400" />
-                              )}
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{copiedMessageId === `sim-text-${idx}` ? 'Copied' : 'Copy'}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleFeedback(`sim-text-${idx}`, 'up')}
-                              className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[`sim-text-${idx}`] === 'up' ? 'text-green-600' : 'text-gray-400'}`}
-                            >
-                              <ThumbsUp className="w-4 h-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Good response</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              onClick={() => handleFeedback(`sim-text-${idx}`, 'down')}
-                              className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[`sim-text-${idx}`] === 'down' ? 'text-red-600' : 'text-gray-400'}`}
-                            >
-                              <ThumbsDown className="w-4 h-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Bad response</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </div>
+                  <TextResponseBlock
+                    messageId={`sim-text-${idx}`}
+                    content={msg.content}
+                    copiedMessageId={copiedMessageId}
+                    feedbackState={feedbackMessageId}
+                    onCopy={handleCopyMessage}
+                    onFeedback={handleFeedback}
+                  />
                 )}
 
                 {msg.type === 'artifact' && (
-                  <div>
-                    <button
-                      onClick={() => {
-                        setSelectedArtifact(msg.data);
-                        setShowOutputPanel(true);
-                      }}
-                      className="inline-flex bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="text-gray-500">
-                          {getFileIcon(msg.data.fileType)}
-                        </div>
-                        <div>
-                          <div className="font-medium text-gray-900 text-sm">{msg.data.title}</div>
-                          <div className="text-xs text-gray-500 mt-0.5">{msg.data.description}</div>
-                        </div>
-                      </div>
-                    </button>
-                  </div>
+                  <ArtifactCard
+                    title={msg.data.title}
+                    description={msg.data.description}
+                    fileType={msg.data.fileType}
+                    onSelect={() => {
+                      setSelectedArtifact(msg.data);
+                      setShowOutputPanel(true);
+                    }}
+                  />
                 )}
               </div>
             ))}
@@ -947,147 +789,63 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       {messagesAfterLastUser.map((msg, idx) => (
                         <div key={`after-${idx}`} className="group">
                           {msg.type === 'thinking' && (
-                            <div className="flex flex-col gap-1 mb-4 p-3 bg-white rounded-lg border border-gray-200">
-                              <button
-                                onClick={() => toggleThinkingExpanded(idx + 1000)}
-                                className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
-                              >
-                                <span className="text-sm font-medium text-gray-600">Reasoning</span>
-                                <div className="text-gray-600">
-                                  {expandedThinkingIds.has(idx + 1000) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                </div>
-                              </button>
-                              {expandedThinkingIds.has(idx + 1000) && msg.reasoning && (
-                                <div className="mt-2 space-y-2">
-                                  {msg.reasoning.map((step: string, stepIdx: number) => (
-                                    <div key={stepIdx} className="flex items-start gap-2 text-sm text-gray-600">
-                                      <span className="text-gray-400 font-mono text-xs mt-0.5">{stepIdx + 1}.</span>
-                                      <span>{step}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
+                            <ReasoningBlock
+                              id={idx + 1000}
+                              reasoning={msg.reasoning || []}
+                              doneSummary={msg.doneSummary}
+                              isExpanded={expandedThinkingIds.has(idx + 1000)}
+                              onToggle={toggleThinkingExpanded}
+                            />
                           )}
                           {msg.type === 'assistantSwitch' && (
-                            <div className="flex justify-center">
-                              <div className="flex items-center gap-2 text-xs text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                                <span className="text-gray-500">Switched to</span>
-                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                <span className="font-semibold text-gray-900">{msg.message}</span>
-                              </div>
-                            </div>
+                            <AssistantSwitchBadge message={msg.message} />
                           )}
                           {msg.type === 'text' && (
-                            <div className="flex flex-col gap-1 mb-2">
-                              <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>{msg.content}</div>
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button onClick={() => handleCopyMessage(`sim-after-${idx}`, msg.content)} className="p-1.5 hover:bg-gray-100 rounded">
-                                        {copiedMessageId === `sim-after-${idx}` ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>{copiedMessageId === `sim-after-${idx}` ? 'Copied' : 'Copy'}</p></TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button onClick={() => handleFeedback(`sim-after-${idx}`, 'up')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[`sim-after-${idx}`] === 'up' ? 'text-green-600' : 'text-gray-400'}`}>
-                                        <ThumbsUp className="w-4 h-4" />
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Good response</p></TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button onClick={() => handleFeedback(`sim-after-${idx}`, 'down')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[`sim-after-${idx}`] === 'down' ? 'text-red-600' : 'text-gray-400'}`}>
-                                        <ThumbsDown className="w-4 h-4" />
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Bad response</p></TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </div>
-                            </div>
+                            <TextResponseBlock
+                              messageId={`sim-after-${idx}`}
+                              content={msg.content}
+                              copiedMessageId={copiedMessageId}
+                              feedbackState={feedbackMessageId}
+                              onCopy={handleCopyMessage}
+                              onFeedback={handleFeedback}
+                            />
                           )}
                           {msg.type === 'artifact' && (
-                            <div>
-                              <button
-                                onClick={() => { setSelectedArtifact(msg.data); setShowOutputPanel(true); }}
-                                className="inline-flex bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="text-gray-500">{getFileIcon(msg.data.fileType)}</div>
-                                  <div>
-                                    <div className="font-medium text-gray-900 text-sm">{msg.data.title}</div>
-                                    <div className="text-xs text-gray-500 mt-0.5">{msg.data.description}</div>
-                                  </div>
-                                </div>
-                              </button>
-                            </div>
+                            <ArtifactCard
+                              title={msg.data.title}
+                              description={msg.data.description}
+                              fileType={msg.data.fileType}
+                              onSelect={() => {
+                                setSelectedArtifact(msg.data);
+                                setShowOutputPanel(true);
+                              }}
+                            />
                           )}
                         </div>
                       ))}
 
                       {/* Active thinking state with live reasoning */}
                       {(currentThought || currentReasoning.length > 0) && (
-                        <div className="flex flex-col gap-1 mb-4 p-3 bg-white rounded-lg border border-gray-200">
-                          <button
-                            onClick={() => setExpandedThinkingIds(prev => {
-                              const newSet = new Set(prev);
-                              if (newSet.has(-1)) newSet.delete(-1);
-                              else newSet.add(-1);
-                              return newSet;
-                            })}
-                            className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
-                          >
-                            <span className="text-sm font-medium text-gray-600">
-                              {currentReasoning.length > 0
-                                ? currentReasoning[currentReasoning.length - 1]
-                                : currentThought || "Processing..."}
-                            </span>
-                            <div className="text-gray-600">
-                              {expandedThinkingIds.has(-1) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                            </div>
-                          </button>
-                          {expandedThinkingIds.has(-1) && currentReasoning.length > 0 && (
-                            <div className="mt-2 space-y-2">
-                              {currentReasoning.map((step, stepIdx) => (
-                                <div key={stepIdx} className="flex items-start gap-2 text-sm text-gray-600">
-                                  <span className="text-gray-400 font-mono text-xs mt-0.5">{stepIdx + 1}.</span>
-                                  <span className={stepIdx === currentReasoning.length - 1 ? 'shimmer-text' : ''}>{step}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                        <ReasoningBlock
+                          id={-1}
+                          reasoning={currentReasoning}
+                          isExpanded={expandedThinkingIds.has(-1)}
+                          onToggle={(id) => setExpandedThinkingIds(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(id)) newSet.delete(id);
+                            else newSet.add(id);
+                            return newSet;
+                          })}
+                          isLive
+                          liveLabel={currentThought || 'Processing...'}
+                        />
                       )}
 
                       {/* Searching assistant loading state */}
-                      {searchingAssistant && (
-                        <div className="flex justify-center">
-                          <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span>Searching assistants...</span>
-                          </div>
-                        </div>
-                      )}
+                      {searchingAssistant && <SearchingAssistantLoader />}
 
                       {/* Skeleton loader */}
-                      {showThinkingDots && (
-                        <div className="flex justify-start">
-                          <div className="max-w-[80%] space-y-3 py-3">
-                            <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4"></div>
-                            <div className="h-4 bg-gray-100 rounded animate-pulse w-full"></div>
-                            <div className="h-4 bg-gray-100 rounded animate-pulse w-5/6"></div>
-                          </div>
-                        </div>
-                      )}
+                      {showThinkingDots && <SkeletonLoader />}
                     </div>
                   )}
                 </>

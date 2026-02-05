@@ -26,14 +26,13 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Analyzing user's request and preparing PQ workflow...",
           reasoning: [
-            { text: "Understanding user's confirmation that they have PQ text ready...", icon: "search", description: "Interpreting the user's intent and selecting the appropriate PQ drafting workflow." },
-            { text: "Loading Parliamentary Question response templates...", icon: "file-text", description: "Retrieving the standard MND response templates with pre-approved formatting and structure." },
-            { text: "Preparing PQ input form with required fields...", icon: "file-text", description: "Building an interactive form to capture the question text, ministry, classification, and due date." },
-            { text: "Configuring workflow for MND ministry responses...", icon: "search", description: "Setting ministry-specific parameters including housing policy terminology and approval chains." },
-            { text: "Setting up Hansard database connection for past PQ references...", icon: "database", description: "Connecting to the parliamentary Hansard records to enable cross-referencing with historical questions." }
+            "Understanding user's confirmation that they have PQ text ready...",
+            "Loading Parliamentary Question response templates...",
+            "Preparing PQ input form with required fields...",
+            "Configuring workflow for MND ministry responses...",
+            "Setting up Hansard database connection for past PQ references..."
           ],
-          timingMs: 10000,
-          doneSummary: "Loaded PQ templates and connected to Hansard — 5 steps"
+          timingMs: 5000
         },
         {
           type: "text" as const,
@@ -126,14 +125,13 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Analyzing PQ structure and requirements...",
           reasoning: [
-            { text: "Processing submitted Parliamentary Question details...", icon: "search", description: "Parsing the form submission to extract the question text, ministry, and classification level." },
-            { text: "Analyzing PQ format and identifying question components (a) and (b)...", icon: "search", description: "Breaking the question into part (a) on BTO waiting times and part (b) on policy measures." },
-            { text: "Checking classification requirements and ministry alignment...", icon: "search", description: "Confirming the question is unclassified and falls under MND Housing Policy Division." },
-            { text: "Determining research scope and data requirements...", icon: "search", description: "Identifying the need for statistical data on waiting times and details on current government initiatives." },
-            { text: "Planning comprehensive search strategy across databases...", icon: "search", description: "Mapping out queries for the Hansard database, internal statistics repository, and policy document archives." }
+            "Processing submitted Parliamentary Question details...",
+            "Analyzing PQ format and identifying question components (a) and (b)...",
+            "Checking classification requirements and ministry alignment...",
+            "Determining research scope and data requirements...",
+            "Planning comprehensive search strategy across databases..."
           ],
-          timingMs: 10000,
-          doneSummary: "Analyzed PQ structure and planned research strategy — 5 steps"
+          timingMs: 5000
         },
         {
           type: "text" as const,
@@ -158,15 +156,14 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Searching Hansard database for similar past PQs...",
           reasoning: [
-            { text: "Querying Hansard database for BTO-related Parliamentary Questions...", icon: "database", description: "Searching the official parliamentary records for questions mentioning BTO flats and waiting times." },
-            { text: "Filtering results by ministry (MND) and topic (housing policy)...", icon: "search", description: "Narrowing results to MND-answered questions on housing supply and construction timelines." },
-            { text: "Analyzing past ministerial responses and language patterns...", icon: "search", description: "Extracting tone, phrasing, and key talking points used in previous ministerial answers." },
-            { text: "Cross-referencing with current policy positions...", icon: "search", description: "Verifying that past response themes are still aligned with the latest ministerial public statements." },
-            { text: "Identifying consistent response frameworks...", icon: "search", description: "Detecting recurring structures like empathetic opening, data provision, and policy measure listing." },
-            { text: "Compiling relevant precedents and statistical data...", icon: "database", description: "Assembling the three most relevant past PQs and verified BTO statistics into a research brief." }
+            "Querying Hansard database for BTO-related Parliamentary Questions...",
+            "Filtering results by ministry (MND) and topic (housing policy)...",
+            "Analyzing past ministerial responses and language patterns...",
+            "Cross-referencing with current policy positions...",
+            "Identifying consistent response frameworks...",
+            "Compiling relevant precedents and statistical data..."
           ],
-          timingMs: 12000,
-          doneSummary: "Searched Hansard and compiled 3 past PQ precedents — 6 steps"
+          timingMs: 6000
         },
         {
           type: "assistantSwitch" as const,
@@ -326,17 +323,16 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Drafting comprehensive PQ response...",
           reasoning: [
-            { text: "Loading MND Parliamentary Question response template...", icon: "file-text", description: "Retrieving the standard two-part PQ answer template used by the Housing Policy Division." },
-            { text: "Structuring two-part answer format for parts (a) and (b)...", icon: "file-text", description: "Organizing the response with part (a) addressing waiting time data and part (b) outlining policy measures." },
-            { text: "Incorporating verified statistics (3.9 years average waiting time)...", icon: "search", description: "Embedding the confirmed 3.9-year average along with mature (4.2) and non-mature (3.8) estate breakdowns." },
-            { text: "Aligning language and tone with past ministerial responses...", icon: "search", description: "Matching phrasing to PQs 2284 and 1856 so the response maintains consistency across parliamentary sessions." },
-            { text: "Ensuring empathetic acknowledgment of waiting time concerns...", icon: "search", description: "Adding a compassionate opening that recognizes homebuyer frustrations, as done in previous answers." },
-            { text: "Including all four policy measures with proper justification...", icon: "search", description: "Detailing the 100,000-flat supply plan, contractor expansion, DfMA construction, and PLH model." },
-            { text: "Cross-checking content against internal MND guidelines...", icon: "search", description: "Validating that no future timeline commitments are made and all figures come from approved sources." },
-            { text: "Formatting document for official parliamentary submission...", icon: "file-text", description: "Applying the formal parliamentary document layout, headers, and metadata fields." }
+            "Loading MND Parliamentary Question response template...",
+            "Structuring two-part answer format for parts (a) and (b)...",
+            "Incorporating verified statistics (3.9 years average waiting time)...",
+            "Aligning language and tone with past ministerial responses...",
+            "Ensuring empathetic acknowledgment of waiting time concerns...",
+            "Including all four policy measures with proper justification...",
+            "Cross-checking content against internal MND guidelines...",
+            "Formatting document for official parliamentary submission..."
           ],
-          timingMs: 16000,
-          doneSummary: "Drafted PQ response with verified data and 4 policy measures — 8 steps"
+          timingMs: 8000
         },
         {
           type: "text" as const,
@@ -514,16 +510,15 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Preparing complete submission package...",
           reasoning: [
-            { text: "Generating final PQ response document in .docx format...", icon: "file-text", description: "Converting the approved Version 1 draft into an official Word document with proper headers." },
-            { text: "Creating professional cover note for director review...", icon: "file-text", description: "Writing a summary cover note highlighting key points and requesting director clearance." },
-            { text: "Compiling Annex A: Past PQ references with Hansard database links...", icon: "file-text", description: "Assembling the three similar PQs with direct Hansard links and response excerpts." },
-            { text: "Compiling Annex B: Statistical documentation with source verification...", icon: "file-text", description: "Documenting the BTO waiting time figures with their internal database sources and retrieval dates." },
-            { text: "Creating Annex C: Policy alignment checklist for compliance...", icon: "file-text", description: "Building a verification matrix confirming alignment with ministerial statements and guidelines." },
-            { text: "Formatting all documents according to MND standards...", icon: "file-text", description: "Applying ministry-standard fonts, margins, headers, and classification markings across all files." },
-            { text: "Packaging all components into submission-ready bundle...", icon: "file-text", description: "Combining all five documents into a single 349 KB package ready for email attachment." }
+            "Generating final PQ response document in .docx format...",
+            "Creating professional cover note for director review...",
+            "Compiling Annex A: Past PQ references with Hansard database links...",
+            "Compiling Annex B: Statistical documentation with source verification...",
+            "Creating Annex C: Policy alignment checklist for compliance...",
+            "Formatting all documents according to MND standards...",
+            "Packaging all components into submission-ready bundle..."
           ],
-          timingMs: 14000,
-          doneSummary: "Generated 5 submission documents in MND format — 7 steps"
+          timingMs: 7000
         },
         {
           type: "artifact" as const,
@@ -682,13 +677,12 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Composing professional submission email...",
           reasoning: [
-            { text: "Drafting professional email for director submission...", icon: "file-text", description: "Composing a formal cover email addressed to the director with a clear request for review and clearance." },
-            { text: "Summarizing key PQ points and recommendations...", icon: "file-text", description: "Condensing the question type, statistics, and response strategy into a quick-read summary section." },
-            { text: "Preparing attachment list with all supporting documents...", icon: "file-text", description: "Listing all five submission package files with sizes for the email attachment section." },
-            { text: "Formatting email according to ministry communication standards...", icon: "search", description: "Applying MND email conventions including proper sign-off, division name, and contact details." }
+            "Drafting professional email for director submission...",
+            "Summarizing key PQ points and recommendations...",
+            "Preparing attachment list with all supporting documents...",
+            "Formatting email according to ministry communication standards..."
           ],
-          timingMs: 8000,
-          doneSummary: "Drafted submission email with 5 attachments — 4 steps"
+          timingMs: 4000
         },
         {
           type: "text" as const,
@@ -800,13 +794,12 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Revising to create concise email...",
           reasoning: [
-            { text: "Analyzing user feedback to simplify email length...", icon: "search", description: "Reviewing the user's request and identifying which sections can be removed from the email body." },
-            { text: "Drafting brief, professional cover email...", icon: "file-text", description: "Rewriting the email to a concise three-sentence format that lets the attachments speak for themselves." },
-            { text: "Moving detailed information to attached documents...", icon: "file-text", description: "Ensuring all statistics, PQ references, and strategy details remain accessible in the cover note attachment." },
-            { text: "Ensuring key points remain visible while reducing verbosity...", icon: "search", description: "Keeping the due date and clearance request prominent while cutting the overall word count by 70%." }
+            "Analyzing user feedback to simplify email length...",
+            "Drafting brief, professional cover email...",
+            "Moving detailed information to attached documents...",
+            "Ensuring key points remain visible while reducing verbosity..."
           ],
-          timingMs: 8000,
-          doneSummary: "Revised email to concise format — 4 steps"
+          timingMs: 4000
         },
         {
           type: "artifact" as const,
@@ -886,14 +879,13 @@ export const pqResponseDataV2 = {
           type: "thinking" as const,
           thought: "Sending PQ submission email...",
           reasoning: [
-            { text: "Attaching all 5 documents to email (349 KB total size)...", icon: "database", description: "Bundling the PQ response, cover note, and three annexes as email attachments." },
-            { text: "Verifying recipient addresses: michael.tan@mnd.gov.sg, rachel.lim@mnd.gov.sg...", icon: "search", description: "Validating both email addresses against the ministry directory before sending." },
-            { text: "Formatting professional email with proper ministry protocols...", icon: "search", description: "Applying the finalized concise email template with the director's name and correct sign-off." },
-            { text: "Processing email send request...", icon: "database", description: "Submitting the email through the secure government mail gateway with delivery tracking enabled." },
-            { text: "Confirming successful delivery...", icon: "database", description: "Receiving delivery confirmation from the mail server for both recipients." }
+            "Attaching all 5 documents to email (349 KB total size)...",
+            "Verifying recipient addresses: michael.tan@mnd.gov.sg, rachel.lim@mnd.gov.sg...",
+            "Formatting professional email with proper ministry protocols...",
+            "Processing email send request...",
+            "Confirming successful delivery..."
           ],
-          timingMs: 10000,
-          doneSummary: "Sent email with 5 attachments to 2 recipients — 5 steps"
+          timingMs: 5000
         },
         {
           type: "text" as const,

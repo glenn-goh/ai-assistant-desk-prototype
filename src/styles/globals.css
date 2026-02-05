@@ -424,27 +424,30 @@
   }
 }
 
-/* Text shimmer animation for thinking state */
+/* Text shimmer animation for thinking state — inspired by Vercel AI Elements */
 @keyframes shimmer {
   0% {
-    background-position: -200% 0;
+    background-position: 100% center;
   }
   100% {
-    background-position: 200% 0;
+    background-position: 0% center;
   }
 }
 
 .shimmer-text {
-  background: linear-gradient(
-    90deg,
-    #404040 0%,
-    #a3a3a3 50%,
-    #404040 100%
-  );
-  background-size: 200% 100%;
+  --shimmer-spread: 60px;
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent calc(50% - var(--shimmer-spread)),
+      #d4d4d4 50%,
+      transparent calc(50% + var(--shimmer-spread))
+    ),
+    linear-gradient(#737373, #737373);
+  background-size: 250% 100%, auto;
+  background-repeat: no-repeat, padding-box;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: shimmer 1.5s ease-in-out infinite;
-  animation-delay: 0.3s;
+  animation: shimmer 1.2s linear infinite;
 }

@@ -8,7 +8,7 @@ import type { Chat } from '../App';
 const demoSimulations = [
   { id: 'marketing-software-aor', title: 'Marketing Software AOR' },
   { id: 'hr-candidate-shortlisting', title: 'HR Candidate Shortlisting' },
-  { id: 'pq-response-mnd', title: 'PQ Response - MND Housing' },
+  { id: 'pq-response-mnd-v2', title: 'PQ Response - MND Housing' },
   { id: 'feature-overview', title: 'Feature Overview' },
   { id: 'customer-support', title: 'Customer Support' },
   { id: 'feedback-collection', title: 'Feedback Collection' },

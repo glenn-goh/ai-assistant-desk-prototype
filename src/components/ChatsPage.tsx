@@ -19,7 +19,7 @@ interface ChatsPageProps {
 const demoSimulations = [
   { id: 'marketing-software-aor', title: 'Marketing Software AOR', preview: 'Draft an approval paper for procurement...' },
   { id: 'hr-candidate-shortlisting', title: 'HR Candidate Shortlisting', preview: 'Help me shortlist candidates from Workday...' },
-  { id: 'pq-response-mnd', title: 'PQ Response - MND Housing', preview: 'Draft a parliamentary question response...' },
+  { id: 'pq-response-mnd-v2', title: 'PQ Response - MND Housing', preview: 'Draft a parliamentary question response...' },
   { id: 'feature-overview', title: 'Feature Overview', preview: 'Show me what this AI assistant can do...' },
   { id: 'customer-support', title: 'Customer Support', preview: 'Help with customer inquiries...' },
   { id: 'feedback-collection', title: 'Feedback Collection', preview: 'Collect and analyze feedback...' },
