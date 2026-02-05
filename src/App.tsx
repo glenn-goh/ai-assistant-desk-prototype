@@ -9,11 +9,14 @@ import { LoginPage } from './components/LoginPage';
 import { OnboardingPage } from './components/OnboardingPage';
 import { PersonalizationDialog } from './components/PersonalizationDialog';
 import { ChatSimulatorView } from './components/ChatSimulatorView';
-import { FolderPage } from './components/FolderPage';
+import { ProjectPage } from './components/ProjectPage';
 import { WalkthroughTour } from './components/WalkthroughTour';
 import { SwapBookmarkModal } from './components/SwapBookmarkModal';
+import { Error404Page } from './components/Error404Page';
+import { Error500Page } from './components/Error500Page';
+import { MaintenancePage } from './components/MaintenancePage';
 import { ColorTheme, FontStyle } from './components/PersonalizationDialog';
-import type { Folder } from './types/folder';
+import type { Project } from './types/project';
 import type { Assistant } from './data/assistants';
 import { topRatedAssistants, essentialAssistants, roleBasedAssistants } from './data/assistants';
 import { featureOverviewData } from './data/feature-overview';
@@ -41,11 +44,12 @@ export interface Chat {
   messages: Message[];
   createdAt: Date;
   assistantType?: string;
+  assistantName?: string; // Display name of the custom assistant
   classificationType?: 'rsn' | 'cce-sn' | 'cce-sh';
   isIncognito?: boolean;
 }
 
-export type View = 'chat' | 'explore' | 'studio' | 'home' | 'library' | 'chats' | 'folder';
+export type View = 'chat' | 'explore' | 'studio' | 'home' | 'library' | 'chats' | 'project';
 export type Mode = 'desk' | 'studio';
 
 export interface UserProfile {
@@ -68,8 +72,18 @@ export interface UserProfile {
 }
 
 export default function App() {
+  const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasOnboarded, setHasOnboarded] = useState(false);
+
+  // Simple hash-based routing
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentRoute(window.location.hash.slice(1) || '/');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: 'John Doe',
     email: 'john.doe@tech.gov.sg',
@@ -88,8 +102,8 @@ export default function App() {
   const [mode, setMode] = useState<Mode>('desk');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [homeResetKey, setHomeResetKey] = useState(0);
-  const [folders, setFolders] = useState<Folder[]>([]);
-  const [activeFolderId, setActiveFolderId] = useState<string | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [bookmarkedAssistants, setBookmarkedAssistants] = useState<string[]>([]); // Store assistant IDs
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations
   const [searchModalOpen, setSearchModalOpen] = useState(false);
@@ -191,6 +205,7 @@ export default function App() {
         messages: [starterMessage, userMessage],
         // Force R/SN classification for saved chats (CCE/SN cannot be saved)
         classificationType: 'rsn',
+        assistantName: previewChat.assistantName, // Preserve assistant name
       };
       currentChats = [newChat, ...chats];
       setChats(currentChats);
@@ -432,6 +447,7 @@ export default function App() {
       messages: [],
       createdAt: new Date(),
       assistantType,
+      assistantName, // Store the assistant name
     };
 
     setPreviewChat(newPreviewChat);
@@ -443,8 +459,8 @@ export default function App() {
     const filteredChats = chats.filter(chat => chat.id !== chatId);
     setChats(filteredChats);
 
-    // Also remove from any folders
-    setFolders(folders.map(f => ({
+    // Also remove from any projects
+    setProjects(projects.map(f => ({
       ...f,
       chatIds: f.chatIds.filter(id => id !== chatId)
     })));
@@ -481,6 +497,16 @@ export default function App() {
       setIsWalkthroughOpen(true);
     }, 500); // Small delay for smooth transition
   };
+
+  // Auto-start walkthrough when user logs in directly (skips onboarding)
+  useEffect(() => {
+    if (isAuthenticated && hasOnboarded && !isWalkthroughOpen) {
+      // Only start if we haven't already started it from onboarding
+      setTimeout(() => {
+        setIsWalkthroughOpen(true);
+      }, 500);
+    }
+  }, [isAuthenticated, hasOnboarded]);
 
   const handleSignOut = () => {
     // Reset authentication state
@@ -519,18 +545,18 @@ export default function App() {
     setActiveView('chat');
   };
 
-  const handleCreateFolder = (name: string) => {
-    const newFolder: Folder = {
+  const handleCreateProject = (name: string) => {
+    const newProject: Project = {
       id: Date.now().toString(),
       name,
       createdAt: new Date(),
       chatIds: [],
-      memoriesScope: 'folder-only',
+      memoriesScope: 'project-only',
     };
-    setFolders([...folders, newFolder]);
-    // Navigate to the newly created folder
-    setActiveFolderId(newFolder.id);
-    setActiveView('folder');
+    setProjects([...projects, newProject]);
+    // Navigate to the newly created project
+    setActiveProjectId(newProject.id);
+    setActiveView('project');
   };
 
   const handleToggleBookmark = (assistantId: string) => {
@@ -559,16 +585,16 @@ export default function App() {
     setPendingBookmarkAssistantId(null);
   };
 
-  const handleAddChatToFolder = (chatId: string, folderId: string) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId && !f.chatIds.includes(chatId)) {
+  const handleAddChatToProject = (chatId: string, projectId: string) => {
+    setProjects(projects.map(f => {
+      if (f.id === projectId && !f.chatIds.includes(chatId)) {
         return { ...f, chatIds: [...f.chatIds, chatId] };
       }
       return f;
     }));
   };
 
-  const handleStartNewChatInFolder = (folderId: string) => {
+  const handleStartNewChatInProject = (projectId: string) => {
     const newId = Date.now().toString();
     const newChat: Chat = {
       id: newId,
@@ -577,9 +603,9 @@ export default function App() {
       createdAt: new Date(),
     };
     setChats([newChat, ...chats]);
-    // Add chat to folder
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
+    // Add chat to project
+    setProjects(projects.map(f => {
+      if (f.id === projectId) {
         return { ...f, chatIds: [...f.chatIds, newId] };
       }
       return f;
@@ -588,38 +614,49 @@ export default function App() {
     setActiveView('chat');
   };
 
-  const handleUpdateFolder = (folderId: string, updates: Partial<Folder>) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
+  const handleUpdateProject = (projectId: string, updates: Partial<Project>) => {
+    setProjects(projects.map(f => {
+      if (f.id === projectId) {
         return { ...f, ...updates };
       }
       return f;
     }));
   };
 
-  const handleSelectFolder = (folderId: string) => {
-    setActiveFolderId(folderId);
-    setActiveView('folder');
+  const handleSelectProject = (projectId: string) => {
+    setActiveProjectId(projectId);
+    setActiveView('project');
   };
 
-  const handleDeleteFolder = (folderId: string) => {
-    setFolders(folders.filter(f => f.id !== folderId));
-    if (activeFolderId === folderId) {
-      setActiveFolderId(null);
+  const handleDeleteProject = (projectId: string) => {
+    setProjects(projects.filter(f => f.id !== projectId));
+    if (activeProjectId === projectId) {
+      setActiveProjectId(null);
       setActiveView('home');
     }
   };
 
-  const handleRemoveChatFromFolder = (folderId: string, chatId: string) => {
-    setFolders(folders.map(f => {
-      if (f.id === folderId) {
+  const handleRemoveChatFromProject = (projectId: string, chatId: string) => {
+    setProjects(projects.map(f => {
+      if (f.id === projectId) {
         return { ...f, chatIds: f.chatIds.filter(id => id !== chatId) };
       }
       return f;
     }));
   };
 
-  const activeFolder = activeFolderId ? folders.find(f => f.id === activeFolderId) : null;
+  const activeProject = activeProjectId ? projects.find(f => f.id === activeProjectId) : null;
+
+  // Show error/maintenance pages based on route
+  if (currentRoute === '/404') {
+    return <Error404Page onBackToLogin={() => window.location.hash = ''} />;
+  }
+  if (currentRoute === '/500') {
+    return <Error500Page onBackToLogin={() => window.location.hash = ''} />;
+  }
+  if (currentRoute === '/maintenance') {
+    return <MaintenancePage onBackToLogin={() => window.location.hash = ''} />;
+  }
 
   // Check if current view is a simulation
   const isSimulation = activeChatId.startsWith('sim-');
@@ -700,11 +737,11 @@ export default function App() {
         userProfile={userProfile}
         onSignOut={handleSignOut}
         onSelectSimulation={handleSelectSimulation}
-        folders={folders}
-        onCreateFolder={handleCreateFolder}
-        onSelectFolder={handleSelectFolder}
+        projects={projects}
+        onCreateProject={handleCreateProject}
+        onSelectProject={handleSelectProject}
         onStartAssistantChat={handleStartAssistantChat}
-        onAddChatToFolder={handleAddChatToFolder}
+        onAddChatToProject={handleAddChatToProject}
         searchModalOpen={searchModalOpen}
         onSearchModalChange={setSearchModalOpen}
         onWalkthroughStart={() => {
@@ -741,10 +778,11 @@ export default function App() {
               onRenameChat={handleRenameChat}
               isNewChat={activeChatId.startsWith('new-')}
               isIncognito={activeChat?.isIncognito}
-              folders={folders}
-              onMoveToFolder={handleAddChatToFolder}
+              projects={projects}
+              onMoveToProject={handleAddChatToProject}
               bookmarkedAssistants={bookmarkedAssistants}
               assistantType={activeChat?.assistantType}
+              assistantName={activeChat?.assistantName}
             />
           </div>
         )
@@ -776,16 +814,16 @@ export default function App() {
           onDeleteChat={handleDeleteChat}
           onSelectSimulation={handleSelectSimulation}
         />
-      ) : activeView === 'folder' && activeFolder ? (
-        <FolderPage
-          folder={activeFolder}
+      ) : activeView === 'project' && activeProject ? (
+        <ProjectPage
+          project={activeProject}
           chats={chats}
           onBack={() => setActiveView('home')}
           onSelectChat={handleSelectChat}
-          onDeleteFolder={handleDeleteFolder}
-          onRemoveChatFromFolder={handleRemoveChatFromFolder}
-          onStartNewChatInFolder={handleStartNewChatInFolder}
-          onUpdateFolder={handleUpdateFolder}
+          onDeleteProject={handleDeleteProject}
+          onRemoveChatFromProject={handleRemoveChatFromProject}
+          onStartNewChatInProject={handleStartNewChatInProject}
+          onUpdateProject={handleUpdateProject}
         />
       ) : (
         <HomePage

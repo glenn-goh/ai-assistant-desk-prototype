@@ -5,7 +5,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resiz
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
-import type { Folder } from '../types/folder';
+import type { Project } from '../types/project';
 import { IncognitoIcon } from './IncognitoIcon';
 
 // Type definitions
@@ -90,10 +90,11 @@ interface ChatSimulatorProps {
   onRenameChat?: (chatId: string, newTitle: string) => void;
   isNewChat?: boolean;
   isIncognito?: boolean;
-  folders?: Folder[];
-  onMoveToFolder?: (chatId: string, folderId: string) => void;
+  projects?: Project[];
+  onMoveToProject?: (chatId: string, projectId: string) => void;
   bookmarkedAssistants?: string[];
   assistantType?: string;
+  assistantName?: string; // Display name of the custom assistant being used
 }
 
 // Simulated reasoning content for thinking states
@@ -123,10 +124,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onRenameChat,
   isNewChat = false,
   isIncognito = false,
-  folders = [],
-  onMoveToFolder,
+  projects = [],
+  onMoveToProject,
   bookmarkedAssistants = [],
   assistantType,
+  assistantName,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -536,7 +538,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 autoFocus
               />
             ) : (
-              <div className="flex items-center gap-2 group/title">
+              <div className="flex flex-col gap-0.5 group/title">
                 <span
                   className="text-sm font-medium text-gray-900 cursor-pointer"
                   onDoubleClick={() => {
@@ -549,6 +551,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 >
                   {isInteractive ? (interactiveTitle || 'New Chat') : data?.title}
                 </span>
+                {assistantName && (
+                  <span className="text-xs text-gray-500">
+                    {assistantName}
+                  </span>
+                )}
+                {!assistantName && !isNewChat && isInteractive && (
+                  <span className="text-xs text-gray-500">
+                    My AI Assistant
+                  </span>
+                )}
               </div>
             )}
             {isInteractive ? (
@@ -591,8 +603,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 Temporary
               </span>
             )}
-            {/* Ellipsis Menu - only show for existing chats (not new chats) and non-incognito */}
-            {isInteractive && !isNewChat && chatId && !isIncognito && (
+            {/* Ellipsis Menu - only show for existing chats (not new chats), non-incognito, and non-CCE */}
+            {isInteractive && !isNewChat && chatId && !isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700">
@@ -600,26 +612,26 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                  {/* Only show Move to folder for non-incognito and non-CCE chats */}
+                  {/* Only show Move to project for non-incognito and non-CCE chats */}
                   {!isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger className="hover:bg-gray-100">
                         <FolderPlus className="w-4 h-4 mr-2" />
-                        Move to folder
+                        Move to project
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-white border-2 border-gray-900 rounded-lg">
-                        {folders.length === 0 ? (
+                        {projects.length === 0 ? (
                           <DropdownMenuItem disabled className="text-gray-400 text-sm">
-                            No folders available
+                            No projects available
                           </DropdownMenuItem>
                         ) : (
-                          folders.map(folder => (
+                          projects.map(project => (
                             <DropdownMenuItem
-                              key={folder.id}
-                              onClick={() => onMoveToFolder?.(chatId, folder.id)}
+                              key={project.id}
+                              onClick={() => onMoveToProject?.(chatId, project.id)}
                               className="hover:bg-gray-100"
                             >
-                              {folder.name}
+                              {project.name}
                             </DropdownMenuItem>
                           ))
                         )}

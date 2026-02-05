@@ -158,8 +158,18 @@ export function PersonalizationDialog({
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">{userProfile.name}</h4>
                   <p className="text-sm text-gray-500">{userProfile.email}</p>
-                  <p className="text-sm text-gray-500">{userProfile.agency}</p>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={callMeName}
+                  onChange={(e) => setCallMeName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="bg-white"
+                />
               </div>
 
               <div className="space-y-2">
@@ -170,7 +180,11 @@ export function PersonalizationDialog({
 
             <div className="flex justify-end pt-4">
               <Button onClick={() => {
-                // Save changes logic would go here
+                // Save changes logic - update name
+                onUpdateProfile({
+                  ...userProfile,
+                  name: callMeName.trim() || userProfile.name,
+                });
                 onOpenChange?.(false);
               }}>Save Changes</Button>
             </div>

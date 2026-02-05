@@ -84,7 +84,7 @@ const allAssistants = {
     tags: ['Parliamentary', 'Writing'],
     icon: FileText,
     uses: '11.4k',
-    classification: 'C(CE)/SH',
+    classification: 'C(CE)/SN',
     type: 'Official' as const,
     assistantType: 'parliamentary',
   },
@@ -234,7 +234,7 @@ const allAssistants = {
     tags: ['Policy', 'Writing'],
     icon: FileText,
     uses: '6.8k',
-    classification: 'C(CE)/SH',
+    classification: 'C(CE)/SN',
     type: 'Official' as const,
     assistantType: 'policy',
   },
@@ -462,7 +462,7 @@ export const getClassificationText = (code: string): string => {
   const classificationMap: Record<string, string> = {
     'R/SN': 'Restricted, Sensitive: Normal',
     'C(CE)/SN': 'Cloud Confidential, Sensitive: Normal',
-    'C(CE)/SH': 'Cloud Confidential, Sensitive: High',
+    'CCE/SN': 'Cloud Confidential, Sensitive: Normal',
   };
   return classificationMap[code] || code;
 };

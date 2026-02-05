@@ -49,6 +49,38 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     </p>
                 </CardContent>
             </Card>
+
+            {/* Security Warning */}
+            <div className="w-full max-w-md mt-6">
+                <p className="text-xs text-gray-400 text-center leading-relaxed">
+                    This is an internal system used by the Singapore Government. Unauthorised use is strictly prohibited. If you are not authorised, please exit from the system immediately. The use of this system is subject to the Computer Misuse Act.
+                </p>
+            </div>
+
+            {/* Error/Maintenance Page Links */}
+            <div className="absolute bottom-4 left-4 flex gap-3">
+                <a
+                    href="/#/404"
+                    className="text-gray-300 hover:text-gray-500 underline transition-colors"
+                    style={{ fontSize: '8px' }}
+                >
+                    404
+                </a>
+                <a
+                    href="/#/500"
+                    className="text-gray-300 hover:text-gray-500 underline transition-colors"
+                    style={{ fontSize: '8px' }}
+                >
+                    500
+                </a>
+                <a
+                    href="/#/maintenance"
+                    className="text-gray-300 hover:text-gray-500 underline transition-colors"
+                    style={{ fontSize: '8px' }}
+                >
+                    Maintenance
+                </a>
+            </div>
         </div>
     );
 }
