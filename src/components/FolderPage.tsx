@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Folder as ProjectIcon, MessageSquare, MoreHorizontal, Trash2, SquarePen, Settings, Upload, FileText, X } from 'lucide-react';
+import { ArrowLeft, Folder as FolderIcon, MessageSquare, MoreHorizontal, Trash2, SquarePen, Settings, Upload, FileText, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -7,41 +7,41 @@ import { Textarea } from './ui/textarea';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Separator } from './ui/separator';
-import type { Project } from '../types/project';
+import type { Folder } from '../types/folder';
 import type { Chat } from '../App';
 
-interface ProjectPageProps {
-  project: Project;
+interface FolderPageProps {
+  folder: Folder;
   chats: Chat[];
   onBack: () => void;
   onSelectChat: (chatId: string) => void;
-  onDeleteProject: (projectId: string) => void;
-  onRemoveChatFromProject: (projectId: string, chatId: string) => void;
-  onStartNewChatInProject?: (projectId: string) => void;
-  onUpdateProject?: (projectId: string, updates: Partial<Project>) => void;
+  onDeleteFolder: (folderId: string) => void;
+  onRemoveChatFromFolder: (folderId: string, chatId: string) => void;
+  onStartNewChatInFolder?: (folderId: string) => void;
+  onUpdateFolder?: (folderId: string, updates: Partial<Folder>) => void;
 }
 
-export function ProjectPage({
-  project,
+export function FolderPage({
+  folder,
   chats,
   onBack,
   onSelectChat,
-  onDeleteProject,
-  onRemoveChatFromProject,
-  onStartNewChatInProject,
-  onUpdateProject,
-}: ProjectPageProps) {
+  onDeleteFolder,
+  onRemoveChatFromFolder,
+  onStartNewChatInFolder,
+  onUpdateFolder,
+}: FolderPageProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [editName, setEditName] = useState(project.name);
-  const [editInstructions, setEditInstructions] = useState(project.customInstructions || '');
-  const [memoriesScope, setMemoriesScope] = useState<'project-only' | 'include-external'>(project.memoriesScope);
+  const [editName, setEditName] = useState(folder.name);
+  const [editInstructions, setEditInstructions] = useState(folder.customInstructions || '');
+  const [memoriesScope, setMemoriesScope] = useState<'folder-only' | 'include-external'>(folder.memoriesScope);
 
-  const projectChats = chats.filter(chat => project.chatIds.includes(chat.id));
+  const folderChats = chats.filter(chat => folder.chatIds.includes(chat.id));
 
   const handleSaveSettings = () => {
-    if (onUpdateProject) {
-      onUpdateProject(project.id, {
-        name: editName.trim() || project.name,
+    if (onUpdateFolder) {
+      onUpdateFolder(folder.id, {
+        name: editName.trim() || folder.name,
         customInstructions: editInstructions.trim(),
         memoriesScope,
       });
@@ -57,17 +57,17 @@ export function ProjectPage({
       size: 1024 * 100,
       uploadedAt: new Date(),
     };
-    if (onUpdateProject) {
-      onUpdateProject(project.id, {
-        files: [...(project.files || []), mockFile],
+    if (onUpdateFolder) {
+      onUpdateFolder(folder.id, {
+        files: [...(folder.files || []), mockFile],
       });
     }
   };
 
   const handleRemoveFile = (fileId: string) => {
-    if (onUpdateProject) {
-      onUpdateProject(project.id, {
-        files: (project.files || []).filter(f => f.id !== fileId),
+    if (onUpdateFolder) {
+      onUpdateFolder(folder.id, {
+        files: (folder.files || []).filter(f => f.id !== fileId),
       });
     }
   };
@@ -83,15 +83,15 @@ export function ProjectPage({
           <ArrowLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2 flex-1">
-          <ProjectIcon className="w-5 h-5 text-gray-600" />
+          <FolderIcon className="w-5 h-5 text-gray-600" />
           <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>
-            {project.name}
+            {folder.name}
           </h1>
         </div>
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => onStartNewChatInProject?.(project.id)}
+          onClick={() => onStartNewChatInFolder?.(folder.id)}
           className="gap-2"
         >
           <SquarePen className="w-4 h-4" />
@@ -112,11 +112,11 @@ export function ProjectPage({
               Settings
             </DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => onDeleteProject(project.id)}
+              onClick={() => onDeleteFolder(folder.id)}
               className="text-red-500 hover:bg-gray-100"
             >
               <Trash2 className="w-4 h-4 mr-1" />
-              Delete Project
+              Delete Folder
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -127,15 +127,15 @@ export function ProjectPage({
         {/* Left Column - Chats */}
         <div className="flex-1 px-4 py-8">
           <div className="max-w-3xl mx-auto space-y-4">
-            {/* Project isolation info */}
+            {/* Folder isolation info */}
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
               <p className="text-sm text-gray-700">
-                Chats within this project will only reference files, custom instructions, and memories from within this project.
+                Chats within this folder will only reference files, custom instructions, and memories from within this folder.
               </p>
             </div>
 
-            {projectChats.length > 0 ? (
-              projectChats.map((chat) => (
+            {folderChats.length > 0 ? (
+              folderChats.map((chat) => (
               <div
                 key={chat.id}
                 onClick={() => onSelectChat(chat.id)}
@@ -169,12 +169,12 @@ export function ProjectPage({
                     <DropdownMenuItem
                       onClick={(e) => {
                         e.stopPropagation();
-                        onRemoveChatFromProject(project.id, chat.id);
+                        onRemoveChatFromFolder(folder.id, chat.id);
                       }}
                       className="hover:bg-gray-100"
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
-                      Remove from project
+                      Remove from folder
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -182,12 +182,12 @@ export function ProjectPage({
             ))
           ) : (
             <div className="text-center py-12">
-              <ProjectIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">This project is empty</h3>
+              <FolderIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">This folder is empty</h3>
               <p className="text-sm text-gray-500 mb-4">
                 Start a new chat or drag existing chats here to organize them
               </p>
-              <Button onClick={() => onStartNewChatInProject?.(project.id)} className="gap-2">
+              <Button onClick={() => onStartNewChatInFolder?.(folder.id)} className="gap-2">
                 <SquarePen className="w-4 h-4" />
                 Start New Chat
               </Button>
@@ -209,13 +209,13 @@ export function ProjectPage({
                 Edit
               </button>
             </div>
-            {project.customInstructions ? (
+            {folder.customInstructions ? (
               <button
                 onClick={() => setSettingsOpen(true)}
                 className="w-full text-left text-sm text-gray-700 bg-gray-50 p-3 rounded-lg hover:bg-gray-100 transition-colors"
               >
                 <div className="line-clamp-3">
-                  {project.customInstructions}
+                  {folder.customInstructions}
                 </div>
               </button>
             ) : (
@@ -234,8 +234,8 @@ export function ProjectPage({
           <div className="space-y-2">
             <h3 className="text-sm font-semibold text-gray-900">Files</h3>
             <div className="space-y-2">
-              {(project.files || []).length > 0 ? (
-                (project.files || []).map(file => (
+              {(folder.files || []).length > 0 ? (
+                (folder.files || []).map(file => (
                   <div key={file.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg group">
                     <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
                     <span className="text-sm text-gray-700 flex-1 truncate">{file.name}</span>
@@ -259,19 +259,19 @@ export function ProjectPage({
         </div>
       </div>
 
-      {/* Project Settings Dialog */}
+      {/* Folder Settings Dialog */}
       <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
         <DialogContent className="sm:max-w-lg bg-white border-2 border-gray-900">
           <DialogHeader>
-            <DialogTitle className="text-gray-900">Project Settings</DialogTitle>
+            <DialogTitle className="text-gray-900">Folder Settings</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            {/* Project Name */}
+            {/* Folder Name */}
             <div className="space-y-2">
-              <Label htmlFor="project-name" className="text-gray-700">Project Name</Label>
+              <Label htmlFor="folder-name" className="text-gray-700">Folder Name</Label>
               <Input
-                id="project-name"
+                id="folder-name"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 className="bg-white border-gray-300"
@@ -283,13 +283,13 @@ export function ProjectPage({
               <Label htmlFor="custom-instructions" className="text-gray-700">Custom Instructions</Label>
               <Textarea
                 id="custom-instructions"
-                placeholder="Add custom instructions for chats in this project..."
+                placeholder="Add custom instructions for chats in this folder..."
                 value={editInstructions}
                 onChange={(e) => setEditInstructions(e.target.value)}
                 className="bg-white border-gray-300 min-h-[100px]"
               />
               <p className="text-xs text-gray-500">
-                These instructions will apply to all chats within this project.
+                These instructions will apply to all chats within this folder.
               </p>
             </div>
 
@@ -297,8 +297,8 @@ export function ProjectPage({
             <div className="space-y-2">
               <Label className="text-gray-700">Files</Label>
               <div className="border border-gray-200 rounded-lg p-3 space-y-2">
-                {(project.files || []).length > 0 ? (
-                  (project.files || []).map(file => (
+                {(folder.files || []).length > 0 ? (
+                  (folder.files || []).map(file => (
                     <div key={file.id} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
                       <FileText className="w-4 h-4 text-gray-500" />
                       <span className="text-sm text-gray-700 flex-1 truncate">{file.name}</span>
@@ -319,7 +319,7 @@ export function ProjectPage({
                 </Button>
               </div>
               <p className="text-xs text-gray-500">
-                Files uploaded here will be referenced by chats in this project.
+                Files uploaded here will be referenced by chats in this folder.
               </p>
             </div>
 
@@ -331,14 +331,14 @@ export function ProjectPage({
                   <input
                     type="radio"
                     name="memories-scope"
-                    checked={memoriesScope === 'project-only'}
-                    onChange={() => setMemoriesScope('project-only')}
+                    checked={memoriesScope === 'folder-only'}
+                    onChange={() => setMemoriesScope('folder-only')}
                     className="mt-0.5"
                   />
                   <div>
-                    <div className="text-sm font-medium text-gray-900">Project only</div>
+                    <div className="text-sm font-medium text-gray-900">Folder only</div>
                     <div className="text-xs text-gray-500">
-                      Chats will only reference files and memories from within this project
+                      Chats will only reference files and memories from within this folder
                     </div>
                   </div>
                 </label>
@@ -353,7 +353,7 @@ export function ProjectPage({
                   <div>
                     <div className="text-sm font-medium text-gray-900">Include external</div>
                     <div className="text-xs text-gray-500">
-                      Chats can also reference memories and files from outside this project
+                      Chats can also reference memories and files from outside this folder
                     </div>
                   </div>
                 </label>

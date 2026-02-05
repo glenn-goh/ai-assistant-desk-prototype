@@ -66,16 +66,27 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
     setInputValue(prompt);
   };
 
-  // Reset incognito when switching to CCE/SN
-  const handleClassificationChange = (value: 'rsn' | 'cce-sn') => {
-    setClassificationType(value);
-    if (value === 'cce-sn') {
-      setIsIncognito(false);
-    }
-  };
-
   return (
     <div className="flex-1 h-full flex flex-col bg-gray-100">
+      {/* Incognito Toggle - Top Right */}
+      <div className="absolute top-4 right-6">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => setIsIncognito(!isIncognito)}
+                className={`p-2 rounded-lg transition-colors ${isIncognito ? 'bg-gray-200 text-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
+              >
+                <IncognitoIcon className="w-5 h-5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{isIncognito ? 'Exit incognito mode' : 'Enable incognito mode'}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
       {/* Main Content */}
       <div className="flex-1 overflow-auto flex items-center">
         <div className="flex flex-col w-full max-w-chat mx-auto px-6">
@@ -106,7 +117,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
               <span className="text-sm font-medium text-gray-900">
                 Data classification
               </span>
-              <Select value={classificationType} onValueChange={(value) => handleClassificationChange(value as 'rsn' | 'cce-sn')}>
+              <Select value={classificationType} onValueChange={(value) => setClassificationType(value as 'rsn' | 'cce-sn')}>
                 <SelectTrigger
                   className="w-auto h-9 bg-white border-gray-300 px-3"
                 >
@@ -151,28 +162,9 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                   </SelectContent>
                 </Select>
             </div>
-            <p className="text-xs text-gray-500 flex-1">
+            <p className="text-xs text-gray-500">
               This setting cannot be changed once the chat begins.
             </p>
-
-            {/* Incognito Toggle - Only for R/SN */}
-            {classificationType === 'rsn' && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setIsIncognito(!isIncognito)}
-                      className={`p-2 rounded-lg transition-colors ml-auto ${isIncognito ? 'bg-gray-200 text-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
-                    >
-                      <IncognitoIcon className="w-5 h-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isIncognito ? 'Exit incognito mode' : 'Enable incognito mode'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
           </div>
 
           {/* Chat Input Section */}

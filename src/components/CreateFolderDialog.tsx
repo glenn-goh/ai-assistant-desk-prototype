@@ -5,31 +5,31 @@ import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Label } from './ui/label';
 
-interface CreateProjectDialogProps {
+interface CreateFolderDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateProject: (name: string) => void;
+  onCreateFolder: (name: string) => void;
 }
 
-export function CreateProjectDialog({
+export function CreateFolderDialog({
   open,
   onOpenChange,
-  onCreateProject,
-}: CreateProjectDialogProps) {
-  const [projectName, setProjectName] = useState('');
+  onCreateFolder,
+}: CreateFolderDialogProps) {
+  const [folderName, setFolderName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (projectName.trim()) {
-      onCreateProject(projectName.trim());
-      setProjectName('');
+    if (folderName.trim()) {
+      onCreateFolder(folderName.trim());
+      setFolderName('');
       onOpenChange(false);
     }
   };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setProjectName('');
+      setFolderName('');
     }
     onOpenChange(open);
   };
@@ -38,32 +38,32 @@ export function CreateProjectDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md bg-white border-2 border-gray-900">
         <DialogHeader>
-          <DialogTitle className="text-gray-900">Create New Project</DialogTitle>
+          <DialogTitle className="text-gray-900">Create New Folder</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="project-name" className="text-gray-700">
-                Project Name
+              <Label htmlFor="folder-name" className="text-gray-700">
+                Folder Name
               </Label>
               <Input
-                id="project-name"
-                placeholder="Enter project name..."
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
+                id="folder-name"
+                placeholder="Enter folder name..."
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
                 className="bg-white border-gray-300"
                 autoFocus
               />
             </div>
 
-            {/* Project scope info */}
+            {/* Folder scope info */}
             <div className="flex items-start gap-2 p-3 bg-gray-100 rounded-lg border border-gray-300">
               <Info className="w-4 h-4 text-gray-700 mt-0.5 flex-shrink-0" />
               <p className="text-xs text-gray-900">
-                Chats within this project will only reference files, custom instructions,
-                and memories from within this project by default. You can change this in
-                project settings after creation.
+                Chats within this folder will only reference files, custom instructions,
+                and memories from within this folder by default. You can change this in
+                folder settings after creation.
               </p>
             </div>
           </div>
@@ -76,8 +76,8 @@ export function CreateProjectDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={!projectName.trim()}>
-              Create Project
+            <Button type="submit" disabled={!folderName.trim()}>
+              Create Folder
             </Button>
           </DialogFooter>
         </form>

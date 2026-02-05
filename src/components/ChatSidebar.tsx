@@ -5,13 +5,12 @@ import { ScrollArea } from './ui/scroll-area';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { SearchChatsModal } from './SearchChatsModal';
-import { CreateProjectDialog } from './CreateProjectDialog';
+import { CreateFolderDialog } from './CreateFolderDialog';
 import type { Chat, View } from '../App';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
-import type { Project as ProjectType } from '../types/project';
-import { getAssistantsForRole, roleBasedAssistants, topRatedAssistants, essentialAssistants } from '../data/assistants';
+import type { Folder as FolderType } from '../types/folder';
+import { getAssistantsForRole, roleBasedAssistants } from '../data/assistants';
 
 interface ChatSidebarProps {
   isOpen: boolean;
@@ -40,16 +39,15 @@ interface ChatSidebarProps {
   userProfile: import('../App').UserProfile;
   onSignOut: () => void;
   onSelectSimulation?: (simulationId: string) => void;
-  projects?: ProjectType[];
-  onCreateProject?: (name: string) => void;
-  onSelectProject?: (projectId: string) => void;
+  folders?: FolderType[];
+  onCreateFolder?: (name: string) => void;
+  onSelectFolder?: (folderId: string) => void;
   onStartAssistantChat?: (assistantName: string, assistantType: string) => void;
-  onAddChatToProject?: (chatId: string, projectId: string) => void;
+  onAddChatToFolder?: (chatId: string, folderId: string) => void;
   searchModalOpen?: boolean;
   onSearchModalChange?: (open: boolean) => void;
   onWalkthroughStart?: () => void;
   viewedSimulations?: string[];
-  bookmarkedAssistants?: string[];
 }
 
 export function ChatSidebar({
@@ -79,95 +77,59 @@ export function ChatSidebar({
   userProfile,
   onSignOut,
   onSelectSimulation,
-  projects = [],
-  onCreateProject,
-  onSelectProject,
+  folders = [],
+  onCreateFolder,
+  onSelectFolder,
   onStartAssistantChat,
-  onAddChatToProject,
+  onAddChatToFolder,
   searchModalOpen = false,
   onSearchModalChange,
   onWalkthroughStart,
   viewedSimulations = [],
-  bookmarkedAssistants = [],
 }: ChatSidebarProps) {
   const [recentChatsOpen, setRecentChatsOpen] = useState(true);
   const [customAssistantsOpen, setCustomAssistantsOpen] = useState(false);
-  const [projectsOpen, setProjectsOpen] = useState(false);
-  const [createProjectOpen, setCreateProjectOpen] = useState(false);
-  const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
+  const [foldersOpen, setFoldersOpen] = useState(false);
+  const [createFolderOpen, setCreateFolderOpen] = useState(false);
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
   const [editChatName, setEditChatName] = useState('');
-  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
-  // Get bookmarked assistants
+  // Get specific assistants: PQ and HR (deduplicated)
   const allRoleAssistants = Object.values(roleBasedAssistants).flat();
-  const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
-  const uniqueAssistants = Array.from(
-    new Map(allAvailableAssistants.map(a => [a.id, a])).values()
-  );
-
-  // Always show 3 assistants in sidebar
-  // If user has bookmarked assistants, show those (up to 3)
-  // Otherwise, show default assistants (PQ and HR)
-  const defaultAssistants = uniqueAssistants.filter(
+  const filteredAssistants = allRoleAssistants.filter(
     assistant =>
       assistant.assistantType === 'parliamentary-question' ||
       assistant.assistantType === 'workday-shortlister'
   );
-
-  let recommendedAssistants;
-  if (bookmarkedAssistants.length > 0) {
-    // User has bookmarks - show up to 3 bookmarked assistants
-    recommendedAssistants = bookmarkedAssistants
-      .map(id => uniqueAssistants.find(a => a.id === id))
-      .filter((a): a is import('../data/assistants').Assistant => a !== undefined)
-      .slice(0, 3); // Take only first 3 bookmarks
-
-    // If less than 3 bookmarks, fill with defaults
-    if (recommendedAssistants.length < 3) {
-      const bookmarkedIds = new Set(bookmarkedAssistants);
-      const additionalDefaults = defaultAssistants
-        .filter(a => !bookmarkedIds.has(a.id))
-        .slice(0, 3 - recommendedAssistants.length);
-      recommendedAssistants = [...recommendedAssistants, ...additionalDefaults];
-    }
-  } else {
-    // No bookmarks - show defaults, ensuring we have 3
-    recommendedAssistants = defaultAssistants.slice(0, 3);
-
-    // If we don't have 3 defaults, add more from unique assistants
-    if (recommendedAssistants.length < 3) {
-      const defaultIds = new Set(recommendedAssistants.map(a => a.id));
-      const additionalAssistants = uniqueAssistants
-        .filter(a => !defaultIds.has(a.id))
-        .slice(0, 3 - recommendedAssistants.length);
-      recommendedAssistants = [...recommendedAssistants, ...additionalAssistants];
-    }
-  }
+  // Remove duplicates based on ID
+  const recommendedAssistants = Array.from(
+    new Map(filteredAssistants.map(a => [a.id, a])).values()
+  );
 
   const handleDragStart = (e: React.DragEvent, chatId: string) => {
     e.dataTransfer.setData('chatId', chatId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
-  const handleDragOver = (e: React.DragEvent, projectId: string) => {
+  const handleDragOver = (e: React.DragEvent, folderId: string) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    setDragOverProjectId(projectId);
+    setDragOverFolderId(folderId);
   };
 
   const handleDragLeave = () => {
-    setDragOverProjectId(null);
+    setDragOverFolderId(null);
   };
 
-  const handleDrop = (e: React.DragEvent, projectId: string) => {
+  const handleDrop = (e: React.DragEvent, folderId: string) => {
     e.preventDefault();
     const chatId = e.dataTransfer.getData('chatId');
-    if (chatId && onAddChatToProject) {
-      onAddChatToProject(chatId, projectId);
+    if (chatId && onAddChatToFolder) {
+      onAddChatToFolder(chatId, folderId);
     }
-    setDragOverProjectId(null);
+    setDragOverFolderId(null);
   };
 
   // Section header component with consistent styling
@@ -261,6 +223,21 @@ export function ChatSidebar({
             </Tooltip>
           </TooltipProvider>
 
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => onSearchModalChange(true)}
+                  className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-700"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="right">
+                <p>Search Chats (⌘K)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Settings at bottom */}
@@ -306,7 +283,7 @@ export function ChatSidebar({
         {/* App Title */}
         <div className="px-4 py-3 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">
-            AI Assistant Desk (MVP)
+            AI Assistant Desk
           </h2>
           <TooltipProvider>
             <Tooltip>
@@ -352,6 +329,37 @@ export function ChatSidebar({
                     </Tooltip>
                   </TooltipProvider>
 
+                  {/* Search Chats with shortcut on hover */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={() => onSearchModalChange(true)}
+                          className="w-full justify-start gap-2 px-2 h-9 text-sm group"
+                          variant="ghost"
+                        >
+                          <Search className="w-4 h-4" />
+                          <span className="flex-1 text-left">Search Chats</span>
+                          <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">⌘K</span>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>Search all chats (⌘K)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {/* Library Tab - Coming Soon */}
+                  <Button
+                    disabled
+                    className="w-full justify-start gap-2 px-2 h-9 text-sm opacity-50 cursor-not-allowed"
+                    variant="ghost"
+                  >
+                    <FolderOpen className="w-4 h-4" />
+                    <span className="flex-1 text-left">Library</span>
+                    <span className="text-xs text-gray-400">(Coming soon)</span>
+                  </Button>
+
                   {/* Custom Assistants Section */}
                   <Collapsible open={customAssistantsOpen} onOpenChange={setCustomAssistantsOpen} className="mt-3" data-tour="custom-assistants">
                     <CollapsibleTrigger className="w-full">
@@ -362,7 +370,7 @@ export function ChatSidebar({
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="space-y-0.5 mt-0.5">
+                      <div className="space-y-0 mt-0.5">
                         {recommendedAssistants.map(assistant => {
                           const IconComponent = assistant.icon;
                           return (
@@ -387,37 +395,38 @@ export function ChatSidebar({
                     </CollapsibleContent>
                   </Collapsible>
 
-                  {/* Projects Section */}
-                  <Collapsible open={projectsOpen} onOpenChange={setProjectsOpen} className="mt-2" data-tour="projects">
+                  {/* Folders Section */}
+                  <Collapsible open={foldersOpen} onOpenChange={setFoldersOpen} className="mt-2" data-tour="folders">
                     <CollapsibleTrigger className="w-full">
                       <SectionHeader
-                        label="Projects"
-                        isOpen={projectsOpen}
-                        sectionId="projects"
+                        label="Folders"
+                        isOpen={foldersOpen}
+                        sectionId="folders"
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="space-y-0.5 mt-0.5">
+                      <div className="space-y-0 mt-0.5">
                         <button
-                          onClick={() => setCreateProjectOpen(true)}
+                          onClick={() => setCreateFolderOpen(true)}
                           className="w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-semibold hover:bg-gray-200 text-left text-gray-700"
                         >
                           <FolderPlus className="w-4 h-4" />
-                          <span>New Project</span>
+                          <span>New Folder</span>
                         </button>
-                        {projects.map(project => (
+                        {folders.map(folder => (
                           <button
-                            key={project.id}
-                            onClick={() => onSelectProject?.(project.id)}
-                            onDragOver={(e) => handleDragOver(e, project.id)}
+                            key={folder.id}
+                            onClick={() => onSelectFolder?.(folder.id)}
+                            onDragOver={(e) => handleDragOver(e, folder.id)}
                             onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, project.id)}
-                            className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${dragOverProjectId === project.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
-                              }`}
+                            onDrop={(e) => handleDrop(e, folder.id)}
+                            className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${
+                              dragOverFolderId === folder.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
+                            }`}
                           >
                             <Folder className="w-4 h-4 text-gray-500" />
-                            <span className="truncate flex-1">{project.name}</span>
-                            <span className="text-xs text-gray-400">{project.chatIds.length}</span>
+                            <span className="truncate flex-1">{folder.name}</span>
+                            <span className="text-xs text-gray-400">{folder.chatIds.length}</span>
                           </button>
                         ))}
                       </div>
@@ -432,11 +441,11 @@ export function ChatSidebar({
                         isOpen={recentChatsOpen}
                         sectionId="recent"
                         showInfo
-                        infoText="Chats are cleared after 90 days. Drag to projects to organize."
+                        infoText="Chats are cleared after 90 days. Drag to folders to organize."
                       />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="space-y-0.5 mt-0.5">
+                      <div className="space-y-0 mt-0.5">
                         {/* Demo Simulations - Show only if viewed */}
                         {[
                           { id: 'hr-candidate-shortlisting', title: 'HR Candidate Shortlisting', classification: 'rsn' as const },
@@ -448,8 +457,9 @@ export function ChatSidebar({
                           return (
                             <div
                               key={sim.id}
-                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === `sim-${sim.id}` ? 'bg-gray-200' : 'hover:bg-gray-200'
-                                }`}
+                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${
+                                activeChatId === `sim-${sim.id}` ? 'bg-gray-200' : 'hover:bg-gray-200'
+                              }`}
                               onClick={() => onSelectSimulation?.(sim.id)}
                               title={sim.title}
                             >
@@ -507,137 +517,111 @@ export function ChatSidebar({
 
                         {/* Regular Chats - draggable with ellipsis on hover */}
                         {/* Filter out CCE/SN and CCE/SH chats (ephemeral, don't save to history) */}
-                        {/* Also filter out chats that are in projects */}
+                        {/* Also filter out chats that are in folders */}
                         {chats
                           .filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
-                          .filter(chat => !projects?.some(project => project.chatIds.includes(chat.id)))
+                          .filter(chat => !folders?.some(folder => folder.chatIds.includes(chat.id)))
                           .map(chat => {
-                            const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
-                            const isEditing = editingChatId === chat.id;
+                          const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
+                          const isEditing = editingChatId === chat.id;
 
-                            return (
-                              <div
-                                key={chat.id}
-                                draggable={!isEditing}
-                                onDragStart={(e) => handleDragStart(e, chat.id)}
-                                className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'
-                                  }`}
-                                onClick={() => !isEditing && onSelectChat(chat.id)}
-                                title={chat.title}
-                              >
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editChatName}
-                                    onChange={(e) => setEditChatName(e.target.value)}
-                                    onBlur={() => {
+                          return (
+                            <div
+                              key={chat.id}
+                              draggable={!isEditing}
+                              onDragStart={(e) => handleDragStart(e, chat.id)}
+                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${
+                                chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'
+                              }`}
+                              onClick={() => !isEditing && onSelectChat(chat.id)}
+                              title={chat.title}
+                            >
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  value={editChatName}
+                                  onChange={(e) => setEditChatName(e.target.value)}
+                                  onBlur={() => {
+                                    if (editChatName.trim() && onRenameChat) {
+                                      onRenameChat(chat.id, editChatName.trim());
+                                    }
+                                    setEditingChatId(null);
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
                                       if (editChatName.trim() && onRenameChat) {
                                         onRenameChat(chat.id, editChatName.trim());
                                       }
                                       setEditingChatId(null);
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        if (editChatName.trim() && onRenameChat) {
-                                          onRenameChat(chat.id, editChatName.trim());
-                                        }
-                                        setEditingChatId(null);
-                                      } else if (e.key === 'Escape') {
-                                        setEditingChatId(null);
-                                      }
-                                    }}
+                                    } else if (e.key === 'Escape') {
+                                      setEditingChatId(null);
+                                    }
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                  autoFocus
+                                />
+                              ) : (
+                                <span
+                                  className="flex-1 truncate text-gray-900"
+                                  onDoubleClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditChatName(chat.title);
+                                    setEditingChatId(chat.id);
+                                  }}
+                                  title="Double-click to rename"
+                                >
+                                  {displayTitle}
+                                </span>
+                              )}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0"
                                     onClick={(e) => e.stopPropagation()}
-                                    className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                                    <span
-                                      className="truncate text-gray-900"
-                                      onDoubleClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditChatName(chat.title);
-                                        setEditingChatId(chat.id);
-                                      }}
-                                      title="Double-click to rename"
-                                    >
-                                      {displayTitle}
-                                    </span>
-                                    <span className="text-xs text-gray-500 truncate">
-                                      {chat.assistantName || 'My AI Assistant'}
-                                    </span>
-                                  </div>
-                                )}
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <MoreHorizontal className="w-3 h-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditChatName(chat.title);
-                                        setEditingChatId(chat.id);
-                                      }}
-                                      className="hover:bg-gray-100"
-                                    >
-                                      <Pencil className="w-4 h-4 mr-2" />
-                                      Rename
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onPinChat?.(chat.id);
-                                      }}
-                                      className="hover:bg-gray-100"
-                                    >
-                                      <Pin className="w-4 h-4 mr-2" />
-                                      Pin
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setChatToDelete(chat.id);
-                                      }}
-                                      className="text-red-500 hover:bg-gray-100"
-                                    >
-                                      <Trash2 className="w-4 h-4 mr-2" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            );
-                          })}
-
-                        {/* Empty state placeholder */}
-                        {viewedSimulations.length === 0 &&
-                          chats.filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
-                            .filter(chat => !projects?.some(project => project.chatIds.includes(chat.id)))
-                            .length === 0 && (
-                            <div className="px-2 py-4 text-center">
-                              <div className="flex items-center gap-2 justify-center">
-                                <SquarePen className="w-4 h-4 text-gray-400" />
-                                <p className="text-sm text-gray-500">
-                                  Start a{' '}
-                                  <button
-                                    onClick={onNewChat}
-                                    className="text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
                                   >
-                                    new chat
-                                  </button>
-                                  {' '}to begin
-                                </p>
-                              </div>
+                                    <MoreHorizontal className="w-3 h-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditChatName(chat.title);
+                                      setEditingChatId(chat.id);
+                                    }}
+                                    className="hover:bg-gray-100"
+                                  >
+                                    <Pencil className="w-4 h-4 mr-2" />
+                                    Rename
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onPinChat?.(chat.id);
+                                    }}
+                                    className="hover:bg-gray-100"
+                                  >
+                                    <Pin className="w-4 h-4 mr-2" />
+                                    Pin
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onDeleteChat(chat.id);
+                                    }}
+                                    className="text-red-500 hover:bg-gray-100"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          )}
+                          );
+                        })}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
@@ -673,6 +657,7 @@ export function ChatSidebar({
             <div className="w-7 h-7 rounded-full bg-gray-600 flex-shrink-0" />
             <div className="text-left overflow-hidden">
               <div className="text-sm font-medium text-gray-900">{userProfile.name}</div>
+              <div className="text-xs text-gray-500">{userProfile.role}</div>
             </div>
           </div>
           <DropdownMenu>
@@ -721,41 +706,15 @@ export function ChatSidebar({
         onOpenChange={onSearchModalChange}
         chats={chats}
         onSelectChat={onSelectChat}
-        onSelectSimulation={onSelectSimulation || (() => { })}
+        onSelectSimulation={onSelectSimulation || (() => {})}
       />
 
-      {/* Create Project Dialog */}
-      <CreateProjectDialog
-        open={createProjectOpen}
-        onOpenChange={setCreateProjectOpen}
-        onCreateProject={onCreateProject || (() => { })}
+      {/* Create Folder Dialog */}
+      <CreateFolderDialog
+        open={createFolderOpen}
+        onOpenChange={setCreateFolderOpen}
+        onCreateFolder={onCreateFolder || (() => {})}
       />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={chatToDelete !== null} onOpenChange={(open) => !open && setChatToDelete(null)}>
-        <AlertDialogContent className="bg-white border-2 border-gray-900">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete chat?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this chat and all its messages. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setChatToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (chatToDelete) {
-                  onDeleteChat(chatToDelete);
-                  setChatToDelete(null);
-                }
-              }}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

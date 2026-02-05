@@ -23,9 +23,9 @@ const tourSteps: TourStep[] = [
     position: 'right',
   },
   {
-    target: '[data-tour="projects"]',
-    title: 'Organize with Projects',
-    content: 'Create projects to organize your chats by topic or work stream.',
+    target: '[data-tour="folders"]',
+    title: 'Organize with Folders',
+    content: 'Create folders to organize your chats by project or topic.',
     position: 'right',
   },
   {

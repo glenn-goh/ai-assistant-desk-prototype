@@ -5,7 +5,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resiz
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
-import type { Project } from '../types/project';
+import type { Folder } from '../types/folder';
 import { IncognitoIcon } from './IncognitoIcon';
 
 // Type definitions
@@ -90,11 +90,10 @@ interface ChatSimulatorProps {
   onRenameChat?: (chatId: string, newTitle: string) => void;
   isNewChat?: boolean;
   isIncognito?: boolean;
-  projects?: Project[];
-  onMoveToProject?: (chatId: string, projectId: string) => void;
+  folders?: Folder[];
+  onMoveToFolder?: (chatId: string, folderId: string) => void;
   bookmarkedAssistants?: string[];
   assistantType?: string;
-  assistantName?: string; // Display name of the custom assistant being used
 }
 
 // Simulated reasoning content for thinking states
@@ -124,11 +123,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onRenameChat,
   isNewChat = false,
   isIncognito = false,
-  projects = [],
-  onMoveToProject,
+  folders = [],
+  onMoveToFolder,
   bookmarkedAssistants = [],
   assistantType,
-  assistantName,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -154,11 +152,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [feedbackMessageId, setFeedbackMessageId] = useState<{[key: string]: 'up' | 'down' | null}>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
   const outputContentRef = useRef<HTMLDivElement>(null);
-  const shouldScrollToBottom = useRef(false);
-  const lastUserMessageRef = useRef<HTMLDivElement>(null);
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const assistantContentRef = useRef<HTMLDivElement>(null);
-  const [spacerHeight, setSpacerHeight] = useState<number>(0);
 
   // Lo-fi grayscale theme
   const theme = {
@@ -170,39 +163,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     ring: 'focus:ring-gray-500'
   };
 
-  // Scroll user's message to top when they send a message (not when assistant replies)
+  // Auto scroll to bottom
   useEffect(() => {
-    if (shouldScrollToBottom.current) {
-      setTimeout(() => {
-        lastUserMessageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 50);
-      shouldScrollToBottom.current = false;
-    }
-  }, [displayedMessages, interactiveMessages]);
-
-  // Calculate spacer height: container - lastUserMessage - assistantContent - header - gap
-  useEffect(() => {
-    const calculateSpacer = () => {
-      if (!messagesContainerRef.current) return;
-
-      const containerHeight = messagesContainerRef.current.clientHeight;
-      const headerHeight = 52;
-      const gap = 16;
-      const lastUserHeight = lastUserMessageRef.current?.offsetHeight || 0;
-      const assistantHeight = assistantContentRef.current?.offsetHeight || 0;
-
-      const calculated = containerHeight - lastUserHeight - assistantHeight - headerHeight - gap;
-      setSpacerHeight(Math.max(0, calculated));
-    };
-
-    calculateSpacer();
-    const timer = setTimeout(calculateSpacer, 50);
-    window.addEventListener('resize', calculateSpacer);
-    return () => {
-      window.removeEventListener('resize', calculateSpacer);
-      clearTimeout(timer);
-    };
-  }, [displayedMessages, interactiveMessages, currentThought, currentReasoning, showThinkingDots, searchingAssistant]);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [displayedMessages, currentThought, interactiveMessages]);
 
   // Setup form submission handler when artifact changes (simulator only)
   useEffect(() => {
@@ -280,7 +244,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
     const targetText = (currentMsg.content as UserMessage).text;
 
-    shouldScrollToBottom.current = true;
     setIsTyping(false);
     setDisplayedMessages(prev => [...prev, { role: 'user', text: targetText }]);
     setTypedText("");
@@ -538,7 +501,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 autoFocus
               />
             ) : (
-              <div className="flex flex-col gap-0.5 group/title">
+              <div className="flex items-center gap-2 group/title">
                 <span
                   className="text-sm font-medium text-gray-900 cursor-pointer"
                   onDoubleClick={() => {
@@ -551,16 +514,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 >
                   {isInteractive ? (interactiveTitle || 'New Chat') : data?.title}
                 </span>
-                {assistantName && (
-                  <span className="text-xs text-gray-500">
-                    {assistantName}
-                  </span>
-                )}
-                {!assistantName && !isNewChat && isInteractive && (
-                  <span className="text-xs text-gray-500">
-                    My AI Assistant
-                  </span>
-                )}
               </div>
             )}
             {isInteractive ? (
@@ -603,8 +556,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 Temporary
               </span>
             )}
-            {/* Ellipsis Menu - only show for existing chats (not new chats), non-incognito, and non-CCE */}
-            {isInteractive && !isNewChat && chatId && !isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
+            {/* Ellipsis Menu - only show for existing chats (not new chats) and non-incognito */}
+            {isInteractive && !isNewChat && chatId && !isIncognito && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700">
@@ -612,26 +565,26 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                  {/* Only show Move to project for non-incognito and non-CCE chats */}
+                  {/* Only show Move to folder for non-incognito and non-CCE chats */}
                   {!isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
                     <DropdownMenuSub>
                       <DropdownMenuSubTrigger className="hover:bg-gray-100">
                         <FolderPlus className="w-4 h-4 mr-2" />
-                        Move to project
+                        Move to folder
                       </DropdownMenuSubTrigger>
                       <DropdownMenuSubContent className="bg-white border-2 border-gray-900 rounded-lg">
-                        {projects.length === 0 ? (
+                        {folders.length === 0 ? (
                           <DropdownMenuItem disabled className="text-gray-400 text-sm">
-                            No projects available
+                            No folders available
                           </DropdownMenuItem>
                         ) : (
-                          projects.map(project => (
+                          folders.map(folder => (
                             <DropdownMenuItem
-                              key={project.id}
-                              onClick={() => onMoveToProject?.(chatId, project.id)}
+                              key={folder.id}
+                              onClick={() => onMoveToFolder?.(chatId, folder.id)}
                               className="hover:bg-gray-100"
                             >
-                              {project.name}
+                              {folder.name}
                             </DropdownMenuItem>
                           ))
                         )}
@@ -662,41 +615,30 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         </div>
 
         {/* Messages */}
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50">
+        <div className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50">
           <div className="max-w-chat mx-auto space-y-8">
           {isInteractive ? (
             /* Interactive mode - render real chat messages */
-            (() => {
-              const lastUserIdx = interactiveMessages.map(m => m.role).lastIndexOf('user');
-              const messagesUpToLastUser = lastUserIdx >= 0 ? interactiveMessages.slice(0, lastUserIdx + 1) : interactiveMessages;
-              const messagesAfterLastUser = lastUserIdx >= 0 ? interactiveMessages.slice(lastUserIdx + 1) : [];
-
-              return (
-                <>
-                  {/* Messages up to and including last user message */}
-                  {messagesUpToLastUser.map((msg, idx) => (
-                    <div key={msg.id} className="group">
-                      {msg.role === 'user' ? (
-                        <div
-                          ref={idx === lastUserIdx ? lastUserMessageRef : null}
-                          className="flex justify-end items-start gap-2 ml-24"
-                        >
-                          <button
-                            onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
-                            title="Copy message"
-                          >
-                            {copiedMessageId === msg.id ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-gray-400" />
-                            )}
-                          </button>
-                          <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                            {msg.content}
-                          </div>
-                        </div>
+            interactiveMessages.map((msg) => (
+              <div key={msg.id} className="group">
+                {msg.role === 'user' ? (
+                  <div className="flex justify-end items-start gap-2 ml-24 mb-12">
+                    <button
+                      onClick={() => handleCopyMessage(msg.id, msg.content)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
+                      title="Copy message"
+                    >
+                      {copiedMessageId === msg.id ? (
+                        <Check className="w-4 h-4 text-green-600" />
                       ) : (
+                        <Copy className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+                    <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ) : (
                   <div className="flex flex-col gap-1 mb-2">
                     <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                       {msg.content}
@@ -750,82 +692,26 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     </div>
                   </div>
                 )}
-                    </div>
-                  ))}
-
-                  {/* Assistant content after last user message */}
-                  {messagesAfterLastUser.length > 0 && (
-                    <div ref={assistantContentRef} className="space-y-8">
-                      {messagesAfterLastUser.map((msg) => (
-                        <div key={msg.id} className="group">
-                          <div className="flex flex-col gap-1 mb-2">
-                            <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                              {msg.content}
-                            </div>
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <TooltipProvider>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button onClick={() => handleCopyMessage(msg.id, msg.content)} className="p-1.5 hover:bg-gray-100 rounded">
-                                      {copiedMessageId === msg.id ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>{copiedMessageId === msg.id ? 'Copied' : 'Copy'}</p></TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button onClick={() => handleFeedback(msg.id, 'up')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[msg.id] === 'up' ? 'text-green-600' : 'text-gray-400'}`}>
-                                      <ThumbsUp className="w-4 h-4" />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Good response</p></TooltipContent>
-                                </Tooltip>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <button onClick={() => handleFeedback(msg.id, 'down')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[msg.id] === 'down' ? 'text-red-600' : 'text-gray-400'}`}>
-                                      <ThumbsDown className="w-4 h-4" />
-                                    </button>
-                                  </TooltipTrigger>
-                                  <TooltipContent><p>Bad response</p></TooltipContent>
-                                </Tooltip>
-                              </TooltipProvider>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              );
-            })()
+              </div>
+            ))
           ) : (
             /* Simulator mode - render scripted messages */
-            (() => {
-              const lastUserIdx = displayedMessages.map(m => m.role).lastIndexOf('user');
-              const messagesUpToLastUser = lastUserIdx >= 0 ? displayedMessages.slice(0, lastUserIdx + 1) : displayedMessages;
-              const messagesAfterLastUser = lastUserIdx >= 0 ? displayedMessages.slice(lastUserIdx + 1) : [];
-
-              return (
-                <>
-                  {messagesUpToLastUser.map((msg, idx) => (
-                    <div key={idx} className="group">
-                      {msg.role === 'user' && (
-                        <div
-                          ref={idx === lastUserIdx ? lastUserMessageRef : null}
-                          className="flex justify-end items-start gap-2 ml-24"
-                        >
-                          <button
-                            onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
-                            title="Copy message"
-                          >
-                            {copiedMessageId === `sim-${idx}` ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-gray-400" />
-                            )}
-                          </button>
-                    <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+            displayedMessages.map((msg, idx) => (
+              <div key={idx} className="group">
+                {msg.role === 'user' && (
+                  <div className="flex justify-end items-start gap-2 ml-24 mb-12">
+                    <button
+                      onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
+                      title="Copy message"
+                    >
+                      {copiedMessageId === `sim-${idx}` ? (
+                        <Check className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+                    <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                       {msg.text}
                     </div>
                   </div>
@@ -951,164 +837,77 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   </div>
                 )}
               </div>
-            ))}
-
-                  {/* Assistant content after last user message */}
-                  {(messagesAfterLastUser.length > 0 || currentThought || currentReasoning.length > 0 || searchingAssistant || showThinkingDots) && (
-                    <div ref={assistantContentRef} className="space-y-8">
-                      {messagesAfterLastUser.map((msg, idx) => (
-                        <div key={`after-${idx}`} className="group">
-                          {msg.type === 'thinking' && (
-                            <div className="flex flex-col gap-1 mb-4 p-3 bg-white rounded-lg border border-gray-200">
-                              <button
-                                onClick={() => toggleThinkingExpanded(idx + 1000)}
-                                className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
-                              >
-                                <span className="text-sm font-medium text-gray-600">Reasoning</span>
-                                <div className="text-gray-600">
-                                  {expandedThinkingIds.has(idx + 1000) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                                </div>
-                              </button>
-                              {expandedThinkingIds.has(idx + 1000) && msg.reasoning && (
-                                <div className="mt-2 space-y-2">
-                                  {msg.reasoning.map((step: string, stepIdx: number) => (
-                                    <div key={stepIdx} className="flex items-start gap-2 text-sm text-gray-600">
-                                      <span className="text-gray-400 font-mono text-xs mt-0.5">{stepIdx + 1}.</span>
-                                      <span>{step}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          {msg.type === 'assistantSwitch' && (
-                            <div className="flex justify-center">
-                              <div className="flex items-center gap-2 text-xs text-gray-700 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                                <span className="text-gray-500">Switched to</span>
-                                <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                                <span className="font-semibold text-gray-900">{msg.message}</span>
-                              </div>
-                            </div>
-                          )}
-                          {msg.type === 'text' && (
-                            <div className="flex flex-col gap-1 mb-2">
-                              <div className="w-full whitespace-pre-wrap text-gray-900" style={{ fontSize: '16px', lineHeight: '1.7' }}>{msg.content}</div>
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button onClick={() => handleCopyMessage(`sim-after-${idx}`, msg.content)} className="p-1.5 hover:bg-gray-100 rounded">
-                                        {copiedMessageId === `sim-after-${idx}` ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-gray-400" />}
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>{copiedMessageId === `sim-after-${idx}` ? 'Copied' : 'Copy'}</p></TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button onClick={() => handleFeedback(`sim-after-${idx}`, 'up')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[`sim-after-${idx}`] === 'up' ? 'text-green-600' : 'text-gray-400'}`}>
-                                        <ThumbsUp className="w-4 h-4" />
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Good response</p></TooltipContent>
-                                  </Tooltip>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <button onClick={() => handleFeedback(`sim-after-${idx}`, 'down')} className={`p-1.5 hover:bg-gray-100 rounded ${feedbackMessageId[`sim-after-${idx}`] === 'down' ? 'text-red-600' : 'text-gray-400'}`}>
-                                        <ThumbsDown className="w-4 h-4" />
-                                      </button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Bad response</p></TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
-                              </div>
-                            </div>
-                          )}
-                          {msg.type === 'artifact' && (
-                            <div>
-                              <button
-                                onClick={() => { setSelectedArtifact(msg.data); setShowOutputPanel(true); }}
-                                className="inline-flex bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="text-gray-500">{getFileIcon(msg.data.fileType)}</div>
-                                  <div>
-                                    <div className="font-medium text-gray-900 text-sm">{msg.data.title}</div>
-                                    <div className="text-xs text-gray-500 mt-0.5">{msg.data.description}</div>
-                                  </div>
-                                </div>
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-
-                      {/* Active thinking state with live reasoning */}
-                      {(currentThought || currentReasoning.length > 0) && (
-                        <div className="flex flex-col gap-1 mb-4 p-3 bg-white rounded-lg border border-gray-200">
-                          <button
-                            onClick={() => setExpandedThinkingIds(prev => {
-                              const newSet = new Set(prev);
-                              if (newSet.has(-1)) newSet.delete(-1);
-                              else newSet.add(-1);
-                              return newSet;
-                            })}
-                            className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
-                          >
-                            <span className="text-sm font-medium text-gray-600">
-                              {currentReasoning.length > 0
-                                ? currentReasoning[currentReasoning.length - 1]
-                                : currentThought || "Processing..."}
-                            </span>
-                            <div className="text-gray-600">
-                              {expandedThinkingIds.has(-1) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                            </div>
-                          </button>
-                          {expandedThinkingIds.has(-1) && currentReasoning.length > 0 && (
-                            <div className="mt-2 space-y-2">
-                              {currentReasoning.map((step, stepIdx) => (
-                                <div key={stepIdx} className="flex items-start gap-2 text-sm text-gray-600">
-                                  <span className="text-gray-400 font-mono text-xs mt-0.5">{stepIdx + 1}.</span>
-                                  <span className={stepIdx === currentReasoning.length - 1 ? 'shimmer-text' : ''}>{step}</span>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Searching assistant loading state */}
-                      {searchingAssistant && (
-                        <div className="flex justify-center">
-                          <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
-                            <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            <span>Searching assistants...</span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Skeleton loader */}
-                      {showThinkingDots && (
-                        <div className="flex justify-start">
-                          <div className="max-w-[80%] space-y-3 py-3">
-                            <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4"></div>
-                            <div className="h-4 bg-gray-100 rounded animate-pulse w-full"></div>
-                            <div className="h-4 bg-gray-100 rounded animate-pulse w-5/6"></div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </>
-              );
-            })()
+            ))
           )}
 
-            {/* Spacer - placeholder for assistant content */}
-            <div style={{ height: `${spacerHeight}px` }} />
+          {/* Simulator-only states */}
+          {!isInteractive && (
+            <>
+              {/* Active thinking state with live reasoning */}
+              {(currentThought || currentReasoning.length > 0) && (
+                <div className="flex flex-col gap-1 mb-4 p-3 bg-white rounded-lg border border-gray-200">
+                  {/* Expandable thinking header showing current step - entire row clickable */}
+                  <button
+                    onClick={() => setExpandedThinkingIds(prev => {
+                      const newSet = new Set(prev);
+                      if (newSet.has(-1)) newSet.delete(-1);
+                      else newSet.add(-1);
+                      return newSet;
+                    })}
+                    className="flex items-center justify-between w-full text-left hover:opacity-80 transition-opacity"
+                  >
+                    <span className="text-sm font-medium text-gray-600">
+                      {currentReasoning.length > 0
+                        ? currentReasoning[currentReasoning.length - 1]
+                        : currentThought || "Processing..."}
+                    </span>
+                    <div className="text-gray-600">
+                      {expandedThinkingIds.has(-1) ? (
+                        <ChevronDown className="w-4 h-4" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4" />
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Expanded reasoning details */}
+                  {expandedThinkingIds.has(-1) && currentReasoning.length > 0 && (
+                    <div className="mt-2 space-y-2">
+                      {currentReasoning.map((step, stepIdx) => (
+                        <div key={stepIdx} className="flex items-start gap-2 text-sm text-gray-600">
+                          <span className="text-gray-400 font-mono text-xs mt-0.5">{stepIdx + 1}.</span>
+                          <span className={stepIdx === currentReasoning.length - 1 ? 'shimmer-text' : ''}>{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Searching assistant loading state */}
+              {searchingAssistant && (
+                <div className="flex justify-center">
+                  <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-4 py-2 rounded-lg border border-gray-300">
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span>Searching assistants...</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Skeleton loader */}
+              {showThinkingDots && (
+                <div className="flex justify-start">
+                  <div className="max-w-[80%] space-y-3 py-3">
+                    <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4"></div>
+                    <div className="h-4 bg-gray-100 rounded animate-pulse w-full"></div>
+                    <div className="h-4 bg-gray-100 rounded animate-pulse w-5/6"></div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
 
             <div ref={chatEndRef} />
           </div>
@@ -1120,10 +919,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             {isInteractive ? (
               /* Interactive mode - normal input */
               <MessageInput
-                onSend={(message) => {
-                  shouldScrollToBottom.current = true;
-                  onSendMessage?.(message);
-                }}
+                onSend={(message) => onSendMessage?.(message)}
                 autoFocus={true}
                 bookmarkedAssistants={bookmarkedAssistants}
                 assistantType={assistantType}

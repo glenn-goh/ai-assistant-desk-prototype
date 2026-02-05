@@ -59,13 +59,8 @@ export function MessageInput({
     }
     setInternalInput(newValue);
   };
-
-  const tools = [
-    { id: 'web-search', name: 'Web Search', icon: Globe },
-  ];
-
-  const [selectedTools, setSelectedTools] = useState<string[]>(tools.map(t => t.id));
-  const [selectedAssistants, setSelectedAssistants] = useState<string[]>(bookmarkedAssistants);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
+  const [selectedAssistants, setSelectedAssistants] = useState<string[]>([]);
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
   const [isLibraryPopoverOpen, setIsLibraryPopoverOpen] = useState(false);
   const [isToolsPopoverOpen, setIsToolsPopoverOpen] = useState(false);
@@ -81,6 +76,12 @@ export function MessageInput({
   const classificationOptions = [
     { id: 'r-sn' as ClassificationType, label: 'R/SN', fullName: 'Restricted / Sensitive Normal' },
     { id: 'cce-sn' as ClassificationType, label: 'C(CE)/SN', fullName: 'Confidential (Cloud-Eligible) / Sensitive Normal' },
+  ];
+
+  const tools = [
+    { id: 'web-search', name: 'Web Search', icon: Globe },
+    { id: 'deep-research', name: 'Deep Research', icon: Sparkles },
+    { id: 'canvas', name: 'Canvas', icon: PanelRight },
   ];
 
   // Get all available assistants
@@ -145,8 +146,8 @@ export function MessageInput({
   };
 
   const toggleLibrary = (libraryId: string) => {
-    setSelectedLibraries(prev =>
-      prev.includes(libraryId)
+    setSelectedLibraries(prev => 
+      prev.includes(libraryId) 
         ? prev.filter(id => id !== libraryId)
         : [...prev, libraryId]
     );
@@ -235,7 +236,7 @@ export function MessageInput({
                   disabled={isInputDisabled}
                   className={`h-7 w-7 flex-shrink-0 ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Paperclip className="w-4 h-4" />
+                  <Plus className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -249,112 +250,132 @@ export function MessageInput({
             <TooltipProvider>
               <Tooltip>
                 <DropdownMenu open={isInputDisabled ? false : isToolsPopoverOpen} onOpenChange={setIsToolsPopoverOpen}>
-                  <TooltipTrigger asChild>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        disabled={isInputDisabled}
-                        className={`h-7 w-7 flex-shrink-0 relative ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <SlidersHorizontal className="w-3.5 h-3.5" />
-                        {(selectedTools.length + selectedAssistants.length) > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
-                            {selectedTools.length + selectedAssistants.length}
-                          </span>
-                        )}
-                      </Button>
-                    </DropdownMenuTrigger>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Add tools</p>
-                  </TooltipContent>
-                  <DropdownMenuContent
-                    className="w-64 p-0 z-50 bg-white dark:bg-gray-900 overflow-visible"
-                    align="start"
-                    side="top"
-                    sideOffset={8}
-                  >
-                    <div className="p-3 border-b bg-white dark:bg-gray-900">
-                      <h3 className="font-medium text-xs">Available Tools</h3>
-                      <p className="text-xs text-muted-foreground">Select tools you would like the assistant to use if needed.</p>
-                    </div>
-                    <div className="p-2 bg-white dark:bg-gray-900">
-                      {tools.map((tool) => {
-                        const Icon = tool.icon;
-                        const isSelected = selectedTools.includes(tool.id);
-                        return (
-                          <button
-                            key={tool.id}
-                            type="button"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              toggleTool(tool.id);
-                            }}
-                            className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                          >
-                            <Icon className="w-5 h-5 flex-shrink-0 text-gray-700" />
-                            <span className="flex-1 text-left text-xs text-gray-900">{tool.name}</span>
-                            {isSelected && (
-                              <Check className="w-4 h-4 text-gray-900" />
-                            )}
-                          </button>
-                        );
-                      })}
+                <TooltipTrigger asChild>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      disabled={isInputDisabled}
+                      className={`h-7 w-7 flex-shrink-0 relative ${isInputDisabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                      {(selectedTools.length + selectedAssistants.length) > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-gray-900 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+                          {selectedTools.length + selectedAssistants.length}
+                        </span>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add tools</p>
+                </TooltipContent>
+            <DropdownMenuContent
+              className="w-64 p-0 z-50 bg-white dark:bg-gray-900 overflow-visible"
+              align="start"
+              side="top"
+              sideOffset={8}
+            >
+              <div className="p-3 border-b bg-white dark:bg-gray-900">
+                <h3 className="font-medium text-xs">Available Tools</h3>
+                <p className="text-xs text-muted-foreground">Select tools to enable</p>
+              </div>
+              <div className="p-2 bg-white dark:bg-gray-900">
+                {tools.map((tool) => {
+                  const Icon = tool.icon;
+                  const isSelected = selectedTools.includes(tool.id);
+                  return (
+                    <button
+                      key={tool.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleTool(tool.id);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <Icon className="w-5 h-5 flex-shrink-0 text-gray-700" />
+                      <span className="flex-1 text-left text-xs text-gray-900">{tool.name}</span>
+                      {isSelected && (
+                        <Check className="w-4 h-4 text-gray-900" />
+                      )}
+                    </button>
+                  );
+                })}
 
-                      {/* Custom Assistants Submenu */}
-                      <div className="relative group/assistants mt-1 border-t border-gray-200 pt-1">
-                        <button
-                          type="button"
-                          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <Bot className="w-5 h-5 flex-shrink-0 text-gray-700" />
-                          <span className="flex-1 text-left text-xs text-gray-900">Custom Assistants</span>
-                          <ChevronRight className="w-4 h-4 text-gray-400" />
-                        </button>
-                        {/* Submenu */}
-                        <div className="absolute left-full top-0 ml-1 w-56 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
-                          <div className="p-2">
-                            {assistants.length === 0 ? (
-                              <div className="px-3 py-4 text-center">
-                                <p className="text-xs text-gray-500">
-                                  Bookmark a custom assistant for it to appear here
-                                </p>
-                              </div>
-                            ) : (
-                              assistants.map((assistant) => {
-                                const isSelected = selectedAssistants.includes(assistant.id);
-                                return (
-                                  <button
-                                    key={assistant.id}
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      toggleAssistant(assistant.id);
-                                    }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
-                                  >
-                                    <span className="flex-1 text-xs text-gray-900">{assistant.name}</span>
-                                    {isSelected && (
-                                      <Check className="w-4 h-4 text-gray-900" />
-                                    )}
-                                  </button>
-                                );
-                              })
-                            )}
-                          </div>
+                {/* Custom Assistants Submenu */}
+                <div className="relative group/assistants mt-1 border-t border-gray-200 pt-1">
+                  <button
+                    type="button"
+                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <Bot className="w-5 h-5 flex-shrink-0 text-gray-700" />
+                    <span className="flex-1 text-left text-xs text-gray-900">Custom Assistants</span>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </button>
+                  {/* Submenu */}
+                  <div className="absolute left-full top-0 ml-1 w-56 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
+                    <div className="p-2">
+                      {assistants.length === 0 ? (
+                        <div className="px-3 py-4 text-center">
+                          <p className="text-xs text-gray-500">
+                            Bookmark a custom assistant for it to appear here
+                          </p>
                         </div>
-                      </div>
+                      ) : (
+                        assistants.map((assistant) => {
+                          const isSelected = selectedAssistants.includes(assistant.id);
+                          return (
+                            <button
+                              key={assistant.id}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleAssistant(assistant.id);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                            >
+                              <span className="flex-1 text-xs text-gray-900">{assistant.name}</span>
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-gray-900" />
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
                     </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </Tooltip>
-            </TooltipProvider>
+                  </div>
+                </div>
+              </div>
+            </DropdownMenuContent>
+              </DropdownMenu>
+            </Tooltip>
+          </TooltipProvider>
           )
           }
+
+          {/* Library Button - Disabled */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="ghost"
+                  disabled
+                  className="h-7 w-7 flex-shrink-0 relative opacity-50 cursor-not-allowed"
+                >
+                  <FolderOpen className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Coming soon</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         <div className="flex items-center gap-1">
