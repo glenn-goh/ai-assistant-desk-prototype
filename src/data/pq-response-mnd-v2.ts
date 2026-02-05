@@ -28,12 +28,16 @@ export const pqResponseDataV2 = {
           reasoning: [
             { text: "Understanding user's confirmation that they have PQ text ready...", icon: "search", description: "Interpreting the user's intent and selecting the appropriate PQ drafting workflow." },
             { text: "Loading Parliamentary Question response templates...", icon: "file-text", description: "Retrieving the standard MND response templates with pre-approved formatting and structure." },
+            { text: "Using the PQ Template Repository tool...", icon: "wrench", description: "Fetching the latest approved PQ response templates from the central ministry template repository." },
             { text: "Preparing PQ input form with required fields...", icon: "file-text", description: "Building an interactive form to capture the question text, ministry, classification, and due date." },
             { text: "Configuring workflow for MND ministry responses...", icon: "search", description: "Setting ministry-specific parameters including housing policy terminology and approval chains." },
-            { text: "Setting up Hansard database connection for past PQ references...", icon: "database", description: "Connecting to the parliamentary Hansard records to enable cross-referencing with historical questions." }
+            { text: "Using the MND Policy Database tool...", icon: "wrench", description: "Loading current MND housing policy positions and approved talking points for reference during drafting." },
+            { text: "Setting up Hansard database connection for past PQ references...", icon: "database", description: "Connecting to the parliamentary Hansard records to enable cross-referencing with historical questions." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is validating the classification level and verifying the correct ministry workflow parameters." }
           ],
           timingMs: 10000,
-          doneSummary: "Loaded PQ templates and connected to Hansard — 5 steps"
+          doneSummary: "Loaded PQ templates and connected to Hansard",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -127,13 +131,17 @@ export const pqResponseDataV2 = {
           thought: "Analyzing PQ structure and requirements...",
           reasoning: [
             { text: "Processing submitted Parliamentary Question details...", icon: "search", description: "Parsing the form submission to extract the question text, ministry, and classification level." },
+            { text: "Using the Question Parser tool...", icon: "wrench", description: "Parsing the multi-part question structure and extracting the key data requirements for each sub-question." },
             { text: "Analyzing PQ format and identifying question components (a) and (b)...", icon: "search", description: "Breaking the question into part (a) on BTO waiting times and part (b) on policy measures." },
             { text: "Checking classification requirements and ministry alignment...", icon: "search", description: "Confirming the question is unclassified and falls under MND Housing Policy Division." },
+            { text: "Using the Ministry Directory tool...", icon: "wrench", description: "Looking up the responsible division and assigned officers within MND for this housing policy question." },
             { text: "Determining research scope and data requirements...", icon: "search", description: "Identifying the need for statistical data on waiting times and details on current government initiatives." },
-            { text: "Planning comprehensive search strategy across databases...", icon: "search", description: "Mapping out queries for the Hansard database, internal statistics repository, and policy document archives." }
+            { text: "Planning comprehensive search strategy across databases...", icon: "search", description: "Mapping out queries for the Hansard database, internal statistics repository, and policy document archives." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is verifying the classification level and confirming the question falls within MND's purview." }
           ],
           timingMs: 10000,
-          doneSummary: "Analyzed PQ structure and planned research strategy — 5 steps"
+          doneSummary: "Analyzed PQ structure and planned research strategy",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -159,18 +167,36 @@ export const pqResponseDataV2 = {
           thought: "Searching Hansard database for similar past PQs...",
           reasoning: [
             { text: "Querying Hansard database for BTO-related Parliamentary Questions...", icon: "database", description: "Searching the official parliamentary records for questions mentioning BTO flats and waiting times." },
+            { text: "Using the Hansard Search API tool...", icon: "wrench", description: "Executing keyword and semantic searches against the parliamentary Hansard records for BTO-related questions." },
             { text: "Filtering results by ministry (MND) and topic (housing policy)...", icon: "search", description: "Narrowing results to MND-answered questions on housing supply and construction timelines." },
             { text: "Analyzing past ministerial responses and language patterns...", icon: "search", description: "Extracting tone, phrasing, and key talking points used in previous ministerial answers." },
             { text: "Cross-referencing with current policy positions...", icon: "search", description: "Verifying that past response themes are still aligned with the latest ministerial public statements." },
+            { text: "Using the Policy Alignment Checker tool...", icon: "wrench", description: "Cross-checking retrieved past responses against the latest approved MND policy positions and public statements." },
             { text: "Identifying consistent response frameworks...", icon: "search", description: "Detecting recurring structures like empathetic opening, data provision, and policy measure listing." },
-            { text: "Compiling relevant precedents and statistical data...", icon: "database", description: "Assembling the three most relevant past PQs and verified BTO statistics into a research brief." }
+            { text: "Compiling relevant precedents and statistical data...", icon: "database", description: "Assembling the three most relevant past PQs and verified BTO statistics into a research brief." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is verifying that all compiled precedents are still consistent with current ministry policy." }
           ],
           timingMs: 12000,
-          doneSummary: "Searched Hansard and compiled 3 past PQ precedents — 6 steps"
+          doneSummary: "Searched Hansard and compiled 3 past PQ precedents",
+          tags: ["3 tools used"]
         },
+        // {
+        //   type: "assistantSwitch" as const,
+        //   message: "Deep Research Assistant"
+        // },
         {
-          type: "assistantSwitch" as const,
-          message: "Deep Research Assistant"
+          type: "thinking" as const,
+          thoughts: [
+            "Using the Deep Research Assistant (Tool)...",
+            "Synthesizing research findings..."
+          ],
+          reasoning: [
+            { text: "Using the Deep Research Assistant (Tool)...", icon: "wrench", description: "Delegating to the Deep Research Assistant to cross-reference Hansard records, policy documents, and statistical databases for a comprehensive research brief." },
+            { text: "Synthesizing research findings...", icon: "search", description: "Consolidating all retrieved precedents, statistics, and policy positions into a structured analysis report." }
+          ],
+          timingMs: 6000,
+          doneSummary: "Deep research complete with 3 precedents and verified data",
+          tags: ["1 tool used"]
         },
         {
           type: "text" as const,
@@ -329,14 +355,18 @@ export const pqResponseDataV2 = {
             { text: "Loading MND Parliamentary Question response template...", icon: "file-text", description: "Retrieving the standard two-part PQ answer template used by the Housing Policy Division." },
             { text: "Structuring two-part answer format for parts (a) and (b)...", icon: "file-text", description: "Organizing the response with part (a) addressing waiting time data and part (b) outlining policy measures." },
             { text: "Incorporating verified statistics (3.9 years average waiting time)...", icon: "search", description: "Embedding the confirmed 3.9-year average along with mature (4.2) and non-mature (3.8) estate breakdowns." },
+            { text: "Using the Statistics Verification tool...", icon: "wrench", description: "Cross-checking the BTO waiting time figures against the internal MND statistics database for accuracy." },
             { text: "Aligning language and tone with past ministerial responses...", icon: "search", description: "Matching phrasing to PQs 2284 and 1856 so the response maintains consistency across parliamentary sessions." },
+            { text: "Using the Tone Analyzer tool...", icon: "wrench", description: "Analyzing the draft language against past ministerial response patterns to ensure consistent tone and phrasing." },
             { text: "Ensuring empathetic acknowledgment of waiting time concerns...", icon: "search", description: "Adding a compassionate opening that recognizes homebuyer frustrations, as done in previous answers." },
             { text: "Including all four policy measures with proper justification...", icon: "search", description: "Detailing the 100,000-flat supply plan, contractor expansion, DfMA construction, and PLH model." },
             { text: "Cross-checking content against internal MND guidelines...", icon: "search", description: "Validating that no future timeline commitments are made and all figures come from approved sources." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is running a final compliance check to ensure the draft meets all internal MND guidelines." },
             { text: "Formatting document for official parliamentary submission...", icon: "file-text", description: "Applying the formal parliamentary document layout, headers, and metadata fields." }
           ],
           timingMs: 16000,
-          doneSummary: "Drafted PQ response with verified data and 4 policy measures — 8 steps"
+          doneSummary: "Drafted PQ response with verified data and 4 policy measures",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -515,15 +545,19 @@ export const pqResponseDataV2 = {
           thought: "Preparing complete submission package...",
           reasoning: [
             { text: "Generating final PQ response document in .docx format...", icon: "file-text", description: "Converting the approved Version 1 draft into an official Word document with proper headers." },
+            { text: "Using the Document Generator tool...", icon: "wrench", description: "Converting the approved draft into formatted .docx and .pdf files with proper ministry headers and metadata." },
             { text: "Creating professional cover note for director review...", icon: "file-text", description: "Writing a summary cover note highlighting key points and requesting director clearance." },
             { text: "Compiling Annex A: Past PQ references with Hansard database links...", icon: "file-text", description: "Assembling the three similar PQs with direct Hansard links and response excerpts." },
             { text: "Compiling Annex B: Statistical documentation with source verification...", icon: "file-text", description: "Documenting the BTO waiting time figures with their internal database sources and retrieval dates." },
             { text: "Creating Annex C: Policy alignment checklist for compliance...", icon: "file-text", description: "Building a verification matrix confirming alignment with ministerial statements and guidelines." },
             { text: "Formatting all documents according to MND standards...", icon: "file-text", description: "Applying ministry-standard fonts, margins, headers, and classification markings across all files." },
+            { text: "Using the MND Format Checker tool...", icon: "wrench", description: "Validating all five documents against MND formatting standards including fonts, margins, and classification markings." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is running final quality checks across the entire submission package for completeness and accuracy." },
             { text: "Packaging all components into submission-ready bundle...", icon: "file-text", description: "Combining all five documents into a single 349 KB package ready for email attachment." }
           ],
           timingMs: 14000,
-          doneSummary: "Generated 5 submission documents in MND format — 7 steps"
+          doneSummary: "Generated 5 submission documents in MND format",
+          tags: ["3 tools used"]
         },
         {
           type: "artifact" as const,
@@ -683,12 +717,16 @@ export const pqResponseDataV2 = {
           thought: "Composing professional submission email...",
           reasoning: [
             { text: "Drafting professional email for director submission...", icon: "file-text", description: "Composing a formal cover email addressed to the director with a clear request for review and clearance." },
+            { text: "Using the Email Template Engine tool...", icon: "wrench", description: "Loading the ministry's standard submission email template with pre-configured formatting and sign-off blocks." },
             { text: "Summarizing key PQ points and recommendations...", icon: "file-text", description: "Condensing the question type, statistics, and response strategy into a quick-read summary section." },
             { text: "Preparing attachment list with all supporting documents...", icon: "file-text", description: "Listing all five submission package files with sizes for the email attachment section." },
-            { text: "Formatting email according to ministry communication standards...", icon: "search", description: "Applying MND email conventions including proper sign-off, division name, and contact details." }
+            { text: "Using the Directory Lookup tool...", icon: "wrench", description: "Looking up the director's full name, title, and email address from the ministry staff directory." },
+            { text: "Formatting email according to ministry communication standards...", icon: "search", description: "Applying MND email conventions including proper sign-off, division name, and contact details." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is verifying the email content and attachments meet ministry submission protocol requirements." }
           ],
           timingMs: 8000,
-          doneSummary: "Drafted submission email with 5 attachments — 4 steps"
+          doneSummary: "Drafted submission email with 5 attachments",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -802,11 +840,15 @@ export const pqResponseDataV2 = {
           reasoning: [
             { text: "Analyzing user feedback to simplify email length...", icon: "search", description: "Reviewing the user's request and identifying which sections can be removed from the email body." },
             { text: "Drafting brief, professional cover email...", icon: "file-text", description: "Rewriting the email to a concise three-sentence format that lets the attachments speak for themselves." },
+            { text: "Using the Email Template Engine tool...", icon: "wrench", description: "Switching to the ministry's concise email template optimized for brief submission cover emails." },
             { text: "Moving detailed information to attached documents...", icon: "file-text", description: "Ensuring all statistics, PQ references, and strategy details remain accessible in the cover note attachment." },
-            { text: "Ensuring key points remain visible while reducing verbosity...", icon: "search", description: "Keeping the due date and clearance request prominent while cutting the overall word count by 70%." }
+            { text: "Using the Content Optimizer tool...", icon: "wrench", description: "Reducing the email word count by 70% while preserving the due date and clearance request as key information." },
+            { text: "Ensuring key points remain visible while reducing verbosity...", icon: "search", description: "Keeping the due date and clearance request prominent while cutting the overall word count by 70%." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is confirming the shortened email still meets ministry submission protocol requirements." }
           ],
           timingMs: 8000,
-          doneSummary: "Revised email to concise format — 4 steps"
+          doneSummary: "Revised email to concise format",
+          tags: ["3 tools used"]
         },
         {
           type: "artifact" as const,
@@ -888,12 +930,16 @@ export const pqResponseDataV2 = {
           reasoning: [
             { text: "Attaching all 5 documents to email (349 KB total size)...", icon: "database", description: "Bundling the PQ response, cover note, and three annexes as email attachments." },
             { text: "Verifying recipient addresses: michael.tan@mnd.gov.sg, rachel.lim@mnd.gov.sg...", icon: "search", description: "Validating both email addresses against the ministry directory before sending." },
+            { text: "Using the Address Verification tool...", icon: "wrench", description: "Validating both recipient email addresses against the ministry staff directory to confirm they are active." },
             { text: "Formatting professional email with proper ministry protocols...", icon: "search", description: "Applying the finalized concise email template with the director's name and correct sign-off." },
+            { text: "Using the Gov Email Gateway tool...", icon: "wrench", description: "Submitting the email through the secure government mail gateway with delivery tracking and read receipts." },
             { text: "Processing email send request...", icon: "database", description: "Submitting the email through the secure government mail gateway with delivery tracking enabled." },
-            { text: "Confirming successful delivery...", icon: "database", description: "Receiving delivery confirmation from the mail server for both recipients." }
+            { text: "Confirming successful delivery...", icon: "database", description: "Receiving delivery confirmation from the mail server for both recipients." },
+            { text: "Using the PQ Compliance Checker assistant (Tool)...", icon: "wrench", description: "Custom agent is logging the submission action and confirming all compliance checks passed for audit records." }
           ],
           timingMs: 10000,
-          doneSummary: "Sent email with 5 attachments to 2 recipients — 5 steps"
+          doneSummary: "Sent email with 5 attachments to 2 recipients",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,

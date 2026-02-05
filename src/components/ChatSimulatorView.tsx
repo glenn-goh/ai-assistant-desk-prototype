@@ -46,8 +46,9 @@ interface ThinkingResponse {
   type: "thinking";
   thoughts: string[];
   timingMs?: number;
-  reasoning?: Array<string | { text: string; icon: string }>; // Detailed reasoning steps for expandable view
+  reasoning?: Array<string | { text: string; icon: string; description?: string }>; // Detailed reasoning steps for expandable view
   doneSummary?: string; // Summary shown when reasoning is done
+  tags?: string[]; // Pills shown next to done summary (e.g. ["3 tools used"])
 }
 
 interface AssistantSwitchResponse {
@@ -389,7 +390,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       type: 'thinking',
       thought: response.thought || '',
       reasoning: reasoning,
-      doneSummary: response.doneSummary
+      doneSummary: response.doneSummary,
+      tags: response.tags
     }]);
 
     setCurrentThought("");
@@ -749,6 +751,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     id={idx}
                     reasoning={msg.reasoning || []}
                     doneSummary={msg.doneSummary}
+                    tags={msg.tags}
                     isExpanded={expandedThinkingIds.has(idx)}
                     onToggle={toggleThinkingExpanded}
                   />
@@ -793,6 +796,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                               id={idx + 1000}
                               reasoning={msg.reasoning || []}
                               doneSummary={msg.doneSummary}
+                              tags={msg.tags}
                               isExpanded={expandedThinkingIds.has(idx + 1000)}
                               onToggle={toggleThinkingExpanded}
                             />

@@ -27,17 +27,24 @@ export const hrCandidateShortlistingData = {
           thoughts: [
             "Analyzing job requisition GTA-2024-SE-089...",
             "Connecting to Workday HCM system...",
+            "Using the Workday Recruiting API tool...",
             "Retrieving candidate applications...",
+            "Using the CV Parser tool...",
+            "Using the Candidate Scoring Agent assistant (Tool)...",
             "Preparing shortlisting workflow..."
           ],
           reasoning: [
             { text: "Analyzing job requisition GTA-2024-SE-089...", icon: "search", description: "Parsing the requisition details to extract role requirements, qualifications, and screening criteria." },
-            { text: "Connecting to Workday HCM system...", icon: "database", description: "Establishing a secure connection to the Workday Human Capital Management API." },
-            { text: "Retrieving candidate applications...", icon: "database", description: "Fetching all 127 candidate profiles submitted for this requisition, including resumes and cover letters." },
+            { text: "Connecting to Workday HCM system...", icon: "database", description: "Establishing a secure connection and retrieving all 127 candidate profiles submitted for this requisition." },
+            { text: "Using the Workday Recruiting API tool...", icon: "wrench", description: "Invoking the Workday Recruiting API to fetch all 127 candidate records, application metadata, and submission timestamps." },
+            { text: "Retrieving candidate applications...", icon: "database", description: "Downloading resumes and cover letters attached to each candidate application." },
+            { text: "Using the CV Parser tool...", icon: "wrench", description: "Extracting structured data from uploaded resumes — skills, experience, qualifications, and certifications — into standardized candidate profiles." },
+            { text: "Using the Candidate Scoring Agent assistant (Tool)...", icon: "wrench", description: "Custom agent is pre-screening candidate profiles for data completeness and flagging any missing required fields." },
             { text: "Preparing shortlisting workflow...", icon: "search", description: "Setting up the evaluation pipeline with weighted scoring based on the role's must-have and nice-to-have criteria." }
           ],
           timingMs: 8000,
-          doneSummary: "Analyzed requisition and retrieved 127 candidates from Workday — 4 steps"
+          doneSummary: "Analyzed requisition and retrieved 127 candidates",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -122,22 +129,25 @@ export const hrCandidateShortlistingData = {
             "Processing job description criteria...",
             "Extracting must-have requirements...",
             "Loading saved user preferences...",
-            "Connecting to AI Platform's Recommendations API...",
-            "Uploading candidate data for analysis...",
+            "Using the AI Recommendations API tool...",
+            "Using the Skills Taxonomy Matcher tool...",
+            "Using the Candidate Scoring Agent assistant (Tool)...",
             "Running intelligent matching algorithms...",
             "Calculating match scores..."
           ],
           reasoning: [
             { text: "Processing job description criteria...", icon: "search", description: "Breaking down the Senior Software Engineer role into weighted scoring dimensions." },
             { text: "Extracting must-have requirements...", icon: "search", description: "Identifying the three non-negotiable qualifications: 5+ years experience, backend skills, and cloud platform expertise." },
-            { text: "Loading saved user preferences...", icon: "database", description: "Retrieving Michelle's screening preferences from past software engineering shortlists." },
-            { text: "Connecting to AI Platform's Recommendations API...", icon: "database", description: "Opening a session with the AI-powered candidate matching service for intelligent scoring." },
-            { text: "Uploading candidate data for analysis...", icon: "database", description: "Sending all 127 candidate profiles including CVs and structured data to the matching engine." },
-            { text: "Running intelligent matching algorithms...", icon: "search", description: "Evaluating each candidate across technical skills, cloud proficiency, government exposure, and leadership potential." },
-            { text: "Calculating match scores...", icon: "search", description: "Generating composite fit scores from 0–100% and ranking all candidates by overall suitability." }
+            { text: "Loading saved user preferences...", icon: "database", description: "Loading Michelle's saved screening preferences from past software engineering shortlists." },
+            { text: "Using the AI Recommendations API tool...", icon: "wrench", description: "Sending 127 candidate profiles to the AI-powered matching service for multi-dimensional skill and experience analysis." },
+            { text: "Using the Skills Taxonomy Matcher tool...", icon: "wrench", description: "Mapping candidate skills to the government's standardized skills taxonomy to ensure consistent evaluation across all profiles." },
+            { text: "Using the Candidate Scoring Agent assistant (Tool)...", icon: "wrench", description: "Custom agent is running the multi-criteria evaluation, weighing technical skills, cloud proficiency, and government sector experience." },
+            { text: "Running intelligent matching algorithms...", icon: "search", description: "Evaluating 127 candidates across technical skills, cloud proficiency, and government exposure." },
+            { text: "Calculating match scores...", icon: "search", description: "Ranking all candidates by overall suitability and identifying the top 10 shortlist." }
           ],
           timingMs: 14000,
-          doneSummary: "Processed 127 candidates with AI-powered matching — 7 steps"
+          doneSummary: "Processed 127 candidates with AI matching",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -331,18 +341,25 @@ export const hrCandidateShortlistingData = {
           type: "thinking" as const,
           thoughts: [
             "Drafting professional email for hiring manager...",
+            "Using the Email Template Engine tool...",
             "Structuring shortlist summary...",
             "Including key statistics and recommendations...",
+            "Using the Report Generator tool...",
+            "Using the Candidate Scoring Agent assistant (Tool)...",
             "Formatting with government communication standards..."
           ],
           reasoning: [
             { text: "Drafting professional email for hiring manager...", icon: "file-text", description: "Composing a formal email addressed to James Wong summarizing the shortlisting outcome." },
+            { text: "Using the Email Template Engine tool...", icon: "wrench", description: "Loading the government's standard email templates for professional shortlisting communications." },
             { text: "Structuring shortlist summary...", icon: "file-text", description: "Organizing the top-10 candidate overview with match scores and key qualifications." },
-            { text: "Including key statistics and recommendations...", icon: "file-text", description: "Adding aggregate metrics like average experience, government background ratio, and certification counts." },
+            { text: "Including key statistics and recommendations...", icon: "file-text", description: "Creating a formatted report with detailed candidate profiles, match scores, and key strengths." },
+            { text: "Using the Report Generator tool...", icon: "wrench", description: "Creating the formatted shortlist report attachment with candidate profiles and match scores." },
+            { text: "Using the Candidate Scoring Agent assistant (Tool)...", icon: "wrench", description: "Custom agent is verifying candidate data accuracy and match scores referenced in the email summary." },
             { text: "Formatting with government communication standards...", icon: "search", description: "Applying GovTech email formatting guidelines and professional tone conventions." }
           ],
           timingMs: 8000,
-          doneSummary: "Drafted hiring manager email with shortlist summary — 4 steps"
+          doneSummary: "Drafted hiring manager email with shortlist summary",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,
@@ -417,21 +434,25 @@ export const hrCandidateShortlistingData = {
           thoughts: [
             "Preparing email package for sending...",
             "Generating PDF documents...",
-            "Connecting to email server...",
+            "Using the Gov Email Gateway tool...",
             "Sending email to james.wong@tech.gov.sg...",
+            "Using the Workday Status API tool...",
             "Updating Workday with shortlist status...",
+            "Using the Candidate Scoring Agent assistant (Tool)...",
             "Recording audit trail..."
           ],
           reasoning: [
             { text: "Preparing email package for sending...", icon: "file-text", description: "Bundling the email body with three attachments: shortlist report, candidate profiles, and statistics." },
-            { text: "Generating PDF documents...", icon: "file-text", description: "Converting the shortlist analysis and candidate detail cards into formatted PDF files." },
-            { text: "Connecting to email server...", icon: "database", description: "Establishing a secure SMTP connection through the government mail gateway." },
-            { text: "Sending email to james.wong@tech.gov.sg...", icon: "database", description: "Delivering the complete package to the hiring manager's inbox with read-receipt tracking." },
-            { text: "Updating Workday with shortlist status...", icon: "database", description: "Marking all 10 shortlisted candidates as 'Shortlisted' and advancing the requisition to Manager Review." },
+            { text: "Using the Gov Email Gateway tool...", icon: "wrench", description: "Connecting to the secure government mail gateway to deliver the email with all attachments." },
+            { text: "Sending email to james.wong@tech.gov.sg...", icon: "database", description: "Delivering the complete package via the government mail gateway." },
+            { text: "Using the Workday Status API tool...", icon: "wrench", description: "Calling the Workday Status API to batch-update all 10 shortlisted candidate records." },
+            { text: "Updating Workday with shortlist status...", icon: "database", description: "Marking all shortlisted candidates and advancing the requisition to Manager Review stage." },
+            { text: "Using the Candidate Scoring Agent assistant (Tool)...", icon: "wrench", description: "Custom agent is performing a final validation of the shortlist data before recording the audit trail." },
             { text: "Recording audit trail...", icon: "search", description: "Logging each action taken during this session for HR compliance and governance records." }
           ],
           timingMs: 12000,
-          doneSummary: "Sent email and updated Workday with audit trail — 6 steps"
+          doneSummary: "Sent email and updated Workday",
+          tags: ["3 tools used"]
         },
         {
           type: "text" as const,

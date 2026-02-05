@@ -6,6 +6,7 @@ import {
   Database,
   FileText,
   Bot,
+  Wrench,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -16,6 +17,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   database: Database,   // connect, retrieve, send, API calls
   'file-text': FileText, // draft, format, generate documents
   bot: Bot,             // assistant delegation
+  wrench: Wrench,       // tool usage
 };
 
 // ---------- Public types ----------
@@ -52,6 +54,7 @@ interface ReasoningBlockProps {
   summary?: string;
   status?: 'thinking' | 'done' | 'error';
   steps?: ThinkingStep[];
+  tags?: string[];
 }
 
 // ---------- Helpers ----------
@@ -206,6 +209,7 @@ export function ReasoningBlock({
   summary,
   status,
   steps,
+  tags,
 }: ReasoningBlockProps) {
   const resolvedSteps = resolveSteps(steps, reasoning);
   const resolvedStatus = resolveStatus(status, isLive);
@@ -220,9 +224,23 @@ export function ReasoningBlock({
         aria-expanded={isExpanded}
         className="flex items-center gap-2 w-full py-1 text-left hover:opacity-80 transition-opacity"
       >
+        {/* Tags */}
+        {!isThinking && tags && tags.length > 0 && (
+          <span className="flex items-center gap-1.5 shrink-0">
+            {tags.map((tag, i) => (
+              <span
+                key={i}
+                className="text-xs font-medium text-gray-500 bg-gray-100 border border-gray-300 rounded-full px-2.5 py-0.5 whitespace-nowrap"
+              >
+                {tag}
+              </span>
+            ))}
+          </span>
+        )}
+
         {/* Summary text — shimmer when thinking */}
         <span className={`text-base font-medium italic text-gray-500 truncate min-w-0 ${isThinking ? 'shimmer-text' : ''}`}>
-          {resolvedSummary}
+          {resolvedSummary}{!isThinking && resolvedSteps.length > 0 ? ` (${resolvedSteps.length} steps)` : ''}
         </span>
 
         {/* Chevron */}
@@ -240,41 +258,41 @@ export function ReasoningBlock({
         style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
       >
         <div className="overflow-hidden">
-        <div className="mt-2 p-5 bg-white rounded-lg border border-gray-300">
-        {resolvedSteps.length > 0 && (
-          <div>
-            {resolvedSteps.map((step, i) => (
-              <StepItem
-                key={step.id}
-                step={step}
-                isLastLive={isLive && i === resolvedSteps.length - 1}
-                showConnector={i < resolvedSteps.length - 1 || resolvedStatus !== 'thinking'}
-              />
-            ))}
-          </div>
-        )}
+          <div className="mt-2 p-5 bg-white rounded-lg border border-gray-300">
+            {resolvedSteps.length > 0 && (
+              <div>
+                {resolvedSteps.map((step, i) => (
+                  <StepItem
+                    key={step.id}
+                    step={step}
+                    isLastLive={isLive && i === resolvedSteps.length - 1}
+                    showConnector={i < resolvedSteps.length - 1 || resolvedStatus !== 'thinking'}
+                  />
+                ))}
+              </div>
+            )}
 
-        {/* Final status step — "Done" or "Failed" as last timeline item */}
-        <div className="flex items-center gap-2" aria-live="polite">
-          {isThinking ? (
-            <span className="text-sm text-gray-400 shimmer-text ml-7">Thinking...</span>
-          ) : resolvedStatus === 'done' ? (
-            <>
-              <div className="flex items-center justify-center w-5 shrink-0">
-                <CheckCircle2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-              </div>
-              <span className="text-sm text-gray-500 font-medium">Done</span>
-            </>
-          ) : (
-            <>
-              <div className="flex items-center justify-center w-5 shrink-0">
-                <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
-              </div>
-              <span className="text-sm text-red-500 font-medium">Failed</span>
-            </>
-          )}
-        </div>
-        </div>
+            {/* Final status step — "Done" or "Failed" as last timeline item */}
+            <div className="flex items-center gap-2" aria-live="polite">
+              {isThinking ? (
+                <span className="text-sm text-gray-400 shimmer-text ml-7">Thinking...</span>
+              ) : resolvedStatus === 'done' ? (
+                <>
+                  <div className="flex items-center justify-center w-5 shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  </div>
+                  <span className="text-sm text-gray-500 font-medium">Done</span>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-center w-5 shrink-0">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  </div>
+                  <span className="text-sm text-red-500 font-medium">Failed</span>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
