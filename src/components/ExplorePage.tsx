@@ -69,27 +69,38 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
         onClick={() => onStartAssistantChat(assistant.name, assistant.assistantType)}
       >
         <CardContent className="p-6">
-          {/* Bookmark Icon - Top Right */}
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleBookmark?.(assistant.id);
-                  }}
-                  className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Bookmark
-                    className={`w-5 h-5 ${isBookmarked ? 'fill-gray-900 text-gray-900' : 'text-gray-400'}`}
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Bookmark</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          {/* Top Right: Classification Pill and Bookmark Icon */}
+          <div className="absolute top-4 right-4 flex items-center gap-2">
+            {/* Classification Pill */}
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${assistant.classification.includes('C(CE)') || assistant.classification.includes('CCE')
+                ? 'bg-gray-700 text-white'
+                : 'bg-gray-400 text-white'
+              }`}>
+              {assistant.classification.replace('C(CE)/SN', 'CCE/SN')}
+            </div>
+
+            {/* Bookmark Icon */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleBookmark?.(assistant.id);
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <Bookmark
+                      className={`w-5 h-5 ${isBookmarked ? 'fill-gray-900 text-gray-900' : 'text-gray-400'}`}
+                    />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Bookmark</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
 
           {/* Icon Container */}
           <div className={`w-12 h-12 rounded-lg ${iconBgColor} flex items-center justify-center flex-shrink-0 mb-4`}>
@@ -104,12 +115,6 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
             <p className="text-sm text-gray-500 leading-relaxed">
               {assistant.description}
             </p>
-          </div>
-
-          {/* Classification */}
-          <div className="flex items-center text-xs text-gray-500">
-            <Database className="w-3.5 h-3.5 mr-1.5 flex-shrink-0" />
-            <span className="truncate">{assistant.classification.replace('C(CE)/SN', 'CCE/SN')}</span>
           </div>
         </CardContent>
       </Card>

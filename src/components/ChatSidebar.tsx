@@ -105,16 +105,44 @@ export function ChatSidebar({
     new Map(allAvailableAssistants.map(a => [a.id, a])).values()
   );
 
-  // If there are bookmarked assistants, use those; otherwise use default PQ and HR
-  const recommendedAssistants = bookmarkedAssistants.length > 0
-    ? bookmarkedAssistants
-        .map(id => uniqueAssistants.find(a => a.id === id))
-        .filter((a): a is import('../data/assistants').Assistant => a !== undefined)
-    : uniqueAssistants.filter(
-        assistant =>
-          assistant.assistantType === 'parliamentary-question' ||
-          assistant.assistantType === 'workday-shortlister'
-      );
+  // Always show 3 assistants in sidebar
+  // If user has bookmarked assistants, show those (up to 3)
+  // Otherwise, show default assistants (PQ and HR)
+  const defaultAssistants = uniqueAssistants.filter(
+    assistant =>
+      assistant.assistantType === 'parliamentary-question' ||
+      assistant.assistantType === 'workday-shortlister'
+  );
+
+  let recommendedAssistants;
+  if (bookmarkedAssistants.length > 0) {
+    // User has bookmarks - show up to 3 bookmarked assistants
+    recommendedAssistants = bookmarkedAssistants
+      .map(id => uniqueAssistants.find(a => a.id === id))
+      .filter((a): a is import('../data/assistants').Assistant => a !== undefined)
+      .slice(0, 3); // Take only first 3 bookmarks
+
+    // If less than 3 bookmarks, fill with defaults
+    if (recommendedAssistants.length < 3) {
+      const bookmarkedIds = new Set(bookmarkedAssistants);
+      const additionalDefaults = defaultAssistants
+        .filter(a => !bookmarkedIds.has(a.id))
+        .slice(0, 3 - recommendedAssistants.length);
+      recommendedAssistants = [...recommendedAssistants, ...additionalDefaults];
+    }
+  } else {
+    // No bookmarks - show defaults, ensuring we have 3
+    recommendedAssistants = defaultAssistants.slice(0, 3);
+
+    // If we don't have 3 defaults, add more from unique assistants
+    if (recommendedAssistants.length < 3) {
+      const defaultIds = new Set(recommendedAssistants.map(a => a.id));
+      const additionalAssistants = uniqueAssistants
+        .filter(a => !defaultIds.has(a.id))
+        .slice(0, 3 - recommendedAssistants.length);
+      recommendedAssistants = [...recommendedAssistants, ...additionalAssistants];
+    }
+  }
 
   const handleDragStart = (e: React.DragEvent, chatId: string) => {
     e.dataTransfer.setData('chatId', chatId);
@@ -382,9 +410,8 @@ export function ChatSidebar({
                             onDragOver={(e) => handleDragOver(e, folder.id)}
                             onDragLeave={handleDragLeave}
                             onDrop={(e) => handleDrop(e, folder.id)}
-                            className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${
-                              dragOverFolderId === folder.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
-                            }`}
+                            className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${dragOverFolderId === folder.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
+                              }`}
                           >
                             <Folder className="w-4 h-4 text-gray-500" />
                             <span className="truncate flex-1">{folder.name}</span>
@@ -419,9 +446,8 @@ export function ChatSidebar({
                           return (
                             <div
                               key={sim.id}
-                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${
-                                activeChatId === `sim-${sim.id}` ? 'bg-gray-200' : 'hover:bg-gray-200'
-                              }`}
+                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === `sim-${sim.id}` ? 'bg-gray-200' : 'hover:bg-gray-200'
+                                }`}
                               onClick={() => onSelectSimulation?.(sim.id)}
                               title={sim.title}
                             >
@@ -484,121 +510,127 @@ export function ChatSidebar({
                           .filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
                           .filter(chat => !folders?.some(folder => folder.chatIds.includes(chat.id)))
                           .map(chat => {
-                          const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
-                          const isEditing = editingChatId === chat.id;
+                            const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
+                            const isEditing = editingChatId === chat.id;
 
-                          return (
-                            <div
-                              key={chat.id}
-                              draggable={!isEditing}
-                              onDragStart={(e) => handleDragStart(e, chat.id)}
-                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${
-                                chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'
-                              }`}
-                              onClick={() => !isEditing && onSelectChat(chat.id)}
-                              title={chat.title}
-                            >
-                              {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={editChatName}
-                                  onChange={(e) => setEditChatName(e.target.value)}
-                                  onBlur={() => {
-                                    if (editChatName.trim() && onRenameChat) {
-                                      onRenameChat(chat.id, editChatName.trim());
-                                    }
-                                    setEditingChatId(null);
-                                  }}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
+                            return (
+                              <div
+                                key={chat.id}
+                                draggable={!isEditing}
+                                onDragStart={(e) => handleDragStart(e, chat.id)}
+                                className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'
+                                  }`}
+                                onClick={() => !isEditing && onSelectChat(chat.id)}
+                                title={chat.title}
+                              >
+                                {isEditing ? (
+                                  <input
+                                    type="text"
+                                    value={editChatName}
+                                    onChange={(e) => setEditChatName(e.target.value)}
+                                    onBlur={() => {
                                       if (editChatName.trim() && onRenameChat) {
                                         onRenameChat(chat.id, editChatName.trim());
                                       }
                                       setEditingChatId(null);
-                                    } else if (e.key === 'Escape') {
-                                      setEditingChatId(null);
-                                    }
-                                  }}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                  autoFocus
-                                />
-                              ) : (
-                                <span
-                                  className="flex-1 truncate text-gray-900"
-                                  onDoubleClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditChatName(chat.title);
-                                    setEditingChatId(chat.id);
-                                  }}
-                                  title="Double-click to rename"
-                                >
-                                  {displayTitle}
-                                </span>
-                              )}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0"
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        if (editChatName.trim() && onRenameChat) {
+                                          onRenameChat(chat.id, editChatName.trim());
+                                        }
+                                        setEditingChatId(null);
+                                      } else if (e.key === 'Escape') {
+                                        setEditingChatId(null);
+                                      }
+                                    }}
                                     onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <MoreHorizontal className="w-3 h-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
+                                    className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                    autoFocus
+                                  />
+                                ) : (
+                                  <span
+                                    className="flex-1 truncate text-gray-900"
+                                    onDoubleClick={(e) => {
                                       e.stopPropagation();
                                       setEditChatName(chat.title);
                                       setEditingChatId(chat.id);
                                     }}
-                                    className="hover:bg-gray-100"
+                                    title="Double-click to rename"
                                   >
-                                    <Pencil className="w-4 h-4 mr-2" />
-                                    Rename
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onPinChat?.(chat.id);
-                                    }}
-                                    className="hover:bg-gray-100"
-                                  >
-                                    <Pin className="w-4 h-4 mr-2" />
-                                    Pin
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onDeleteChat(chat.id);
-                                    }}
-                                    className="text-red-500 hover:bg-gray-100"
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          );
-                        })}
+                                    {displayTitle}
+                                  </span>
+                                )}
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      <MoreHorizontal className="w-3 h-3" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setEditChatName(chat.title);
+                                        setEditingChatId(chat.id);
+                                      }}
+                                      className="hover:bg-gray-100"
+                                    >
+                                      <Pencil className="w-4 h-4 mr-2" />
+                                      Rename
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPinChat?.(chat.id);
+                                      }}
+                                      className="hover:bg-gray-100"
+                                    >
+                                      <Pin className="w-4 h-4 mr-2" />
+                                      Pin
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteChat(chat.id);
+                                      }}
+                                      className="text-red-500 hover:bg-gray-100"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            );
+                          })}
 
                         {/* Empty state placeholder */}
                         {viewedSimulations.length === 0 &&
-                         chats.filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
-                              .filter(chat => !folders?.some(folder => folder.chatIds.includes(chat.id)))
-                              .length === 0 && (
-                          <div className="px-2 py-4 text-center">
-                            <div className="flex flex-col items-center gap-2">
-                              <SquarePen className="w-4 h-4 text-gray-400" />
-                              <p className="text-sm text-gray-500">
-                                Start a new chat to begin
-                              </p>
+                          chats.filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
+                            .filter(chat => !folders?.some(folder => folder.chatIds.includes(chat.id)))
+                            .length === 0 && (
+                            <div className="px-2 py-4 text-center">
+                              <div className="flex items-center gap-2 justify-center">
+                                <SquarePen className="w-4 h-4 text-gray-400" />
+                                <p className="text-sm text-gray-500">
+                                  Start a{' '}
+                                  <button
+                                    onClick={onNewChat}
+                                    className="text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
+                                  >
+                                    new chat
+                                  </button>
+                                  {' '}to begin
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                        )}
+                          )}
                       </div>
                     </CollapsibleContent>
                   </Collapsible>
@@ -682,14 +714,14 @@ export function ChatSidebar({
         onOpenChange={onSearchModalChange}
         chats={chats}
         onSelectChat={onSelectChat}
-        onSelectSimulation={onSelectSimulation || (() => {})}
+        onSelectSimulation={onSelectSimulation || (() => { })}
       />
 
       {/* Create Folder Dialog */}
       <CreateFolderDialog
         open={createFolderOpen}
         onOpenChange={setCreateFolderOpen}
-        onCreateFolder={onCreateFolder || (() => {})}
+        onCreateFolder={onCreateFolder || (() => { })}
       />
     </>
   );
