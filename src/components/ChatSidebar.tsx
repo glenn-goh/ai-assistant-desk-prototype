@@ -456,25 +456,20 @@ export function ChatSidebar({
 
                           const entries: UnifiedEntry[] = [];
 
-                          // Simulation instances
+                          // Simulation instances - only show after first user message
                           for (const inst of simulationInstances) {
-                            if (simMeta[inst.simulationId]) {
+                            if (simMeta[inst.simulationId] && startedSimulations.includes(inst.instanceId)) {
                               const ts = parseInt(inst.instanceId.split('-').pop() || '0', 10);
                               entries.push({ type: 'simulation', key: inst.instanceId, timestamp: ts });
                             }
                           }
 
-                          // Legacy simulations (non-instance)
+                          // Legacy simulations (non-instance) - only show after first user message
                           const instanceSimIds = new Set(simulationInstances.map(i => i.simulationId));
                           for (const simId of Object.keys(simMeta)) {
-                            if (!instanceSimIds.has(simId) && viewedSimulations.includes(simId)) {
+                            if (!instanceSimIds.has(simId) && viewedSimulations.includes(simId) && startedSimulations.includes(`sim-${simId}`)) {
                               entries.push({ type: 'simulation', key: simId, timestamp: 0 });
                             }
-                          }
-
-                          // Preview chat
-                          if (previewChat) {
-                            entries.push({ type: 'preview', key: previewChat.id, timestamp: previewChat.createdAt.getTime() });
                           }
 
                           // Regular chats
@@ -497,16 +492,14 @@ export function ChatSidebar({
                               const meta = simMeta[simId];
                               if (!meta) return null;
                               const activeChatKey = inst ? inst.instanceId : `sim-${simId}`;
-                              const hasStarted = startedSimulations.includes(activeChatKey);
-                              const titleText = hasStarted ? meta.title : 'Untitled';
-                              const displayTitle = titleText.length > 24 ? titleText.substring(0, 24) + '...' : titleText;
+                              const displayTitle = meta.title.length > 24 ? meta.title.substring(0, 24) + '...' : meta.title;
 
                               return (
                                 <div
                                   key={entry.key}
                                   className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === activeChatKey ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
                                   onClick={() => onSelectSimulation?.(inst ? inst.instanceId : simId)}
-                                  title={hasStarted ? meta.title : 'Untitled'}
+                                  title={meta.title}
                                 >
                                   <div className="flex-1 flex flex-col gap-0.5 min-w-0">
                                     <span className="truncate text-gray-900">{displayTitle}</span>
@@ -530,23 +523,6 @@ export function ChatSidebar({
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>
-                                </div>
-                              );
-                            }
-
-                            // --- Preview chat entry ---
-                            if (entry.type === 'preview' && previewChat) {
-                              return (
-                                <div
-                                  key={previewChat.id}
-                                  className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${previewChat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
-                                  onClick={() => onSelectChat(previewChat.id)}
-                                  title="Untitled"
-                                >
-                                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                                    <span className="truncate text-gray-900">Untitled</span>
-                                    <span className="text-xs text-gray-500 truncate">{previewChat.assistantName || 'My AI Assistant'}</span>
-                                  </div>
                                 </div>
                               );
                             }
