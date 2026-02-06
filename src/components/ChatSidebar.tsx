@@ -439,9 +439,9 @@ export function ChatSidebar({
                       <div className="space-y-0.5 mt-0.5">
                         {/* Demo Simulations - Show only if viewed */}
                         {[
-                          { id: 'hr-candidate-shortlisting', title: 'HR Candidate Shortlisting', classification: 'rsn' as const },
-                          { id: 'pq-response-mnd-v2', title: 'PQ Response - MND Housing', classification: 'rsn' as const },
-                          { id: 'canvas-demo', title: 'Canvas Generation Demo', classification: 'rsn' as const },
+                          { id: 'hr-candidate-shortlisting', title: 'HR Candidate Shortlisting', assistantName: 'HR Recruitment Assistant', classification: 'rsn' as const },
+                          { id: 'pq-response-mnd-v2', title: 'PQ Response - MND Housing', assistantName: 'Parliamentary Question Assistant', classification: 'rsn' as const },
+                          { id: 'canvas-demo', title: 'Canvas Generation Demo', assistantName: undefined as string | undefined, classification: 'rsn' as const },
                         ].filter(sim => viewedSimulations.includes(sim.id)).map(sim => {
                           const displayTitle = sim.title.length > 24 ? sim.title.substring(0, 24) + '...' : sim.title;
 
@@ -453,7 +453,12 @@ export function ChatSidebar({
                               onClick={() => onSelectSimulation?.(sim.id)}
                               title={sim.title}
                             >
-                              <span className="flex-1 truncate text-gray-900">{displayTitle}</span>
+                              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                                <span className="truncate text-gray-900">{displayTitle}</span>
+                                <span className="text-xs text-gray-500 truncate">
+                                  {sim.assistantName || 'My AI Assistant'}
+                                </span>
+                              </div>
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button

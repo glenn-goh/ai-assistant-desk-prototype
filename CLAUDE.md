@@ -48,6 +48,8 @@ Chats transition through states managed in App.tsx:
 
 Active chat is derived with priority: incognito > preview > new draft > regular chats.
 
+**Assistant Chat Naming:** When a user starts a chat with a custom assistant, the header initially shows only the assistant name as the title (no subtitle). After the first user message, the title changes to a predefined mock chat name (from `getAssistantMockTitle()` in App.tsx) and the assistant name becomes the subtitle. This applies to both simulator mode (using `data.assistantName`/`data.title`) and interactive mode (using `assistantName` prop/`interactiveTitle`).
+
 ### ChatSimulatorView Dual-Mode Component
 
 `ChatSimulatorView` handles both scripted demos and real interactive chats:
@@ -64,7 +66,7 @@ Active chat is derived with priority: incognito > preview > new draft > regular 
 
 ### Simulation Data Format
 
-Pre-scripted conversation flows in `src/data/`. Bot responses can be:
+Pre-scripted conversation flows in `src/data/`. Each simulation has `id`, `title` (shown after first user message), optional `assistantName` (shown as title before first user message, subtitle after), and `messages`. Bot responses can be:
 - `ThinkingResponse` — `{type: "thinking", thought?, reasoning?: string[], timingMs?}`
 - `TextResponse` — `{type: "text", content: string, delayMs?}`
 - `ArtifactResponse` — `{type: "artifact", title, fileType, description, content, delayMs?, interactive?}`
@@ -74,7 +76,7 @@ Pre-scripted conversation flows in `src/data/`. Bot responses can be:
 
 ```typescript
 interface Message { id, role: 'user' | 'assistant', content, timestamp, hasFile?, fileName? }
-interface Chat { id, title, messages: Message[], createdAt, assistantType?, classificationType?, isIncognito? }
+interface Chat { id, title, messages: Message[], createdAt, assistantType?, assistantName?, classificationType?, isIncognito? }
 interface Folder { id, name, createdAt, chatIds: string[], customInstructions?, files?, memoriesScope }
 interface UserProfile { name, email, role, agency, profileDescription?, workFocus?, customInstructions?, traits?, aiStyle?, workActivities?, dataSources? }
 ```
