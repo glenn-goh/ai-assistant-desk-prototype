@@ -47,7 +47,7 @@ export function getWebSearchResponses(searchTerm: string): WebSearchResponses {
       },
       {
         type: "decision",
-        question: `I'd like to search the web for "${searchTerm}". This will query external sources. Would you like to proceed?`,
+        question: `I would like to search the web for "${searchTerm}" using the Web search tool. This will query external sources. Would you like to proceed?`,
         options: [
           { label: "Proceed with search", value: "proceed", variant: "primary" },
           { label: "Cancel", value: "cancel", variant: "secondary" },
