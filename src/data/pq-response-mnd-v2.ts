@@ -1,6 +1,7 @@
 export const pqResponseDataV2 = {
   id: "pq-response-mnd-v2",
-  title: "PQ Response - MND Housing (V2)",
+  title: "Draft PQ response on BTO flat waiting times ",
+  assistantName: "Parliamentary Question Assistant",
   description: "Enhanced PQ response workflow with contextual assistance and form-based inputs",
   colorScheme: "purple" as const,
   messages: [
