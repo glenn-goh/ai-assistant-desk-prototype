@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Trash2, FolderOpen, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Pin, Pencil } from 'lucide-react';
+import { Settings, Trash2, FolderOpen, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Pin, Pencil, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
@@ -53,6 +53,7 @@ interface ChatSidebarProps {
   startedSimulations?: string[];
   bookmarkedAssistants?: string[];
   previewChat?: Chat | null;
+  onToggleBookmark?: (assistantId: string) => void;
 }
 
 export function ChatSidebar({
@@ -95,10 +96,11 @@ export function ChatSidebar({
   startedSimulations = [],
   bookmarkedAssistants = [],
   previewChat = null,
+  onToggleBookmark,
 }: ChatSidebarProps) {
   const [recentChatsOpen, setRecentChatsOpen] = useState(true);
-  const [customAssistantsOpen, setCustomAssistantsOpen] = useState(false);
-  const [projectsOpen, setProjectsOpen] = useState(false);
+  const [customAssistantsOpen, setCustomAssistantsOpen] = useState(true);
+  const [projectsOpen, setProjectsOpen] = useState(true);
   const [createProjectOpen, setCreateProjectOpen] = useState(false);
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
@@ -106,49 +108,66 @@ export function ChatSidebar({
   const [editChatName, setEditChatName] = useState('');
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
-  // Get bookmarked assistants
+  // Get all available assistants
   const allRoleAssistants = Object.values(roleBasedAssistants).flat();
   const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
   const uniqueAssistants = Array.from(
     new Map(allAvailableAssistants.map(a => [a.id, a])).values()
   );
 
-  // Always show 3 assistants in sidebar
-  // If user has bookmarked assistants, show those (up to 3)
-  // Otherwise, show default assistants (PQ and HR)
-  const defaultAssistants = uniqueAssistants.filter(
-    assistant =>
-      assistant.assistantType === 'parliamentary-question' ||
-      assistant.assistantType === 'workday-shortlister'
+  // Find custom assistants user has chatted with (from chat history)
+  const chattedAssistantTypes = new Set(
+    chats
+      .filter(chat => chat.assistantType) // Only chats with custom assistants
+      .map(chat => chat.assistantType)
   );
 
-  let recommendedAssistants;
-  if (bookmarkedAssistants.length > 0) {
-    // User has bookmarks - show up to 3 bookmarked assistants
-    recommendedAssistants = bookmarkedAssistants
+  // Get assistants user has interacted with
+  const interactedAssistants = uniqueAssistants.filter(a => chattedAssistantTypes.has(a.assistantType));
+
+  // Build the custom assistants list
+  let recommendedAssistants: import('../data/assistants').Assistant[] = [];
+
+  // Only show section if user has bookmarked or chatted with custom assistants
+  const hasCustomAssistants = bookmarkedAssistants.length > 0 || interactedAssistants.length > 0;
+
+  if (hasCustomAssistants) {
+    // First, add bookmarked assistants (in order of bookmarking, max 3)
+    const bookmarkedList = bookmarkedAssistants
       .map(id => uniqueAssistants.find(a => a.id === id))
       .filter((a): a is import('../data/assistants').Assistant => a !== undefined)
-      .slice(0, 3); // Take only first 3 bookmarks
+      .slice(0, 3);
 
-    // If less than 3 bookmarks, fill with defaults
-    if (recommendedAssistants.length < 3) {
-      const bookmarkedIds = new Set(bookmarkedAssistants);
-      const additionalDefaults = defaultAssistants
-        .filter(a => !bookmarkedIds.has(a.id))
-        .slice(0, 3 - recommendedAssistants.length);
-      recommendedAssistants = [...recommendedAssistants, ...additionalDefaults];
-    }
-  } else {
-    // No bookmarks - show defaults, ensuring we have 3
-    recommendedAssistants = defaultAssistants.slice(0, 3);
+    recommendedAssistants = [...bookmarkedList];
 
-    // If we don't have 3 defaults, add more from unique assistants
-    if (recommendedAssistants.length < 3) {
-      const defaultIds = new Set(recommendedAssistants.map(a => a.id));
-      const additionalAssistants = uniqueAssistants
-        .filter(a => !defaultIds.has(a.id))
-        .slice(0, 3 - recommendedAssistants.length);
-      recommendedAssistants = [...recommendedAssistants, ...additionalAssistants];
+    // Then, add recently used non-bookmarked assistants (up to max 5 total)
+    const bookmarkedAssistantTypes = new Set(
+      bookmarkedList.map(a => a.assistantType)
+    );
+    const remainingSlots = 5 - recommendedAssistants.length;
+
+    if (remainingSlots > 0) {
+      // Get chats with custom assistants, most recent first
+      // Exclude assistants that are already bookmarked (by assistantType)
+      const recentChatsWithAssistants = chats
+        .filter(chat => chat.assistantType && !bookmarkedAssistantTypes.has(chat.assistantType))
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+      // Get unique assistant types from recent chats
+      const seenTypes = new Set<string>();
+      const recentAssistants: import('../data/assistants').Assistant[] = [];
+
+      for (const chat of recentChatsWithAssistants) {
+        if (chat.assistantType && !seenTypes.has(chat.assistantType) && recentAssistants.length < remainingSlots) {
+          const assistant = uniqueAssistants.find(a => a.assistantType === chat.assistantType);
+          if (assistant) {
+            recentAssistants.push(assistant);
+            seenTypes.add(chat.assistantType);
+          }
+        }
+      }
+
+      recommendedAssistants = [...recommendedAssistants, ...recentAssistants];
     }
   }
 
@@ -358,79 +377,110 @@ export function ChatSidebar({
                     </Tooltip>
                   </TooltipProvider>
 
-                  {/* Custom Assistants Section */}
-                  <Collapsible open={customAssistantsOpen} onOpenChange={setCustomAssistantsOpen} className="mt-3" data-tour="custom-assistants">
-                    <CollapsibleTrigger className="w-full">
-                      <SectionHeader
-                        label="Custom Assistants"
-                        isOpen={customAssistantsOpen}
-                        sectionId="assistants"
-                      />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="space-y-0.5 mt-0.5">
-                        {recommendedAssistants.map(assistant => {
-                          const IconComponent = assistant.icon;
-                          return (
+                  {/* New Project Button */}
+                  <Button
+                    data-tour="new-project"
+                    className="w-full justify-start gap-2 px-2 h-9 text-sm mt-1"
+                    variant="ghost"
+                    onClick={() => setCreateProjectOpen(true)}
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                    <span className="flex-1 text-left">New Project</span>
+                  </Button>
+
+                  {/* Explore Assistants Button */}
+                  <Button
+                    data-tour="explore-assistants"
+                    className="w-full justify-start gap-2 px-2 h-9 text-sm mt-1"
+                    variant="ghost"
+                    onClick={onExploreClick}
+                  >
+                    <Compass className="w-4 h-4" />
+                    <span className="flex-1 text-left">Explore Assistants</span>
+                  </Button>
+
+                  {/* Projects Section - Only show if there are projects */}
+                  {projects.length > 0 && (
+                    <Collapsible open={projectsOpen} onOpenChange={setProjectsOpen} className="mt-2" data-tour="projects">
+                      <CollapsibleTrigger className="w-full">
+                        <SectionHeader
+                          label="Projects"
+                          isOpen={projectsOpen}
+                          sectionId="projects"
+                        />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="space-y-0.5 mt-0.5">
+                          {projects.map(project => (
                             <button
-                              key={assistant.id}
-                              onClick={() => onStartAssistantChat?.(assistant.name, assistant.assistantType)}
-                              className="w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left"
+                              key={project.id}
+                              onClick={() => onSelectProject?.(project.id)}
+                              onDragOver={(e) => handleDragOver(e, project.id)}
+                              onDragLeave={handleDragLeave}
+                              onDrop={(e) => handleDrop(e, project.id)}
+                              className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${dragOverProjectId === project.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
+                                }`}
                             >
-                              <IconComponent className="w-4 h-4 text-gray-500" />
-                              <span className="truncate">{assistant.name}</span>
+                              <Folder className="w-4 h-4 text-gray-500" />
+                              <span className="truncate flex-1">{project.name}</span>
+                              <span className="text-xs text-gray-400">{project.chatIds.length}</span>
                             </button>
-                          );
-                        })}
-                        <button
-                          onClick={onExploreClick}
-                          className="w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-semibold hover:bg-gray-200 text-left"
-                        >
-                          <Compass className="w-4 h-4 text-gray-500" />
-                          <span>Explore Assistants</span>
-                        </button>
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
 
-                  {/* Projects Section */}
-                  <Collapsible open={projectsOpen} onOpenChange={setProjectsOpen} className="mt-2" data-tour="projects">
-                    <CollapsibleTrigger className="w-full">
-                      <SectionHeader
-                        label="Projects"
-                        isOpen={projectsOpen}
-                        sectionId="projects"
-                      />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="space-y-0.5 mt-0.5">
-                        <button
-                          onClick={() => setCreateProjectOpen(true)}
-                          className="w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-semibold hover:bg-gray-200 text-left text-gray-700"
-                        >
-                          <FolderPlus className="w-4 h-4" />
-                          <span>New Project</span>
-                        </button>
-                        {projects.map(project => (
-                          <button
-                            key={project.id}
-                            onClick={() => onSelectProject?.(project.id)}
-                            onDragOver={(e) => handleDragOver(e, project.id)}
-                            onDragLeave={handleDragLeave}
-                            onDrop={(e) => handleDrop(e, project.id)}
-                            className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${dragOverProjectId === project.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
-                              }`}
-                          >
-                            <Folder className="w-4 h-4 text-gray-500" />
-                            <span className="truncate flex-1">{project.name}</span>
-                            <span className="text-xs text-gray-400">{project.chatIds.length}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                  {/* Custom Assistants Section - Only show if user has bookmarked or chatted with assistants */}
+                  {hasCustomAssistants && (
+                    <Collapsible open={customAssistantsOpen} onOpenChange={setCustomAssistantsOpen} className="mt-2" data-tour="custom-assistants">
+                      <CollapsibleTrigger className="w-full">
+                        <SectionHeader
+                          label="Custom Assistants"
+                          isOpen={customAssistantsOpen}
+                          sectionId="assistants"
+                        />
+                      </CollapsibleTrigger>
+                      <CollapsibleContent>
+                        <div className="space-y-0.5 mt-0.5">
+                          {recommendedAssistants.map(assistant => {
+                            const IconComponent = assistant.icon;
+                            const isBookmarked = bookmarkedAssistants.includes(assistant.id);
+                            return (
+                              <div
+                                key={assistant.id}
+                                className="group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal hover:bg-gray-200"
+                              >
+                                <IconComponent className="w-4 h-4 text-gray-500" />
+                                <span
+                                  className="truncate flex-1 ml-2"
+                                  onClick={() => onStartAssistantChat?.(assistant.name, assistant.assistantType)}
+                                >
+                                  {assistant.name}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onToggleBookmark?.(assistant.id);
+                                  }}
+                                  className={`flex-shrink-0 p-1 hover:bg-gray-300 rounded transition-colors ${
+                                    isBookmarked ? '' : 'opacity-0 group-hover:opacity-100'
+                                  }`}
+                                  title={isBookmarked ? 'Remove bookmark' : 'Bookmark assistant'}
+                                >
+                                  <Bookmark
+                                    className={`w-3.5 h-3.5 text-gray-500 ${isBookmarked ? 'fill-gray-500' : ''}`}
+                                  />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  )}
 
-                  {/* Recent Chats Section */}
+                  {/* Recent Chats Section - Always at the bottom */}
                   <Collapsible open={recentChatsOpen} onOpenChange={setRecentChatsOpen} className="mt-2" data-tour="recent-chats">
                     <CollapsibleTrigger className="w-full">
                       <SectionHeader
@@ -515,9 +565,6 @@ export function ChatSidebar({
                                       <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
                                         <Pencil className="w-4 h-4 mr-2" /> Rename
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
-                                        <Pin className="w-4 h-4 mr-2" /> Pin
-                                      </DropdownMenuItem>
                                       <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="text-red-500 hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
                                         <Trash2 className="w-4 h-4 mr-2" /> Delete
                                       </DropdownMenuItem>
@@ -595,9 +642,6 @@ export function ChatSidebar({
                                     <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
                                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditChatName(chat.title); setEditingChatId(chat.id); }} className="hover:bg-gray-100">
                                         <Pencil className="w-4 h-4 mr-2" /> Rename
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPinChat?.(chat.id); }} className="hover:bg-gray-100">
-                                        <Pin className="w-4 h-4 mr-2" /> Pin
                                       </DropdownMenuItem>
                                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setChatToDelete(chat.id); }} className="text-red-500 hover:bg-gray-100">
                                         <Trash2 className="w-4 h-4 mr-2" /> Delete
