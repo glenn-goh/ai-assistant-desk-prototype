@@ -60,7 +60,7 @@ export function getWebSearchResponses(searchTerm: string): WebSearchResponses {
         thoughts: [],
         timingMs: 3000,
         reasoning: [
-          { text: "Web Search", icon: "search", description: `Using the web search tool to find results for "${searchTerm}"` },
+          { text: `Using the Web Search tool...`, icon: "wrench", description: `Querying external web sources to find relevant results for "${searchTerm}".` },
           { text: "Retrieving results", icon: "database", description: "Fetching data from multiple external sources" },
           { text: "Analyzing results", icon: "search", description: "Evaluating relevance and reliability of each source" },
           { text: "Cross-referencing", icon: "file-text", description: "Verifying information across multiple sources" },
