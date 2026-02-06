@@ -49,6 +49,7 @@ interface ChatSidebarProps {
   onSearchModalChange?: (open: boolean) => void;
   onWalkthroughStart?: () => void;
   viewedSimulations?: string[];
+  simulationInstances?: Array<{ instanceId: string; simulationId: string }>;
   startedSimulations?: string[];
   bookmarkedAssistants?: string[];
   previewChat?: Chat | null;
@@ -90,6 +91,7 @@ export function ChatSidebar({
   onSearchModalChange,
   onWalkthroughStart,
   viewedSimulations = [],
+  simulationInstances = [],
   startedSimulations = [],
   bookmarkedAssistants = [],
   previewChat = null,
@@ -441,212 +443,201 @@ export function ChatSidebar({
                     </CollapsibleTrigger>
                     <CollapsibleContent>
                       <div className="space-y-0.5 mt-0.5">
-                        {/* Demo Simulations - Show only if viewed */}
-                        {[
-                          { id: 'hr-candidate-shortlisting', title: 'Screen candidates for GTA-2024-SE-089', assistantName: 'HR Recruitment Assistant', classification: 'rsn' as const },
-                          { id: 'pq-response-mnd-v2', title: 'Draft PQ response on BTO flat waiting times', assistantName: 'Parliamentary Question Assistant', classification: 'rsn' as const },
-                          { id: 'canvas-demo', title: 'Canvas Generation Demo', assistantName: undefined as string | undefined, classification: 'rsn' as const },
-                        ].filter(sim => viewedSimulations.includes(sim.id)).map(sim => {
-                          const hasStarted = startedSimulations.includes(sim.id);
-                          const titleText = hasStarted ? sim.title : 'Untitled';
-                          const displayTitle = titleText.length > 24 ? titleText.substring(0, 24) + '...' : titleText;
+                        {/* Unified Recent Chats list - all entries sorted by creation time (newest first) */}
+                        {(() => {
+                          const simMeta: Record<string, { title: string; assistantName?: string }> = {
+                            'hr-candidate-shortlisting': { title: 'Screen candidates for GTA-2024-SE-089', assistantName: 'HR Recruitment Assistant' },
+                            'pq-response-mnd-v2': { title: 'Draft PQ response on BTO flat waiting times', assistantName: 'Parliamentary Question Assistant' },
+                            'canvas-demo': { title: 'Canvas Generation Demo' },
+                          };
 
-                          return (
-                            <div
-                              key={sim.id}
-                              className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === `sim-${sim.id}` ? 'bg-gray-200' : 'hover:bg-gray-200'
-                                }`}
-                              onClick={() => onSelectSimulation?.(sim.id)}
-                              title={hasStarted ? sim.title : 'Untitled'}
-                            >
-                              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                                <span className="truncate text-gray-900">{displayTitle}</span>
-                                <span className="text-xs text-gray-500 truncate">
-                                  {sim.assistantName || 'My AI Assistant'}
-                                </span>
-                              </div>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <MoreHorizontal className="w-3 h-3" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      // Note: Simulations can't be renamed as they're read-only demos
-                                    }}
-                                    className="hover:bg-gray-100 opacity-50 cursor-not-allowed"
-                                    disabled
-                                  >
-                                    <Pencil className="w-4 h-4 mr-2" />
-                                    Rename
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      // Note: Simulations can't be pinned
-                                    }}
-                                    className="hover:bg-gray-100 opacity-50 cursor-not-allowed"
-                                    disabled
-                                  >
-                                    <Pin className="w-4 h-4 mr-2" />
-                                    Pin
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      // Note: Simulations can't be deleted
-                                    }}
-                                    className="text-red-500 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-                                    disabled
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Delete
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          );
-                        })}
+                          type EntryType = 'simulation' | 'preview' | 'chat';
+                          interface UnifiedEntry { type: EntryType; key: string; timestamp: number; }
 
-                        {/* Preview Chat - shows as "Untitled" before first message */}
-                        {previewChat && (
-                          <div
-                            key={previewChat.id}
-                            className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${previewChat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
-                            onClick={() => onSelectChat(previewChat.id)}
-                            title="Untitled"
-                          >
-                            <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                              <span className="truncate text-gray-900">Untitled</span>
-                              <span className="text-xs text-gray-500 truncate">
-                                {previewChat.assistantName || 'My AI Assistant'}
-                              </span>
-                            </div>
-                          </div>
-                        )}
+                          const entries: UnifiedEntry[] = [];
 
-                        {/* Regular Chats - draggable with ellipsis on hover */}
-                        {/* Filter out CCE/SN and CCE/SH chats (ephemeral, don't save to history) */}
-                        {/* Also filter out chats that are in projects */}
-                        {chats
-                          .filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
-                          .filter(chat => !projects?.some(project => project.chatIds.includes(chat.id)))
-                          .map(chat => {
-                            const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
-                            const isEditing = editingChatId === chat.id;
+                          // Simulation instances
+                          for (const inst of simulationInstances) {
+                            if (simMeta[inst.simulationId]) {
+                              const ts = parseInt(inst.instanceId.split('-').pop() || '0', 10);
+                              entries.push({ type: 'simulation', key: inst.instanceId, timestamp: ts });
+                            }
+                          }
 
-                            return (
-                              <div
-                                key={chat.id}
-                                draggable={!isEditing}
-                                onDragStart={(e) => handleDragStart(e, chat.id)}
-                                className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'
-                                  }`}
-                                onClick={() => !isEditing && onSelectChat(chat.id)}
-                                title={chat.title}
-                              >
-                                {isEditing ? (
-                                  <input
-                                    type="text"
-                                    value={editChatName}
-                                    onChange={(e) => setEditChatName(e.target.value)}
-                                    onBlur={() => {
-                                      if (editChatName.trim() && onRenameChat) {
-                                        onRenameChat(chat.id, editChatName.trim());
-                                      }
-                                      setEditingChatId(null);
-                                    }}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
+                          // Legacy simulations (non-instance)
+                          const instanceSimIds = new Set(simulationInstances.map(i => i.simulationId));
+                          for (const simId of Object.keys(simMeta)) {
+                            if (!instanceSimIds.has(simId) && viewedSimulations.includes(simId)) {
+                              entries.push({ type: 'simulation', key: simId, timestamp: 0 });
+                            }
+                          }
+
+                          // Preview chat
+                          if (previewChat) {
+                            entries.push({ type: 'preview', key: previewChat.id, timestamp: previewChat.createdAt.getTime() });
+                          }
+
+                          // Regular chats
+                          const filteredChats = chats
+                            .filter(c => c.classificationType !== 'cce-sn' && c.classificationType !== 'cce-sh')
+                            .filter(c => !projects?.some(p => p.chatIds.includes(c.id)));
+                          for (const chat of filteredChats) {
+                            entries.push({ type: 'chat', key: chat.id, timestamp: chat.createdAt.getTime() });
+                          }
+
+                          // Sort by timestamp descending (newest first)
+                          entries.sort((a, b) => b.timestamp - a.timestamp);
+
+                          return entries.map(entry => {
+                            // --- Simulation entry ---
+                            if (entry.type === 'simulation') {
+                              const isInstance = entry.key !== entry.key.replace(/^sim-/, '').replace(/-\d+$/, '');
+                              const inst = simulationInstances.find(i => i.instanceId === entry.key);
+                              const simId = inst?.simulationId || entry.key;
+                              const meta = simMeta[simId];
+                              if (!meta) return null;
+                              const activeChatKey = inst ? inst.instanceId : `sim-${simId}`;
+                              const hasStarted = startedSimulations.includes(activeChatKey);
+                              const titleText = hasStarted ? meta.title : 'Untitled';
+                              const displayTitle = titleText.length > 24 ? titleText.substring(0, 24) + '...' : titleText;
+
+                              return (
+                                <div
+                                  key={entry.key}
+                                  className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === activeChatKey ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                                  onClick={() => onSelectSimulation?.(inst ? inst.instanceId : simId)}
+                                  title={hasStarted ? meta.title : 'Untitled'}
+                                >
+                                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                                    <span className="truncate text-gray-900">{displayTitle}</span>
+                                    <span className="text-xs text-gray-500 truncate">{meta.assistantName || 'My AI Assistant'}</span>
+                                  </div>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                        <MoreHorizontal className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                                      <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
+                                        <Pencil className="w-4 h-4 mr-2" /> Rename
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
+                                        <Pin className="w-4 h-4 mr-2" /> Pin
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="text-red-500 hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
+                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              );
+                            }
+
+                            // --- Preview chat entry ---
+                            if (entry.type === 'preview' && previewChat) {
+                              return (
+                                <div
+                                  key={previewChat.id}
+                                  className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${previewChat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                                  onClick={() => onSelectChat(previewChat.id)}
+                                  title="Untitled"
+                                >
+                                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                                    <span className="truncate text-gray-900">Untitled</span>
+                                    <span className="text-xs text-gray-500 truncate">{previewChat.assistantName || 'My AI Assistant'}</span>
+                                  </div>
+                                </div>
+                              );
+                            }
+
+                            // --- Regular chat entry ---
+                            if (entry.type === 'chat') {
+                              const chat = filteredChats.find(c => c.id === entry.key);
+                              if (!chat) return null;
+                              const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
+                              const isEditing = editingChatId === chat.id;
+
+                              return (
+                                <div
+                                  key={chat.id}
+                                  draggable={!isEditing}
+                                  onDragStart={(e) => handleDragStart(e, chat.id)}
+                                  className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                                  onClick={() => !isEditing && onSelectChat(chat.id)}
+                                  title={chat.title}
+                                >
+                                  {isEditing ? (
+                                    <input
+                                      type="text"
+                                      value={editChatName}
+                                      onChange={(e) => setEditChatName(e.target.value)}
+                                      onBlur={() => {
                                         if (editChatName.trim() && onRenameChat) {
                                           onRenameChat(chat.id, editChatName.trim());
                                         }
                                         setEditingChatId(null);
-                                      } else if (e.key === 'Escape') {
-                                        setEditingChatId(null);
-                                      }
-                                    }}
-                                    onClick={(e) => e.stopPropagation()}
-                                    className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                                    <span
-                                      className="truncate text-gray-900"
-                                      onDoubleClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditChatName(chat.title);
-                                        setEditingChatId(chat.id);
                                       }}
-                                      title="Double-click to rename"
-                                    >
-                                      {displayTitle}
-                                    </span>
-                                    <span className="text-xs text-gray-500 truncate">
-                                      {chat.assistantName || 'My AI Assistant'}
-                                    </span>
-                                  </div>
-                                )}
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0"
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          if (editChatName.trim() && onRenameChat) {
+                                            onRenameChat(chat.id, editChatName.trim());
+                                          }
+                                          setEditingChatId(null);
+                                        } else if (e.key === 'Escape') {
+                                          setEditingChatId(null);
+                                        }
+                                      }}
                                       onClick={(e) => e.stopPropagation()}
-                                    >
-                                      <MoreHorizontal className="w-3 h-3" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setEditChatName(chat.title);
-                                        setEditingChatId(chat.id);
-                                      }}
-                                      className="hover:bg-gray-100"
-                                    >
-                                      <Pencil className="w-4 h-4 mr-2" />
-                                      Rename
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        onPinChat?.(chat.id);
-                                      }}
-                                      className="hover:bg-gray-100"
-                                    >
-                                      <Pin className="w-4 h-4 mr-2" />
-                                      Pin
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setChatToDelete(chat.id);
-                                      }}
-                                      className="text-red-500 hover:bg-gray-100"
-                                    >
-                                      <Trash2 className="w-4 h-4 mr-2" />
-                                      Delete
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            );
-                          })}
+                                      className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                      autoFocus
+                                    />
+                                  ) : (
+                                    <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                                      <span
+                                        className="truncate text-gray-900"
+                                        onDoubleClick={(e) => {
+                                          e.stopPropagation();
+                                          setEditChatName(chat.title);
+                                          setEditingChatId(chat.id);
+                                        }}
+                                        title="Double-click to rename"
+                                      >
+                                        {displayTitle}
+                                      </span>
+                                      <span className="text-xs text-gray-500 truncate">
+                                        {chat.assistantName || 'My AI Assistant'}
+                                      </span>
+                                    </div>
+                                  )}
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                                        <MoreHorizontal className="w-3 h-3" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditChatName(chat.title); setEditingChatId(chat.id); }} className="hover:bg-gray-100">
+                                        <Pencil className="w-4 h-4 mr-2" /> Rename
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPinChat?.(chat.id); }} className="hover:bg-gray-100">
+                                        <Pin className="w-4 h-4 mr-2" /> Pin
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setChatToDelete(chat.id); }} className="text-red-500 hover:bg-gray-100">
+                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                              );
+                            }
+
+                            return null;
+                          });
+                        })()}
 
                         {/* Empty state placeholder */}
-                        {viewedSimulations.length === 0 &&
+                        {viewedSimulations.length === 0 && simulationInstances.length === 0 && !previewChat &&
                           chats.filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
                             .filter(chat => !projects?.some(project => project.chatIds.includes(chat.id)))
                             .length === 0 && (

@@ -104,8 +104,9 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [bookmarkedAssistants, setBookmarkedAssistants] = useState<string[]>([]); // Store assistant IDs
-  const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations
-  const [startedSimulations, setStartedSimulations] = useState<string[]>([]); // Track simulations that have had first user message
+  const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations (base IDs, for non-assistant simulation launches)
+  const [simulationInstances, setSimulationInstances] = useState<Array<{ instanceId: string; simulationId: string }>>([]);  // Each simulation chat instance
+  const [startedSimulations, setStartedSimulations] = useState<string[]>([]); // Track simulation instance IDs that have had first user message
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [swapBookmarkModalOpen, setSwapBookmarkModalOpen] = useState(false);
@@ -450,16 +451,20 @@ export default function App() {
     return starterMessages[assistantType] || "Hello! How can I assist you today?";
   };
 
-  const handleStartAssistantChat = (assistantName: string, assistantType: string) => {
-    // Check if this is the Workday Shortlister - trigger simulation instead
-    if (assistantType === 'workday-shortlister') {
-      handleSelectSimulation('hr-candidate-shortlisting');
-      return;
-    }
+  // Map of assistant types to simulation IDs for assistants that use scripted demos
+  const assistantSimulationMap: Record<string, string> = {
+    'workday-shortlister': 'hr-candidate-shortlisting',
+    'parliamentary-question': 'pq-response-mnd-v2',
+  };
 
-    // Check if this is the Parliamentary Question Assistant - trigger simulation instead
-    if (assistantType === 'parliamentary-question') {
-      handleSelectSimulation('pq-response-mnd-v2');
+  const handleStartAssistantChat = (assistantName: string, assistantType: string) => {
+    const simulationId = assistantSimulationMap[assistantType];
+    if (simulationId) {
+      // Create a new unique instance of this simulation
+      const instanceId = `sim-${simulationId}-${Date.now()}`;
+      setSimulationInstances(prev => [{ instanceId, simulationId }, ...prev]);
+      setActiveChatId(instanceId);
+      setActiveView('chat');
       return;
     }
 
@@ -565,7 +570,13 @@ export default function App() {
   };
 
   const handleSelectSimulation = (simulationId: string) => {
-    // Track that this simulation has been viewed
+    // If it's already an instance ID (starts with sim-), use directly
+    if (simulationId.startsWith('sim-')) {
+      setActiveChatId(simulationId);
+      setActiveView('chat');
+      return;
+    }
+    // Legacy: track that this simulation has been viewed
     if (!viewedSimulations.includes(simulationId)) {
       setViewedSimulations([...viewedSimulations, simulationId]);
     }
@@ -688,25 +699,27 @@ export default function App() {
 
   // Check if current view is a simulation
   const isSimulation = activeChatId.startsWith('sim-');
-  const simulationData = isSimulation
-    ? activeChatId === 'sim-feature-overview'
-      ? featureOverviewData
-      : activeChatId === 'sim-customer-support'
-      ? customerSupportData
-      : activeChatId === 'sim-feedback-collection'
-      ? feedbackCollectionData
-      : activeChatId === 'sim-hr-candidate-shortlisting'
-      ? hrCandidateShortlistingData
-      : activeChatId === 'sim-procurement-rfq'
-      ? procurementRfqData
-      : activeChatId === 'sim-marketing-software-aor'
-      ? marketingSoftwareAorData
-      : activeChatId === 'sim-pq-response-mnd-v2'
-      ? pqResponseDataV2
-      : activeChatId === 'sim-canvas-demo'
-      ? canvasDemoData
-      : null
-    : null;
+  const simulationDataMap: Record<string, any> = {
+    'feature-overview': featureOverviewData,
+    'customer-support': customerSupportData,
+    'feedback-collection': feedbackCollectionData,
+    'hr-candidate-shortlisting': hrCandidateShortlistingData,
+    'procurement-rfq': procurementRfqData,
+    'marketing-software-aor': marketingSoftwareAorData,
+    'pq-response-mnd-v2': pqResponseDataV2,
+    'canvas-demo': canvasDemoData,
+  };
+  // Resolve simulation data: check instance-based IDs first, then legacy exact IDs
+  const resolveSimulationData = () => {
+    if (!isSimulation) return null;
+    // Check if it's an instance ID (e.g., sim-hr-candidate-shortlisting-1738850000)
+    const instance = simulationInstances.find(i => i.instanceId === activeChatId);
+    if (instance) return simulationDataMap[instance.simulationId] || null;
+    // Legacy: exact match (e.g., sim-hr-candidate-shortlisting)
+    const legacyId = activeChatId.replace('sim-', '');
+    return simulationDataMap[legacyId] || null;
+  };
+  const simulationData = resolveSimulationData();
 
   // Early return for login page
   if (!isAuthenticated) {
@@ -779,6 +792,7 @@ export default function App() {
           setIsWalkthroughOpen(true);
         }}
         viewedSimulations={viewedSimulations}
+        simulationInstances={simulationInstances}
         startedSimulations={startedSimulations}
         bookmarkedAssistants={bookmarkedAssistants}
         previewChat={previewChat}
@@ -792,9 +806,8 @@ export default function App() {
               mode="simulator"
               data={simulationData as any}
               onFirstUserMessage={() => {
-                const simId = activeChatId.replace('sim-', '');
-                if (!startedSimulations.includes(simId)) {
-                  setStartedSimulations(prev => [...prev, simId]);
+                if (!startedSimulations.includes(activeChatId)) {
+                  setStartedSimulations(prev => [...prev, activeChatId]);
                 }
               }}
             />
