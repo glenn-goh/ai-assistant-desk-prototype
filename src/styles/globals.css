@@ -451,3 +451,8 @@
   color: transparent;
   animation: shimmer 1.2s linear infinite;
 }
+
+/* Animate resizable panel flex changes */
+[data-slot="resizable-panel"] {
+  transition: flex-grow 200ms ease-out, flex-shrink 200ms ease-out;
+}

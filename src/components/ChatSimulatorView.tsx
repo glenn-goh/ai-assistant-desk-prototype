@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { FileText, X, ArrowLeft, Copy, Download, Check, Undo2, Redo2, EyeOff, MoreHorizontal, FolderPlus } from 'lucide-react';
 import { MessageInput } from './MessageInput';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
+import type { ImperativePanelHandle } from 'react-resizable-panels';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
@@ -156,12 +157,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [isComplete, setIsComplete] = useState(false);
   const [searchingAssistant, setSearchingAssistant] = useState(false);
   const [showOutputPanel, setShowOutputPanel] = useState(false);
+  const [panelContentVisible, setPanelContentVisible] = useState(false);
   const [expandedThinkingIds, setExpandedThinkingIds] = useState<Set<number>>(new Set());
   const [artifactVersions, setArtifactVersions] = useState<{[key: string]: number}>({});
   const [copied, setCopied] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [feedbackMessageId, setFeedbackMessageId] = useState<{[key: string]: 'up' | 'down' | null}>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<ImperativePanelHandle>(null);
   const outputContentRef = useRef<HTMLDivElement>(null);
   const shouldScrollToBottom = useRef(false);
   const lastUserMessageRef = useRef<HTMLDivElement>(null);
@@ -178,6 +181,25 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     accent: 'bg-gray-700',
     ring: 'focus:ring-gray-500'
   };
+
+  // Animate right panel open/close
+  // Open: expand panel → wait for animation → fade in content
+  // Close: hide content instantly → collapse panel
+  useEffect(() => {
+    const panel = rightPanelRef.current;
+    if (!panel) return;
+    if (showOutputPanel) {
+      panel.expand();
+      // Fade in content after panel expand animation (200ms)
+      const timer = setTimeout(() => setPanelContentVisible(true), 220);
+      return () => clearTimeout(timer);
+    } else {
+      // Hide content instantly, then collapse
+      setPanelContentVisible(false);
+      const timer = setTimeout(() => panel.collapse(), 10);
+      return () => clearTimeout(timer);
+    }
+  }, [showOutputPanel]);
 
   // Scroll user's message to top when they send a message (not when assistant replies)
   useEffect(() => {
@@ -360,9 +382,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       } else if (response.type === 'artifact') {
         await sleep(response.delayMs ? response.delayMs / 1.5 : 667); // 1.5x faster: default was 1000
         setDisplayedMessages(prev => [...prev, { type: 'artifact', data: response }]);
-        // Auto-open canvas when artifact is displayed
-        setSelectedArtifact(response);
-        setShowOutputPanel(true);
+        // Only auto-open and select artifact when panel is not already open
+        // If panel is open, keep showing the user's current selection
+        setShowOutputPanel(prev => {
+          if (!prev) {
+            setSelectedArtifact(response);
+          }
+          return true;
+        });
       }
     }
 
@@ -497,7 +524,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full bg-gray-50">
       {/* Chat Area */}
-      <ResizablePanel defaultSize={showOutputPanel ? 50 : 100} minSize={30}>
+      <ResizablePanel defaultSize={100} minSize={30}>
         <div className="flex-1 flex flex-col h-full">
         {/* Chat Header */}
         <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border-b border-gray-200">
@@ -911,13 +938,19 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       </ResizablePanel>
 
       {/* Resizable Handle */}
-      {showOutputPanel && (
-        <>
-          <ResizableHandle withHandle className="bg-gray-100 hover:bg-gray-100 transition-colors" />
+      <ResizableHandle withHandle className={`bg-gray-100 hover:bg-gray-100 transition-colors ${!showOutputPanel ? 'opacity-0 pointer-events-none' : ''}`} />
 
-          {/* Output Panel */}
-          <ResizablePanel defaultSize={50} minSize={20}>
-            <div className="flex flex-col h-full bg-white">
+      {/* Output Panel */}
+      <ResizablePanel
+        ref={rightPanelRef}
+        defaultSize={0}
+        minSize={20}
+        collapsedSize={0}
+        collapsible
+        onExpand={() => setShowOutputPanel(true)}
+        onCollapse={() => setShowOutputPanel(false)}
+      >
+        <div className={`flex flex-col h-full bg-white overflow-hidden transition-opacity duration-75 ${panelContentVisible ? 'opacity-100' : 'opacity-0'}`}>
           {/* Canvas Header with Toolbar */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 bg-white h-[52px]">
             <div className="flex items-center gap-2">
@@ -1117,9 +1150,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             )}
           </div>
             </div>
-          </ResizablePanel>
-        </>
-      )}
+      </ResizablePanel>
     </ResizablePanelGroup>
   );
 };
