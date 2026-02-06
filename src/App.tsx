@@ -27,6 +27,7 @@ import { procurementRfqData } from './data/procurement-rfq';
 import { marketingSoftwareAorData } from './data/marketing-software-aor';
 import { pqResponseDataV2 } from './data/pq-response-mnd-v2';
 import { canvasDemoData } from './data/canvas-demo';
+import { getWebSearchResponses } from './data/interactive-web-search';
 
 export interface Message {
   id: string;
@@ -70,6 +71,24 @@ export interface UserProfile {
   }>;
 }
 
+function detectWebSearchKeyword(message: string): string | null {
+  const patterns = [
+    /search\s+the\s+web\s+for\s+([^.,!?]+)/i,
+    /search\s+for\s+([^.,!?]+)\s+(?:on|in)\s+the\s+web/i,
+    /search\s+([^.,!?]+)\s+(?:on|in)\s+the\s+web/i,
+    /web\s+search\s+(?:for\s+)?([^.,!?]+)/i,
+    /^search\s+for\s+([^.,!?]+)/i,
+    /^search\s+([^.,!?]+)/i,
+  ];
+  for (const pattern of patterns) {
+    const match = message.match(pattern);
+    if (match?.[1]) {
+      return match[1].trim();
+    }
+  }
+  return null;
+}
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -111,6 +130,8 @@ export default function App() {
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [swapBookmarkModalOpen, setSwapBookmarkModalOpen] = useState(false);
   const [pendingBookmarkAssistantId, setPendingBookmarkAssistantId] = useState<string | null>(null);
+  const [pendingBotResponses, setPendingBotResponses] = useState<any[]>([]);
+  const [pendingSearchTerm, setPendingSearchTerm] = useState<string>('');
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem('hasSeenWalkthrough') === 'true';
   });
@@ -255,6 +276,15 @@ export default function App() {
       setChats(currentChats);
     }
 
+    // Check for web search keywords — trigger rich response pipeline instead of mock response
+    const searchTerm = detectWebSearchKeyword(content);
+    if (searchTerm) {
+      const responses = getWebSearchResponses(searchTerm);
+      setPendingSearchTerm(searchTerm);
+      setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
     // Simulate AI response
     setTimeout(() => {
       // Check if this is an incognito chat or a regular chat
@@ -314,6 +344,8 @@ export default function App() {
   const handleNewChat = () => {
     setPreviewChat(null); // Clear any preview chat
     setIncognitoChat(null); // Clear any incognito chat
+    setPendingBotResponses([]);
+    setPendingSearchTerm('');
     setActiveChatId('new-rsn');
     setActiveView('home');
     setHomeResetKey(prev => prev + 1);
@@ -355,6 +387,15 @@ export default function App() {
     }
     setActiveChatId(newId);
     setActiveView('chat');
+
+    // Check for web search keywords — trigger rich response pipeline
+    const searchTerm = detectWebSearchKeyword(message);
+    if (searchTerm) {
+      const responses = getWebSearchResponses(searchTerm);
+      setPendingSearchTerm(searchTerm);
+      setPendingBotResponses(responses.preDecision);
+      return;
+    }
 
     // Simulate simple AI response
     setTimeout(() => {
@@ -519,8 +560,45 @@ export default function App() {
       setPreviewChat(null); // Clear any preview chat
     }
     setIncognitoChat(null); // Clear any incognito chat
+    setPendingBotResponses([]);
+    setPendingSearchTerm('');
     setActiveChatId(chatId);
     setActiveView('chat');
+  };
+
+  const handleDecisionMade = (value: string) => {
+    if (!pendingSearchTerm) return;
+    const responses = getWebSearchResponses(pendingSearchTerm);
+    if (value === 'proceed') {
+      setPendingBotResponses(responses.onProceed);
+    } else {
+      setPendingBotResponses(responses.onCancel);
+    }
+    setPendingSearchTerm('');
+  };
+
+  const handleRichResponseComplete = () => {
+    setPendingBotResponses([]);
+  };
+
+  const handleCommitRichContent = (textContent: string) => {
+    if (!activeChatId) return;
+    const aiMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: textContent,
+      timestamp: new Date(),
+    };
+
+    if (incognitoChat && activeChatId === incognitoChat.id) {
+      setIncognitoChat(prev => prev ? { ...prev, messages: [...prev.messages, aiMessage] } : prev);
+    } else {
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
+        )
+      );
+    }
   };
 
   const handleCompleteOnboarding = () => {
@@ -831,6 +909,10 @@ export default function App() {
               bookmarkedAssistants={bookmarkedAssistants}
               assistantType={activeChat?.assistantType}
               assistantName={activeChat?.assistantName}
+              pendingBotResponses={pendingBotResponses}
+              onDecisionMade={handleDecisionMade}
+              onRichResponseComplete={handleRichResponseComplete}
+              onCommitRichContent={handleCommitRichContent}
             />
           </div>
         )

@@ -13,6 +13,7 @@ import { ReasoningBlock } from './chat/ReasoningBlock';
 import { TextResponseBlock } from './chat/TextResponseBlock';
 import { AssistantSwitchBadge } from './chat/AssistantSwitchBadge';
 import { ArtifactCard, getFileIcon } from './chat/ArtifactCard';
+import { DecisionCard } from './chat/DecisionCard';
 import { SkeletonLoader } from './chat/SkeletonLoader';
 import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
 
@@ -38,11 +39,18 @@ interface UserMessage {
   autoSend?: boolean;
 }
 
+interface DecisionResponse {
+  type: "decision";
+  question: string;
+  options: Array<{ label: string; value: string; variant?: 'primary' | 'secondary' }>;
+}
+
 type BotResponse =
   | ThinkingResponse
   | AssistantSwitchResponse
   | TextResponse
-  | ArtifactResponse;
+  | ArtifactResponse
+  | DecisionResponse;
 
 interface ThinkingResponse {
   type: "thinking";
@@ -107,6 +115,11 @@ interface ChatSimulatorProps {
   assistantType?: string;
   assistantName?: string; // Display name of the custom assistant being used
   onFirstUserMessage?: () => void; // Called when the first user message appears (simulator mode)
+  // Rich interactive response props
+  pendingBotResponses?: BotResponse[];
+  onDecisionMade?: (value: string) => void;
+  onRichResponseComplete?: () => void;
+  onCommitRichContent?: (textContent: string) => void;
 }
 
 // Simulated reasoning content for thinking states
@@ -142,6 +155,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   assistantType,
   assistantName,
   onFirstUserMessage,
+  pendingBotResponses,
+  onDecisionMade,
+  onRichResponseComplete,
+  onCommitRichContent,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -174,6 +191,12 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const assistantContentRef = useRef<HTMLDivElement>(null);
   const [spacerHeight, setSpacerHeight] = useState<number>(0);
+
+  // Interactive rich response state
+  const [interactiveDisplayedMessages, setInteractiveDisplayedMessages] = useState<any[]>([]);
+  const [isProcessingRichResponse, setIsProcessingRichResponse] = useState(false);
+  const [awaitingDecision, setAwaitingDecision] = useState(false);
+  const richResponseAbortRef = useRef(false);
 
   // Lo-fi grayscale theme
   const theme = {
@@ -236,7 +259,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       window.removeEventListener('resize', calculateSpacer);
       clearTimeout(timer);
     };
-  }, [displayedMessages, interactiveMessages, currentThought, currentReasoning, showThinkingDots, searchingAssistant]);
+  }, [displayedMessages, interactiveMessages, interactiveDisplayedMessages, currentThought, currentReasoning, showThinkingDots, searchingAssistant]);
 
   // Setup form submission handler when artifact changes (simulator only)
   useEffect(() => {
@@ -441,6 +464,98 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     setCurrentThought("");
     setCurrentReasoning([]);
   };
+
+  // Process rich bot responses for interactive mode
+  const processInteractiveBotResponses = async (responses: BotResponse[]) => {
+    setIsProcessingRichResponse(true);
+    richResponseAbortRef.current = false;
+
+    // Show initial thinking dots
+    setShowThinkingDots(true);
+    await sleep(800);
+    if (richResponseAbortRef.current) return;
+    setShowThinkingDots(false);
+
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
+      if (richResponseAbortRef.current) return;
+
+      if (response.type === 'thinking') {
+        await processThinkingResponse(response);
+        if (richResponseAbortRef.current) return;
+        // Check if next response is a decision — if so, mark thinking as pending (no "Done" yet)
+        const nextIsDecision = i + 1 < responses.length && responses[i + 1].type === 'decision';
+        setInteractiveDisplayedMessages(prev => [...prev, {
+          type: 'thinking',
+          thought: response.thought || '',
+          reasoning: response.reasoning || [],
+          doneSummary: response.doneSummary,
+          tags: response.tags,
+          pending: nextIsDecision,
+        }]);
+      } else if (response.type === 'decision') {
+        // Render decision card and pause — wait for user click
+        setInteractiveDisplayedMessages(prev => [...prev, {
+          type: 'decision',
+          question: response.question,
+          options: response.options,
+        }]);
+        setAwaitingDecision(true);
+        setIsProcessingRichResponse(false);
+        return; // Stop processing — will resume via new pendingBotResponses
+      } else if (response.type === 'text') {
+        await sleep(response.delayMs ? response.delayMs / 1.5 : 500);
+        if (richResponseAbortRef.current) return;
+        setInteractiveDisplayedMessages(prev => [...prev, { type: 'text', content: response.content }]);
+      }
+    }
+
+    setIsProcessingRichResponse(false);
+    onRichResponseComplete?.();
+  };
+
+  const handleDecisionSelect = (value: string) => {
+    setAwaitingDecision(false);
+
+    // Find the label before removing the card
+    const option = interactiveDisplayedMessages
+      .filter((m: any) => m.type === 'decision')
+      .flatMap((m: any) => m.options)
+      .find((o: any) => o.value === value);
+    const label = option?.label || value;
+
+    // Remove decision card, mark pending thinking blocks as done, add user's selection bubble
+    setInteractiveDisplayedMessages(prev => [
+      ...prev
+        .filter((m: any) => m.type !== 'decision')
+        .map((m: any) => m.type === 'thinking' && m.pending ? { ...m, pending: false } : m),
+      { type: 'userDecision', text: label },
+    ]);
+
+    onDecisionMade?.(value);
+  };
+
+  // Process pending bot responses when they change (interactive mode)
+  useEffect(() => {
+    if (!isInteractive || !pendingBotResponses || pendingBotResponses.length === 0) return;
+    processInteractiveBotResponses(pendingBotResponses);
+  }, [pendingBotResponses]);
+
+  // Clear interactive rich response state on chat switch (skip initial mount)
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    richResponseAbortRef.current = true;
+    setInteractiveDisplayedMessages([]);
+    setIsProcessingRichResponse(false);
+    setAwaitingDecision(false);
+    setShowThinkingDots(false);
+    setCurrentThought("");
+    setCurrentReasoning([]);
+  }, [chatId]);
 
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -752,8 +867,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     </div>
                   ))}
 
-                  {/* Assistant content after last user message */}
-                  {messagesAfterLastUser.length > 0 && (
+                  {/* Assistant content after last user message + rich responses */}
+                  {(messagesAfterLastUser.length > 0 || interactiveDisplayedMessages.length > 0 || currentThought || currentReasoning.length > 0 || showThinkingDots) && (
                     <div ref={assistantContentRef} className="space-y-8">
                       {messagesAfterLastUser.map((msg) => (
                         <div key={msg.id} className="group">
@@ -767,6 +882,69 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                           />
                         </div>
                       ))}
+
+                      {/* Rich interactive displayed messages (thinking, decisions, text) */}
+                      {interactiveDisplayedMessages.map((msg, idx) => (
+                        <div key={`rich-${idx}`}>
+                          {msg.type === 'thinking' && (
+                            <ReasoningBlock
+                              id={idx + 2000}
+                              reasoning={msg.reasoning || []}
+                              doneSummary={msg.doneSummary}
+                              tags={msg.tags}
+                              isExpanded={expandedThinkingIds.has(idx + 2000)}
+                              onToggle={toggleThinkingExpanded}
+                              isLive={msg.pending}
+                              liveLabel="Awaiting confirmation..."
+                            />
+                          )}
+                          {msg.type === 'decision' && (
+                            <DecisionCard
+                              question={msg.question}
+                              options={msg.options}
+                              onSelect={handleDecisionSelect}
+                              disabled={msg.disabled}
+                            />
+                          )}
+                          {msg.type === 'text' && (
+                            <TextResponseBlock
+                              messageId={`rich-text-${idx}`}
+                              content={msg.content}
+                              copiedMessageId={copiedMessageId}
+                              feedbackState={feedbackMessageId}
+                              onCopy={handleCopyMessage}
+                              onFeedback={handleFeedback}
+                            />
+                          )}
+                          {msg.type === 'userDecision' && (
+                            <div className="flex justify-end items-start gap-2 ml-24">
+                              <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                                {msg.text}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+
+                      {/* Active thinking state with live reasoning (interactive mode) */}
+                      {(currentThought || currentReasoning.length > 0) && (
+                        <ReasoningBlock
+                          id={-1}
+                          reasoning={currentReasoning}
+                          isExpanded={expandedThinkingIds.has(-1)}
+                          onToggle={(id) => setExpandedThinkingIds(prev => {
+                            const newSet = new Set(prev);
+                            if (newSet.has(id)) newSet.delete(id);
+                            else newSet.add(id);
+                            return newSet;
+                          })}
+                          isLive
+                          liveLabel={currentThought || 'Processing...'}
+                        />
+                      )}
+
+                      {/* Skeleton loader */}
+                      {showThinkingDots && <SkeletonLoader />}
                     </div>
                   )}
                 </>
@@ -930,12 +1108,23 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               /* Interactive mode - normal input */
               <MessageInput
                 onSend={(message) => {
+                  // Commit any completed rich content as a regular assistant message before sending
+                  if (interactiveDisplayedMessages.length > 0 && !isProcessingRichResponse && !awaitingDecision) {
+                    const textItems = interactiveDisplayedMessages
+                      .filter((m: any) => m.type === 'text')
+                      .map((m: any) => m.content);
+                    if (textItems.length > 0 && onCommitRichContent) {
+                      onCommitRichContent(textItems.join('\n\n'));
+                    }
+                    setInteractiveDisplayedMessages([]);
+                  }
                   shouldScrollToBottom.current = true;
                   onSendMessage?.(message);
                 }}
                 autoFocus={true}
                 bookmarkedAssistants={bookmarkedAssistants}
                 assistantType={assistantType}
+                disabled={isProcessingRichResponse || awaitingDecision}
               />
             ) : (
               /* Simulator mode - auto-type input */
