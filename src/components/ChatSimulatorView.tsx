@@ -106,6 +106,7 @@ interface ChatSimulatorProps {
   bookmarkedAssistants?: string[];
   assistantType?: string;
   assistantName?: string; // Display name of the custom assistant being used
+  onFirstUserMessage?: () => void; // Called when the first user message appears (simulator mode)
 }
 
 // Simulated reasoning content for thinking states
@@ -140,6 +141,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   bookmarkedAssistants = [],
   assistantType,
   assistantName,
+  onFirstUserMessage,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -302,6 +304,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     }
   };
 
+  // Track whether we've already fired the first user message callback
+  const hasFiredFirstUserMessage = useRef(false);
+
   // Handle message send from MessageInput (simulator only)
   const handleSendMessage = (text: string) => {
     if (!data) return;
@@ -311,6 +316,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     if (currentMsg.role !== 'user') return;
 
     const targetText = (currentMsg.content as UserMessage).text;
+
+    if (!hasFiredFirstUserMessage.current) {
+      hasFiredFirstUserMessage.current = true;
+      onFirstUserMessage?.();
+    }
 
     shouldScrollToBottom.current = true;
     setIsTyping(false);
@@ -342,6 +352,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       if (userContent.autoSend && userContent.text) {
         // Automatically send this message
         setTimeout(() => {
+          if (!hasFiredFirstUserMessage.current) {
+            hasFiredFirstUserMessage.current = true;
+            onFirstUserMessage?.();
+          }
           setDisplayedMessages(prev => [...prev, { role: 'user', text: userContent.text }]);
           setCurrentMessageIndex(prev => prev + 1);
         }, 500);
@@ -575,19 +589,19 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 >
                   {isInteractive
                     ? (assistantName && interactiveMessages.length === 0
-                        ? assistantName
+                        ? 'Untitled'
                         : (interactiveTitle || 'New Chat'))
                     : (data?.assistantName && !displayedMessages.some(m => m.role === 'user')
-                        ? data.assistantName
+                        ? 'Untitled'
                         : data?.title)}
                 </span>
                 {isInteractive
-                  ? (assistantName && interactiveMessages.length > 0
+                  ? (assistantName
                       ? <span className="text-xs text-gray-500">{assistantName}</span>
-                      : !assistantName && !isNewChat
+                      : !isNewChat
                         ? <span className="text-xs text-gray-500">My AI Assistant</span>
                         : null)
-                  : (data?.assistantName && displayedMessages.some(m => m.role === 'user')
+                  : (data?.assistantName
                       ? <span className="text-xs text-gray-500">{data.assistantName}</span>
                       : null)}
               </div>

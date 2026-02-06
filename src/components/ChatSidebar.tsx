@@ -49,7 +49,9 @@ interface ChatSidebarProps {
   onSearchModalChange?: (open: boolean) => void;
   onWalkthroughStart?: () => void;
   viewedSimulations?: string[];
+  startedSimulations?: string[];
   bookmarkedAssistants?: string[];
+  previewChat?: Chat | null;
 }
 
 export function ChatSidebar({
@@ -88,7 +90,9 @@ export function ChatSidebar({
   onSearchModalChange,
   onWalkthroughStart,
   viewedSimulations = [],
+  startedSimulations = [],
   bookmarkedAssistants = [],
+  previewChat = null,
 }: ChatSidebarProps) {
   const [recentChatsOpen, setRecentChatsOpen] = useState(true);
   const [customAssistantsOpen, setCustomAssistantsOpen] = useState(false);
@@ -443,7 +447,9 @@ export function ChatSidebar({
                           { id: 'pq-response-mnd-v2', title: 'Draft PQ response on BTO flat waiting times', assistantName: 'Parliamentary Question Assistant', classification: 'rsn' as const },
                           { id: 'canvas-demo', title: 'Canvas Generation Demo', assistantName: undefined as string | undefined, classification: 'rsn' as const },
                         ].filter(sim => viewedSimulations.includes(sim.id)).map(sim => {
-                          const displayTitle = sim.title.length > 24 ? sim.title.substring(0, 24) + '...' : sim.title;
+                          const hasStarted = startedSimulations.includes(sim.id);
+                          const titleText = hasStarted ? sim.title : 'Untitled';
+                          const displayTitle = titleText.length > 24 ? titleText.substring(0, 24) + '...' : titleText;
 
                           return (
                             <div
@@ -451,7 +457,7 @@ export function ChatSidebar({
                               className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === `sim-${sim.id}` ? 'bg-gray-200' : 'hover:bg-gray-200'
                                 }`}
                               onClick={() => onSelectSimulation?.(sim.id)}
-                              title={sim.title}
+                              title={hasStarted ? sim.title : 'Untitled'}
                             >
                               <div className="flex-1 flex flex-col gap-0.5 min-w-0">
                                 <span className="truncate text-gray-900">{displayTitle}</span>
@@ -509,6 +515,23 @@ export function ChatSidebar({
                             </div>
                           );
                         })}
+
+                        {/* Preview Chat - shows as "Untitled" before first message */}
+                        {previewChat && (
+                          <div
+                            key={previewChat.id}
+                            className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${previewChat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                            onClick={() => onSelectChat(previewChat.id)}
+                            title="Untitled"
+                          >
+                            <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                              <span className="truncate text-gray-900">Untitled</span>
+                              <span className="text-xs text-gray-500 truncate">
+                                {previewChat.assistantName || 'My AI Assistant'}
+                              </span>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Regular Chats - draggable with ellipsis on hover */}
                         {/* Filter out CCE/SN and CCE/SH chats (ephemeral, don't save to history) */}

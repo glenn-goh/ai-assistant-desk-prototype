@@ -105,6 +105,7 @@ export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [bookmarkedAssistants, setBookmarkedAssistants] = useState<string[]>([]); // Store assistant IDs
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations
+  const [startedSimulations, setStartedSimulations] = useState<string[]>([]); // Track simulations that have had first user message
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [swapBookmarkModalOpen, setSwapBookmarkModalOpen] = useState(false);
@@ -508,7 +509,10 @@ export default function App() {
   };
 
   const handleSelectChat = (chatId: string) => {
-    setPreviewChat(null); // Clear any preview chat
+    // Don't clear preview chat if we're selecting the preview chat itself
+    if (!previewChat || chatId !== previewChat.id) {
+      setPreviewChat(null); // Clear any preview chat
+    }
     setIncognitoChat(null); // Clear any incognito chat
     setActiveChatId(chatId);
     setActiveView('chat');
@@ -775,7 +779,9 @@ export default function App() {
           setIsWalkthroughOpen(true);
         }}
         viewedSimulations={viewedSimulations}
+        startedSimulations={startedSimulations}
         bookmarkedAssistants={bookmarkedAssistants}
+        previewChat={previewChat}
       />
 
       {activeView === 'chat' ? (
@@ -785,6 +791,12 @@ export default function App() {
               key={activeChatId}
               mode="simulator"
               data={simulationData as any}
+              onFirstUserMessage={() => {
+                const simId = activeChatId.replace('sim-', '');
+                if (!startedSimulations.includes(simId)) {
+                  setStartedSimulations(prev => [...prev, simId]);
+                }
+              }}
             />
           </div>
         ) : (
