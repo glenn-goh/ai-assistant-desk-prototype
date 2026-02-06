@@ -796,6 +796,7 @@ export default function App() {
         startedSimulations={startedSimulations}
         bookmarkedAssistants={bookmarkedAssistants}
         previewChat={previewChat}
+        onToggleBookmark={handleToggleBookmark}
       />
 
       {activeView === 'chat' ? (

@@ -12,32 +12,32 @@ interface TourStep {
 const tourSteps: TourStep[] = [
   {
     target: '[data-tour="new-chat"]',
-    title: 'Start a New Chat',
+    title: 'New Chat',
     content: 'Click here to start a fresh conversation with your personal assistant.',
     position: 'right',
   },
   {
-    target: '[data-tour="custom-assistants"]',
-    title: 'Custom Assistants',
-    content: 'Access specialised assistants tailored for specific tasks like PQ responses, procurement, and HR recruitment.',
+    target: '[data-tour="new-project"]',
+    title: 'Organize with Projects',
+    content: 'Create projects to organize your chats by topic or work stream. Drag and drop chats into projects to keep them organized.',
     position: 'right',
   },
   {
-    target: '[data-tour="projects"]',
-    title: 'Organize with Projects',
-    content: 'Create projects to organize your chats by topic or work stream.',
+    target: '[data-tour="explore-assistants"]',
+    title: 'Explore Assistants',
+    content: 'Browse and discover specialized assistants tailored for specific tasks like PQ responses, procurement, and HR recruitment.',
     position: 'right',
   },
   {
     target: '[data-tour="recent-chats"]',
     title: 'Recent Chats',
-    content: 'Quickly access your chat history and continue where you left off.',
+    content: 'Quickly access your chat history and continue where you left off. Your chats are automatically organized here.',
     position: 'right',
   },
   {
     target: '[data-tour="chat-interface"]',
-    title: 'Chat Interface',
-    content: 'This is where you interact with your personal assistant — ask questions, upload files, and use tools.',
+    title: 'Your Personal AI Assistant',
+    content: 'This is where you interact with your personal assistant — ask questions, upload files, and use specialized tools.',
     position: 'left',
   },
   {
