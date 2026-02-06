@@ -201,6 +201,7 @@ export default function App() {
       const newChat: Chat = {
         ...previewChat,
         id: newId,
+        title: getAssistantMockTitle(previewChat.assistantType || '', content),
         messages: [starterMessage, userMessage],
         // Force R/SN classification for saved chats (CCE/SN cannot be saved)
         classificationType: 'rsn',
@@ -398,6 +399,30 @@ export default function App() {
   const handleNewSHChat = () => {
     setActiveChatId('new-cce-sh');
     setActiveView('chat');
+  };
+
+  // Helper function to get a mock chat title when an assistant chat starts
+  const getAssistantMockTitle = (assistantType: string, firstMessage: string): string => {
+    const mockTitles: Record<string, string> = {
+      'query': 'What are the policies on public housing grants?',
+      'email-drafter': 'Draft follow-up email to stakeholders',
+      'transcribe': 'Team standup meeting notes',
+      'deep-research-ai': 'Research on digital transformation trends',
+      'powerpoint': 'Generate icons for Q3 presentation',
+      'parliamentary': 'PQ talking points on transport policy',
+      'memo': 'Inter-agency memo on data sharing',
+      'social-media-campaign': 'National Day social media campaign',
+      'content-calendar': 'Q1 content schedule planning',
+      'brand-guidelines': 'Brand compliance review for new campaign',
+      'market-research': 'Public sentiment analysis on housing',
+      'interview-questions': 'Senior engineer interview prep',
+      'onboarding-guide': 'New hire onboarding plan',
+      'performance-review': 'Mid-year performance review draft',
+      'budget': 'FY2025 budget allocation review',
+      'policy': 'Policy paper on AI governance',
+      'procurement': 'RFQ for cloud services procurement',
+    };
+    return mockTitles[assistantType] || firstMessage.slice(0, 50);
   };
 
   // Helper function to get starter message for each assistant type

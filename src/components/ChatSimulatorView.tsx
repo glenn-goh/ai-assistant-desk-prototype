@@ -20,6 +20,7 @@ import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
 interface ChatSimulation {
   id: string;
   title: string;
+  assistantName?: string;
   description?: string;
   colorScheme?: 'indigo' | 'slate' | 'blue' | 'green' | 'purple' | 'emerald';
   classificationType?: 'rsn' | 'cce-sn' | 'cce-sh';
@@ -572,18 +573,23 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   }}
                   title="Double-click to rename"
                 >
-                  {isInteractive ? (interactiveTitle || 'New Chat') : data?.title}
+                  {isInteractive
+                    ? (assistantName && interactiveMessages.length === 0
+                        ? assistantName
+                        : (interactiveTitle || 'New Chat'))
+                    : (data?.assistantName && !displayedMessages.some(m => m.role === 'user')
+                        ? data.assistantName
+                        : data?.title)}
                 </span>
-                {assistantName && (
-                  <span className="text-xs text-gray-500">
-                    {assistantName}
-                  </span>
-                )}
-                {!assistantName && !isNewChat && isInteractive && (
-                  <span className="text-xs text-gray-500">
-                    My AI Assistant
-                  </span>
-                )}
+                {isInteractive
+                  ? (assistantName && interactiveMessages.length > 0
+                      ? <span className="text-xs text-gray-500">{assistantName}</span>
+                      : !assistantName && !isNewChat
+                        ? <span className="text-xs text-gray-500">My AI Assistant</span>
+                        : null)
+                  : (data?.assistantName && displayedMessages.some(m => m.role === 'user')
+                      ? <span className="text-xs text-gray-500">{data.assistantName}</span>
+                      : null)}
               </div>
             )}
             {isInteractive ? (

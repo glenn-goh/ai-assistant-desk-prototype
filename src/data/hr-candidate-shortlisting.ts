@@ -1,6 +1,7 @@
 export const hrCandidateShortlistingData = {
   id: "hr-candidate-shortlisting",
   title: "HR Candidate Shortlisting Demo",
+  assistantName: "HR Recruitment Assistant",
   description: "AI-assisted candidate screening and shortlisting for government recruitment with system integrations",
   colorScheme: "indigo" as const,
   messages: [
