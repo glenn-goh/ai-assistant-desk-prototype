@@ -1,4 +1,6 @@
+import { useMemo } from 'react';
 import { MessageActions } from './MessageActions';
+import { renderSimpleMarkdown } from '../../utils/simple-markdown';
 
 interface TextResponseBlockProps {
   messageId: string;
@@ -17,14 +19,15 @@ export function TextResponseBlock({
   onCopy,
   onFeedback,
 }: TextResponseBlockProps) {
+  const html = useMemo(() => renderSimpleMarkdown(content), [content]);
+
   return (
     <div className="flex flex-col gap-1 mb-2">
       <div
-        className="w-full whitespace-pre-wrap text-gray-900"
+        className="w-full prose prose-sm max-w-none prose-lofi text-gray-900"
         style={{ fontSize: '16px', lineHeight: '1.7' }}
-      >
-        {content}
-      </div>
+        dangerouslySetInnerHTML={{ __html: html }}
+      />
       <MessageActions
         messageId={messageId}
         content={content}
