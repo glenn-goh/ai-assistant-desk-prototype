@@ -22,7 +22,7 @@ export function Error404Page({ onBackToLogin }: Error404PageProps) {
 
           <Button
             className="w-full h-12"
-            onClick={onBackToLogin || (() => window.location.href = '/')}
+            onClick={onBackToLogin || (() => window.location.hash = '')}
           >
             Back to Home
           </Button>
