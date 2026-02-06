@@ -78,6 +78,7 @@ function detectWebSearchKeyword(message: string): string | null {
     /search\s+([^.,!?]+)\s+(?:on|in)\s+the\s+web/i,
     /web\s+search\s+(?:for\s+)?([^.,!?]+)/i,
     /^search\s+for\s+([^.,!?]+)/i,
+    /^search\s+([^.,!?]+)/i,
   ];
   for (const pattern of patterns) {
     const match = message.match(pattern);
@@ -580,6 +581,26 @@ export default function App() {
     setPendingBotResponses([]);
   };
 
+  const handleCommitRichContent = (textContent: string) => {
+    if (!activeChatId) return;
+    const aiMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      role: 'assistant',
+      content: textContent,
+      timestamp: new Date(),
+    };
+
+    if (incognitoChat && activeChatId === incognitoChat.id) {
+      setIncognitoChat(prev => prev ? { ...prev, messages: [...prev.messages, aiMessage] } : prev);
+    } else {
+      setChats(prevChats =>
+        prevChats.map(chat =>
+          chat.id === activeChatId ? { ...chat, messages: [...chat.messages, aiMessage] } : chat
+        )
+      );
+    }
+  };
+
   const handleCompleteOnboarding = () => {
     setHasOnboarded(true);
     // Always start walkthrough after completing personalisation quiz
@@ -891,6 +912,7 @@ export default function App() {
               pendingBotResponses={pendingBotResponses}
               onDecisionMade={handleDecisionMade}
               onRichResponseComplete={handleRichResponseComplete}
+              onCommitRichContent={handleCommitRichContent}
             />
           </div>
         )

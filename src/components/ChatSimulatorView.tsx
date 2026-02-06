@@ -119,6 +119,7 @@ interface ChatSimulatorProps {
   pendingBotResponses?: BotResponse[];
   onDecisionMade?: (value: string) => void;
   onRichResponseComplete?: () => void;
+  onCommitRichContent?: (textContent: string) => void;
 }
 
 // Simulated reasoning content for thinking states
@@ -157,6 +158,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   pendingBotResponses,
   onDecisionMade,
   onRichResponseComplete,
+  onCommitRichContent,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -1106,6 +1108,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               /* Interactive mode - normal input */
               <MessageInput
                 onSend={(message) => {
+                  // Commit any completed rich content as a regular assistant message before sending
+                  if (interactiveDisplayedMessages.length > 0 && !isProcessingRichResponse && !awaitingDecision) {
+                    const textItems = interactiveDisplayedMessages
+                      .filter((m: any) => m.type === 'text')
+                      .map((m: any) => m.content);
+                    if (textItems.length > 0 && onCommitRichContent) {
+                      onCommitRichContent(textItems.join('\n\n'));
+                    }
+                    setInteractiveDisplayedMessages([]);
+                  }
                   shouldScrollToBottom.current = true;
                   onSendMessage?.(message);
                 }}
