@@ -140,7 +140,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       </div>
       <div className="flex items-center gap-1">
         {/* Temporary Chat Toggle - only show when new chat and no messages */}
-        {isInteractive && isNewChat && !hasUserMessage && (
+        {!isIncognito && isInteractive && isNewChat && !hasUserMessage && (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
