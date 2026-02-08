@@ -18,6 +18,7 @@ interface HomePageProps {
   onSelectSimulation?: (simulationId: string) => void;
   onStartChat?: (message: string, classificationType?: 'rsn' | 'cce-sn' | 'cce-sh', isIncognito?: boolean) => void;
   bookmarkedAssistants?: string[];
+  onIncognitoChange?: (isIncognito: boolean) => void;
 }
 
 // Predefined prompts based on user role
@@ -54,7 +55,7 @@ const getPromptSuggestions = (role: string) => {
   }
 };
 
-export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSidebarOpen, userProfile, onSelectSimulation, onStartChat, bookmarkedAssistants = [] }: HomePageProps) {
+export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSidebarOpen, userProfile, onSelectSimulation, onStartChat, bookmarkedAssistants = [], onIncognitoChange }: HomePageProps) {
   const [inputValue, setInputValue] = useState('');
   const [classificationType, setClassificationType] = useState<'rsn' | 'cce-sn'>('rsn');
   const [isIncognito, setIsIncognito] = useState(false);
@@ -71,6 +72,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
     setClassificationType(value);
     if (value === 'cce-sn') {
       setIsIncognito(false);
+      onIncognitoChange?.(false);
     }
   };
 
@@ -161,7 +163,11 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      onClick={() => setIsIncognito(!isIncognito)}
+                      onClick={() => {
+                        const newValue = !isIncognito;
+                        setIsIncognito(newValue);
+                        onIncognitoChange?.(newValue);
+                      }}
                       className={`p-2 rounded-lg transition-colors ml-auto ${isIncognito ? 'bg-gray-200 text-gray-700' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200'}`}
                     >
                       <IncognitoIcon className="w-5 h-5" />

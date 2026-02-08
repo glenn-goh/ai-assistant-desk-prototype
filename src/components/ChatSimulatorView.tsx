@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileText, X, ArrowLeft, Copy, Download, Check, Undo2, Redo2, EyeOff, MoreHorizontal, FolderPlus } from 'lucide-react';
+import { FileText, X, ArrowLeft, Copy, Download, Check, Undo2, Redo2 } from 'lucide-react';
 import { MessageInput } from './MessageInput';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
 import type { ImperativePanelHandle } from 'react-resizable-panels';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
 import type { Project } from '../types/project';
-import { IncognitoIcon } from './IncognitoIcon';
+import { ChatHeader } from './ChatHeader';
 import { MessageActions } from './chat/MessageActions';
 import { ReasoningBlock } from './chat/ReasoningBlock';
 import { TextResponseBlock } from './chat/TextResponseBlock';
@@ -169,9 +168,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [currentReasoning, setCurrentReasoning] = useState<Array<string | { text: string; icon: string }>>([]);
   const [showThinkingDots, setShowThinkingDots] = useState(false);
   const [selectedArtifact, setSelectedArtifact] = useState<ArtifactResponse | null>(null);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editTitleValue, setEditTitleValue] = useState('');
-  const [isTemporaryChat, setIsTemporaryChat] = useState(false);
   const [isEditingCanvasTitle, setIsEditingCanvasTitle] = useState(false);
   const [editCanvasTitleValue, setEditCanvasTitleValue] = useState('');
   const [isComplete, setIsComplete] = useState(false);
@@ -657,167 +653,24 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       <ResizablePanel defaultSize={100} minSize={30}>
         <div className="flex-1 flex flex-col h-full">
         {/* Chat Header */}
-        <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border-b border-gray-200">
-          <div className={`flex items-center gap-3 flex-1 ${isIncognito ? 'justify-center' : ''}`}>
-            {isIncognito ? (
-              <div className="flex items-center gap-2">
-                <IncognitoIcon className="w-4 h-4 text-gray-600" />
-                <span className="text-sm font-medium text-gray-900">
-                  Incognito chat
-                </span>
-              </div>
-            ) : isEditingTitle && isInteractive ? (
-              <input
-                type="text"
-                value={editTitleValue}
-                onChange={(e) => setEditTitleValue(e.target.value)}
-                onBlur={() => {
-                  if (editTitleValue.trim() && chatId && onRenameChat) {
-                    onRenameChat(chatId, editTitleValue.trim());
-                  }
-                  setIsEditingTitle(false);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    if (editTitleValue.trim() && chatId && onRenameChat) {
-                      onRenameChat(chatId, editTitleValue.trim());
-                    }
-                    setIsEditingTitle(false);
-                  } else if (e.key === 'Escape') {
-                    setIsEditingTitle(false);
-                  }
-                }}
-                className="text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                autoFocus
-              />
-            ) : (
-              <div className="flex flex-col gap-0.5 group/title">
-                <span
-                  className="text-sm font-medium text-gray-900 cursor-pointer"
-                  onDoubleClick={() => {
-                    if (isInteractive && onRenameChat) {
-                      setEditTitleValue(interactiveTitle || 'New Chat');
-                      setIsEditingTitle(true);
-                    }
-                  }}
-                  title="Double-click to rename"
-                >
-                  {isInteractive
-                    ? (assistantName && interactiveMessages.length === 0
-                        ? 'Untitled'
-                        : (interactiveTitle || 'New Chat'))
-                    : (data?.assistantName && !displayedMessages.some(m => m.role === 'user')
-                        ? 'Untitled'
-                        : data?.title)}
-                </span>
-                {isInteractive
-                  ? (assistantName
-                      ? <span className="text-xs text-gray-500">{assistantName}</span>
-                      : !isNewChat
-                        ? <span className="text-xs text-gray-500">My AI Assistant</span>
-                        : null)
-                  : (data?.assistantName
-                      ? <span className="text-xs text-gray-500">{data.assistantName}</span>
-                      : null)}
-              </div>
-            )}
-            {isInteractive ? (
-              classificationType && (
-                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">
-                  {classificationType === 'cce-sn' ? 'C(CE) + SN' : classificationType === 'cce-sh' ? 'C(CE) + SH' : 'RSN'}
-                </span>
-              )
-            ) : (
-              data?.classificationType && (
-                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">
-                  {data.classificationType === 'cce-sn' ? 'C(CE) + SN' : data.classificationType === 'cce-sh' ? 'C(CE) + SH' : 'RSN'}
-                </span>
-              )
-            )}
-          </div>
-          <div className="flex items-center gap-1">
-            {/* Temporary Chat Toggle - only show when new chat and no messages */}
-            {isInteractive && isNewChat && interactiveMessages.length === 0 && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setIsTemporaryChat(!isTemporaryChat)}
-                      className={`p-1.5 rounded-lg transition-colors ${isTemporaryChat ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-                    >
-                      <EyeOff className="w-4 h-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isTemporaryChat ? 'Temporary chat enabled - no memory, not saved' : 'Enable temporary chat'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-            {/* Show indicator when temporary chat is active */}
-            {isTemporaryChat && interactiveMessages.length > 0 && (
-              <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg flex items-center gap-1">
-                <EyeOff className="w-3 h-3" />
-                Temporary
-              </span>
-            )}
-            {/* Ellipsis Menu - only show for existing chats (not new chats), non-incognito, and non-CCE */}
-            {isInteractive && !isNewChat && chatId && !isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700">
-                    <MoreHorizontal className="w-5 h-5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                  {/* Only show Move to project for non-incognito and non-CCE chats */}
-                  {!isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
-                    <DropdownMenuSub>
-                      <DropdownMenuSubTrigger className="hover:bg-gray-100">
-                        <FolderPlus className="w-4 h-4 mr-2" />
-                        Move to project
-                      </DropdownMenuSubTrigger>
-                      <DropdownMenuSubContent className="bg-white border-2 border-gray-900 rounded-lg">
-                        {projects.length === 0 ? (
-                          <DropdownMenuItem disabled className="text-gray-400 text-sm">
-                            No projects available
-                          </DropdownMenuItem>
-                        ) : (
-                          projects.map(project => (
-                            <DropdownMenuItem
-                              key={project.id}
-                              onClick={() => onMoveToProject?.(chatId, project.id)}
-                              className="hover:bg-gray-100"
-                            >
-                              {project.name}
-                            </DropdownMenuItem>
-                          ))
-                        )}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuSub>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-            {!showOutputPanel && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => setShowOutputPanel(true)}
-                      className="text-gray-700 hover:text-gray-900 rounded-lg p-1 transition-colors"
-                    >
-                      <FileText className="w-5 h-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Expand canvas</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
-        </div>
+        <ChatHeader
+          isInteractive={isInteractive}
+          isIncognito={isIncognito}
+          isNewChat={isNewChat}
+          interactiveTitle={interactiveTitle}
+          simulatorTitle={data?.title}
+          assistantName={isInteractive ? assistantName : data?.assistantName}
+          classificationType={isInteractive ? classificationType : data?.classificationType}
+          hasUserMessage={isInteractive
+            ? interactiveMessages.length > 0
+            : displayedMessages.some(m => m.role === 'user')}
+          chatId={chatId}
+          onRenameChat={onRenameChat}
+          projects={projects}
+          onMoveToProject={onMoveToProject}
+          showOutputPanel={showOutputPanel}
+          onShowOutputPanel={() => setShowOutputPanel(true)}
+        />
 
         {/* Messages */}
         <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50">

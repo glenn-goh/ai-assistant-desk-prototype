@@ -21,7 +21,8 @@
       "WebFetch(domain:api.github.com)",
       "Bash(gh api:*)",
       "WebFetch(domain:github.com)",
-      "Bash(npx vite build:*)"
+      "Bash(npx vite build:*)",
+      "Bash(git rebase:*)"
     ]
   }
 }

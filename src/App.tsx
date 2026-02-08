@@ -9,6 +9,7 @@ import { LoginPage } from './components/LoginPage';
 import { OnboardingPage } from './components/OnboardingPage';
 import { PersonalizationDialog } from './components/PersonalizationDialog';
 import { ChatSimulatorView } from './components/ChatSimulatorView';
+import { ChatHeader } from './components/ChatHeader';
 import { ProjectPage } from './components/ProjectPage';
 import { WalkthroughTour } from './components/WalkthroughTour';
 import { SwapBookmarkModal } from './components/SwapBookmarkModal';
@@ -16,6 +17,8 @@ import { Error404Page } from './components/Error404Page';
 import { Error500Page } from './components/Error500Page';
 import { MaintenancePage } from './components/MaintenancePage';
 import { ColorTheme, FontStyle } from './components/PersonalizationDialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './components/ui/alert-dialog';
+import { X } from 'lucide-react';
 import type { Project } from './types/project';
 import type { Assistant } from './data/assistants';
 import { topRatedAssistants, essentialAssistants, roleBasedAssistants } from './data/assistants';
@@ -114,6 +117,7 @@ export default function App() {
   const [incognitoChat, setIncognitoChat] = useState<Chat | null>(null);
   const [activeChatId, setActiveChatId] = useState('new-rsn');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isHomeIncognito, setIsHomeIncognito] = useState(false);
   const [colorTheme, setColorTheme] = useState<ColorTheme>('light');
   const [fontStyle, setFontStyle] = useState<FontStyle>('modern');
   const [activeView, setActiveView] = useState<View>('home');
@@ -132,6 +136,7 @@ export default function App() {
   const [pendingBookmarkAssistantId, setPendingBookmarkAssistantId] = useState<string | null>(null);
   const [pendingBotResponses, setPendingBotResponses] = useState<any[]>([]);
   const [pendingSearchTerm, setPendingSearchTerm] = useState<string>('');
+  const [showExitIncognitoDialog, setShowExitIncognitoDialog] = useState(false);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem('hasSeenWalkthrough') === 'true';
   });
@@ -187,8 +192,12 @@ export default function App() {
       } as Chat
     : chats.find(chat => chat.id === activeChatId);
 
+  // Detect if current chat is incognito (home toggle, draft, or real)
+  const isIncognitoMode = isHomeIncognito || activeChatId === 'new-cce-sn' || activeChatId === 'new-cce-sh' || activeChat?.isIncognito === true;
+
   // Hide sidebar when on home or chat view by default, show for other views
-  const shouldShowSidebar = isSidebarOpen;
+  // Also hide sidebar in incognito mode
+  const shouldShowSidebar = isSidebarOpen && !isIncognitoMode;
 
   const handleSendMessage = async (content: string) => {
     if (!activeChat) return;
@@ -442,6 +451,13 @@ export default function App() {
   const handleNewSHChat = () => {
     setActiveChatId('new-cce-sh');
     setActiveView('chat');
+  };
+
+  const handleCloseIncognito = () => {
+    setIncognitoChat(null);
+    setIsHomeIncognito(false);
+    setActiveChatId('new-rsn');
+    setActiveView('home');
   };
 
   // Helper function to get a mock chat title when an assistant chat starts
@@ -816,8 +832,17 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-950 dark:to-blue-950">
-      <ChatSidebar
+    <div className={`flex h-screen ${isIncognitoMode ? 'bg-gray-900 pt-10 px-2 pb-2 relative' : 'bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-950 dark:to-blue-950'}`}>
+      {/* White X button on dark padding for incognito mode */}
+      {isIncognitoMode && (
+        <button
+          onClick={() => setShowExitIncognitoDialog(true)}
+          className="absolute top-2 right-4 p-1.5 rounded-lg hover:bg-gray-800 transition-colors text-white z-10"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      )}
+      {!isIncognitoMode && <ChatSidebar
         isOpen={shouldShowSidebar}
         onClose={() => setIsSidebarOpen(!isSidebarOpen)}
         chats={chats}
@@ -875,7 +900,7 @@ export default function App() {
         bookmarkedAssistants={bookmarkedAssistants}
         previewChat={previewChat}
         onToggleBookmark={handleToggleBookmark}
-      />
+      />}
 
       {activeView === 'chat' ? (
         isSimulation && simulationData ? (
@@ -892,7 +917,7 @@ export default function App() {
             />
           </div>
         ) : (
-          <div className="flex-1 flex flex-col">
+          <div className={`flex-1 flex flex-col ${isIncognitoMode ? 'rounded-xl overflow-hidden' : ''}`}>
             <ChatSimulatorView
               key={activeChatId}
               mode="interactive"
@@ -903,7 +928,7 @@ export default function App() {
               chatId={activeChat?.id}
               onRenameChat={handleRenameChat}
               isNewChat={activeChatId.startsWith('new-')}
-              isIncognito={activeChat?.isIncognito}
+              isIncognito={isIncognitoMode}
               projects={projects}
               onMoveToProject={handleAddChatToProject}
               bookmarkedAssistants={bookmarkedAssistants}
@@ -956,18 +981,21 @@ export default function App() {
           onUpdateProject={handleUpdateProject}
         />
       ) : (
-        <HomePage
-          key={homeResetKey}
-          colorTheme={colorTheme}
-          fontStyle={fontStyle}
-          onSelectChat={handleSelectChat}
-          onNewChat={handleNewChat}
-          onStartChat={handleStartChatFromHome}
-          isSidebarOpen={isSidebarOpen}
-          userProfile={userProfile}
-          onSelectSimulation={handleSelectSimulation}
-          bookmarkedAssistants={bookmarkedAssistants}
-        />
+        <div className={`flex-1 flex flex-col ${isIncognitoMode ? 'rounded-xl overflow-hidden' : ''}`}>
+          <HomePage
+            key={homeResetKey}
+            colorTheme={colorTheme}
+            fontStyle={fontStyle}
+            onSelectChat={handleSelectChat}
+            onNewChat={handleNewChat}
+            onStartChat={handleStartChatFromHome}
+            isSidebarOpen={isSidebarOpen}
+            userProfile={userProfile}
+            onSelectSimulation={handleSelectSimulation}
+            bookmarkedAssistants={bookmarkedAssistants}
+            onIncognitoChange={setIsHomeIncognito}
+          />
+        </div>
       )}
       
       <PersonalizationDialog
@@ -985,6 +1013,29 @@ export default function App() {
         isOpen={isWalkthroughOpen}
         onClose={() => setIsWalkthroughOpen(false)}
       />
+
+      <AlertDialog open={showExitIncognitoDialog} onOpenChange={setShowExitIncognitoDialog}>
+        <AlertDialogContent className="bg-white border-2 border-gray-900">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Exit incognito mode?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your incognito chat will not be saved. Are you sure you want to exit?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowExitIncognitoDialog(false)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShowExitIncognitoDialog(false);
+                handleCloseIncognito();
+              }}
+              className="bg-gray-900 text-white hover:bg-gray-700"
+            >
+              Exit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <SwapBookmarkModal
         open={swapBookmarkModalOpen}
