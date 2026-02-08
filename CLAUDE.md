@@ -9,7 +9,7 @@ npm run dev    # Start development server (http://localhost:3000, auto-opens bro
 npm run build  # Build for production (outputs to build/)
 ```
 
-No test or lint commands are configured.
+No test or lint commands are configured. Requires Node.js v18+.
 
 ## Architecture Overview
 
@@ -99,3 +99,11 @@ Lo-fi grayscale aesthetic with CSS variables defined in `src/styles/globals.css`
 - `ChatSidebar` receives 40+ props from App.tsx for chat/folder/navigation operations
 - Feature tracking: `viewedSimulations`, `hasSeenWalkthrough` (persisted to localStorage)
 - Bookmark system: max 3 bookmarked assistants with swap modal on overflow
+
+### Reference Code
+
+`src/reference/` contains reference code provided by the user to be incorporated into the application. Check this folder when implementing features that may have prior art.
+
+### Design Reference
+
+Original Figma design: https://www.figma.com/design/gOkwlIFZzJLoRd3JF1zp8y/AI-Assistant-Desk--UXD-s-edit

@@ -182,6 +182,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [artifactVersions, setArtifactVersions] = useState<{[key: string]: number}>({});
   const [copied, setCopied] = useState(false);
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [showCopyToast, setShowCopyToast] = useState(false);
   const [feedbackMessageId, setFeedbackMessageId] = useState<{[key: string]: 'up' | 'down' | null}>({});
   const chatEndRef = useRef<HTMLDivElement>(null);
   const rightPanelRef = useRef<ImperativePanelHandle>(null);
@@ -586,7 +587,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const handleCopyMessage = async (messageId: string, content: string) => {
     await navigator.clipboard.writeText(content);
     setCopiedMessageId(messageId);
-    setTimeout(() => setCopiedMessageId(null), 2000);
+    setShowCopyToast(true);
+    setTimeout(() => {
+      setCopiedMessageId(null);
+      setShowCopyToast(false);
+    }, 2000);
   };
 
   const handleFeedback = (messageId: string, feedback: 'up' | 'down') => {
@@ -655,7 +660,15 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     <ResizablePanelGroup direction="horizontal" className="h-full bg-gray-50">
       {/* Chat Area */}
       <ResizablePanel defaultSize={100} minSize={30}>
-        <div className="flex-1 flex flex-col h-full">
+        <div className="flex-1 flex flex-col h-full relative">
+        {/* Copy Toast */}
+        {showCopyToast && (
+          <div className="absolute left-1/2 -translate-x-1/2 z-50" style={{ top: 'calc(44px + 16px)' }}>
+            <div className="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg shadow-lg animate-in fade-in duration-200">
+              Copied
+            </div>
+          </div>
+        )}
         {/* Chat Header */}
         <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border-b border-gray-200">
           <div className={`flex items-center gap-3 flex-1 ${isIncognito ? 'justify-center' : ''}`}>
@@ -844,11 +857,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                             className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
                             title="Copy message"
                           >
-                            {copiedMessageId === msg.id ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-gray-400" />
-                            )}
+                            <Copy className="w-4 h-4 text-gray-400" />
                           </button>
                           <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                             {msg.content}
@@ -971,11 +980,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                             className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
                             title="Copy message"
                           >
-                            {copiedMessageId === `sim-${idx}` ? (
-                              <Check className="w-4 h-4 text-green-600" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-gray-400" />
-                            )}
+                            <Copy className="w-4 h-4 text-gray-400" />
                           </button>
                     <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                       {msg.text}
