@@ -1,4 +1,4 @@
-import { Copy, Check, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface MessageActionsProps {
@@ -27,15 +27,11 @@ export function MessageActions({
               onClick={() => onCopy(messageId, content)}
               className="p-1.5 hover:bg-gray-100 rounded"
             >
-              {copiedMessageId === messageId ? (
-                <Check className="w-4 h-4 text-green-600" />
-              ) : (
-                <Copy className="w-4 h-4 text-gray-400" />
-              )}
+              <Copy className="w-4 h-4 text-gray-400" />
             </button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{copiedMessageId === messageId ? 'Copied' : 'Copy'}</p>
+            <p>Copy</p>
           </TooltipContent>
         </Tooltip>
         <Tooltip>
