@@ -458,6 +458,7 @@ export default function App() {
     setIsHomeIncognito(false);
     setActiveChatId('new-rsn');
     setActiveView('home');
+    setHomeResetKey(k => k + 1);
   };
 
   // Helper function to get a mock chat title when an assistant chat starts
@@ -836,7 +837,13 @@ export default function App() {
       {/* White X button on dark padding for incognito mode */}
       {isIncognitoMode && (
         <button
-          onClick={() => setShowExitIncognitoDialog(true)}
+          onClick={() => {
+            if (incognitoChat && incognitoChat.messages.length > 0) {
+              setShowExitIncognitoDialog(true);
+            } else {
+              handleCloseIncognito();
+            }
+          }}
           className="absolute top-2 right-4 p-1.5 rounded-lg hover:bg-gray-800 transition-colors text-white z-10"
         >
           <X className="w-5 h-5" />

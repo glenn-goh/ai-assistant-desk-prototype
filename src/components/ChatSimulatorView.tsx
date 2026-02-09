@@ -703,17 +703,27 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       {msg.role === 'user' ? (
                         <div
                           ref={idx === lastUserIdx ? lastUserMessageRef : null}
-                          className="flex justify-end items-start gap-2 ml-24"
+                          className="flex flex-col items-end ml-24"
                         >
-                          <button
-                            onClick={() => handleCopyMessage(msg.id, msg.content)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
-                            title="Copy message"
-                          >
-                            <Copy className="w-4 h-4 text-gray-400" />
-                          </button>
                           <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
                             {msg.content}
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() => handleCopyMessage(msg.id, msg.content)}
+                                    className="p-1.5 hover:bg-gray-100 rounded"
+                                  >
+                                    <Copy className="w-4 h-4 text-gray-400" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Copy</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </div>
                       ) : (
@@ -826,20 +836,30 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       {msg.role === 'user' && (
                         <div
                           ref={idx === lastUserIdx ? lastUserMessageRef : null}
-                          className="flex justify-end items-start gap-2 ml-24"
+                          className="flex flex-col items-end ml-24"
                         >
-                          <button
-                            onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
-                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 hover:bg-gray-100 rounded mt-1"
-                            title="Copy message"
-                          >
-                            <Copy className="w-4 h-4 text-gray-400" />
-                          </button>
-                    <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
-                      {msg.text}
-                    </div>
-                  </div>
-                )}
+                          <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                            {msg.text}
+                          </div>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
+                                    className="p-1.5 hover:bg-gray-100 rounded"
+                                  >
+                                    <Copy className="w-4 h-4 text-gray-400" />
+                                  </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Copy</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </div>
+                        </div>
+                      )}
 
                 {msg.type === 'thinking' && (
                   <ReasoningBlock

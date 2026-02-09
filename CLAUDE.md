@@ -35,8 +35,10 @@ React + TypeScript prototype for an AI Assistant Desk application using Vite, Ta
 
 Three-tier classification drives chat persistence behavior:
 - **RSN** (Restricted/Sensitive, Non-Classified): Default, chats are saved to history
-- **CCE-SN** (Confidential CE, Sensitive, Non-Classified): Cannot be saved, uses `incognitoChat` state
-- **CCE-SH** (Confidential CE, Sensitive, Highly Sensitive): Cannot be saved, uses `incognitoChat` state
+- **CCE-SN** (Confidential CE, Sensitive, Non-Classified): Cannot be saved, dark UI treatment
+- **CCE-SH** (Confidential CE, Sensitive, Highly Sensitive): Cannot be saved, dark UI treatment
+
+**Incognito mode** is separate from CCE — it is a manual toggle available only for R/SN classification on the home page (`isHomeIncognito` state). CCE chats have their own dark UI treatment but are not "incognito" in the toggle sense. The `incognitoChat` state variable is used for both, but the UX distinction matters.
 
 ### Chat Lifecycle
 
@@ -67,10 +69,15 @@ Active chat is derived with priority: incognito > preview > new draft > regular 
 ### Simulation Data Format
 
 Pre-scripted conversation flows in `src/data/`. Each simulation has `id`, `title` (shown after first user message), optional `assistantName` (shown as title before first user message, subtitle after), and `messages`. Bot responses can be:
-- `ThinkingResponse` — `{type: "thinking", thought?, reasoning?: string[], timingMs?}`
+- `ThinkingResponse` — `{type: "thinking", thought?, reasoning?: string[], timingMs?, doneSummary?, tags?}`
 - `TextResponse` — `{type: "text", content: string, delayMs?}`
 - `ArtifactResponse` — `{type: "artifact", title, fileType, description, content, delayMs?, interactive?}`
 - `AssistantSwitchResponse` — `{type: "assistantSwitch", message: string}`
+- `DecisionResponse` — `{type: "decision", question: string, options: string[]}`
+
+### Rich Interactive Response Pipeline
+
+In interactive mode, bot responses flow through `pendingBotResponses` state in App.tsx. These are queued and rendered progressively by `ChatSimulatorView`, supporting the same response types as simulation data. This allows interactive chats to display thinking states, artifacts, and decision cards — not just plain text.
 
 ### Key Data Types (defined in App.tsx)
 
@@ -93,16 +100,35 @@ Lo-fi grayscale aesthetic with CSS variables defined in `src/styles/globals.css`
 - Custom animations: `@dotBounce` (thinking indicator), `@shimmer` (thinking text effect)
 - Radix UI primitives in `src/components/ui/` for accessible components
 
+### Project System
+
+Projects group chats with shared context: custom instructions, uploaded files, and memory scope (`project-only` | `include-external`). Defined in `src/types/project.ts`. Projects appear in the sidebar and can be assigned to chats via the chat header menu.
+
 ### State Patterns
 
 - No router — all navigation via `activeView` state in App.tsx
 - `ChatSidebar` receives 40+ props from App.tsx for chat/folder/navigation operations
 - Feature tracking: `viewedSimulations`, `hasSeenWalkthrough` (persisted to localStorage)
 - Bookmark system: max 3 bookmarked assistants with swap modal on overflow
+- `homeResetKey` — incremented to force-remount `HomePage` and reset its local state (e.g., after exiting incognito)
+
+### Keyboard Shortcuts
+
+- `Shift+Cmd+O` — New Chat
+- `Cmd+K` — Search Chats
+- Defined in `handleKeyDown` effect in App.tsx
 
 ### Reference Code
 
 `src/reference/` contains reference code provided by the user to be incorporated into the application. Check this folder when implementing features that may have prior art.
+
+### Deployment
+
+Multi-branch GitHub Pages via `.github/workflows/deploy-multi-branch.yml`:
+- `main` branch builds to `/` root
+- `MVP` branch builds to `/mvp/`
+- Both deployed together with an index selector page
+- Base path `/ai-assistant-desk-prototype/mvp/` is configured in vite.config.ts for the MVP build
 
 ### Design Reference
 
