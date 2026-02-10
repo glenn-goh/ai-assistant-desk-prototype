@@ -22,7 +22,8 @@
       "Bash(gh api:*)",
       "WebFetch(domain:github.com)",
       "Bash(npx vite build:*)",
-      "Bash(git rebase:*)"
+      "Bash(git rebase:*)",
+      "Bash(npm install:*)"
     ]
   }
 }
