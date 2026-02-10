@@ -30,6 +30,7 @@ interface MessageInputProps {
   autoFocus?: boolean;
   bookmarkedAssistants?: string[];
   assistantType?: string;
+  onNavigateToExplore?: () => void;
 }
 
 export function MessageInput({
@@ -47,7 +48,8 @@ export function MessageInput({
   placeholder,
   autoFocus = false,
   bookmarkedAssistants = [],
-  assistantType
+  assistantType,
+  onNavigateToExplore
 }: MessageInputProps) {
   const [internalInput, setInternalInput] = useState('');
 
@@ -319,12 +321,28 @@ export function MessageInput({
                           <ChevronRight className="w-4 h-4 text-gray-400" />
                         </button>
                         {/* Submenu */}
-                        <div className="absolute left-full top-0 ml-1 w-56 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
-                          <div className="p-2 max-h-[300px] overflow-y-auto">
+                        <div className="absolute left-full top-0 ml-1 w-80 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
                             {/* Header */}
-                            <div className="px-3 py-2 border-b border-gray-200 mb-2">
-                              <p className="text-xs font-medium text-gray-900">Select up to 3 assistants</p>
+                            <div className="p-3 border-b bg-white dark:bg-gray-900">
+                              <h3 className="font-medium text-xs">Custom Assistants ({selectedAssistants.length}/3)</h3>
+                              <p className="text-xs text-muted-foreground">
+                                Select up to 3 assistants to use in this chat. Favorite an assistant in the{' '}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsToolsPopoverOpen(false);
+                                    onNavigateToExplore?.();
+                                  }}
+                                  className="text-xs underline hover:text-gray-900"
+                                >
+                                  Explore Assistants
+                                </button>{' '}
+                                page to see it here.
+                              </p>
                             </div>
+                          <div className="p-2 max-h-[300px] overflow-y-auto bg-white dark:bg-gray-900">
                             {assistants.length === 0 ? (
                               <div className="px-3 py-4 text-center">
                                 <p className="text-xs text-gray-500">

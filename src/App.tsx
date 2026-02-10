@@ -719,6 +719,10 @@ export default function App() {
     setActiveView('chat');
   };
 
+  const handleNavigateToExplore = () => {
+    setActiveView('explore');
+  };
+
   const handleCreateProject = (name: string) => {
     const newProject: Project = {
       id: Date.now().toString(),
@@ -980,6 +984,7 @@ export default function App() {
               onDecisionMade={handleDecisionMade}
               onRichResponseComplete={handleRichResponseComplete}
               onCommitRichContent={handleCommitRichContent}
+              onNavigateToExplore={handleNavigateToExplore}
             />
           </div>
         )
@@ -1038,6 +1043,7 @@ export default function App() {
             onSelectSimulation={handleSelectSimulation}
             favoritedAssistants={favoritedAssistants}
             onIncognitoChange={setIsHomeIncognito}
+            onNavigateToExplore={handleNavigateToExplore}
           />
         </div>
       )}

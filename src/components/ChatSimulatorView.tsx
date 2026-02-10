@@ -120,6 +120,7 @@ interface ChatSimulatorProps {
   onDecisionMade?: (value: string) => void;
   onRichResponseComplete?: () => void;
   onCommitRichContent?: (textContent: string, richContent?: any[]) => void;
+  onNavigateToExplore?: () => void;
 }
 
 // Simulated reasoning content for thinking states
@@ -159,6 +160,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onDecisionMade,
   onRichResponseComplete,
   onCommitRichContent,
+  onNavigateToExplore,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -1086,6 +1088,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 bookmarkedAssistants={favoritedAssistants}
                 assistantType={assistantType}
                 disabled={isProcessingRichResponse || awaitingDecision}
+                onNavigateToExplore={onNavigateToExplore}
               />
             ) : (
               /* Simulator mode - auto-type input */
@@ -1096,6 +1099,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 autoTypeText={getCurrentTargetText()}
                 disabled={!isTyping}
                 assistantType={assistantType}
+                onNavigateToExplore={onNavigateToExplore}
               />
             )}
             {/* Disclaimer - only show when chat has started */}
