@@ -66,7 +66,7 @@ export function MessageInput({
   ];
 
   const [selectedTools, setSelectedTools] = useState<string[]>(tools.map(t => t.id));
-  const [selectedAssistants, setSelectedAssistants] = useState<string[]>(bookmarkedAssistants);
+  const [selectedAssistants, setSelectedAssistants] = useState<string[]>([]);
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
   const [isLibraryPopoverOpen, setIsLibraryPopoverOpen] = useState(false);
   const [isToolsPopoverOpen, setIsToolsPopoverOpen] = useState(false);
@@ -313,20 +313,28 @@ export function MessageInput({
                         >
                           <Bot className="w-5 h-5 flex-shrink-0 text-gray-700" />
                           <span className="flex-1 text-left text-xs text-gray-900">Custom Assistants</span>
+                          <span className="text-xs text-gray-400">
+                            ({selectedAssistants.length}/3)
+                          </span>
                           <ChevronRight className="w-4 h-4 text-gray-400" />
                         </button>
                         {/* Submenu */}
                         <div className="absolute left-full top-0 ml-1 w-56 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
-                          <div className="p-2">
+                          <div className="p-2 max-h-[300px] overflow-y-auto">
+                            {/* Header */}
+                            <div className="px-3 py-2 border-b border-gray-200 mb-2">
+                              <p className="text-xs font-medium text-gray-900">Select up to 3 assistants</p>
+                            </div>
                             {assistants.length === 0 ? (
                               <div className="px-3 py-4 text-center">
                                 <p className="text-xs text-gray-500">
-                                  Bookmark a custom assistant for it to appear here
+                                  Favourite a custom assistant for it to appear here
                                 </p>
                               </div>
                             ) : (
                               assistants.map((assistant) => {
                                 const isSelected = selectedAssistants.includes(assistant.id);
+                                const isDisabled = !isSelected && selectedAssistants.length >= 3;
                                 return (
                                   <button
                                     key={assistant.id}
@@ -334,9 +342,14 @@ export function MessageInput({
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      toggleAssistant(assistant.id);
+                                      if (!isDisabled) {
+                                        toggleAssistant(assistant.id);
+                                      }
                                     }}
-                                    className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors text-left"
+                                    disabled={isDisabled}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-left ${
+                                      isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+                                    }`}
                                   >
                                     <span className="flex-1 text-xs text-gray-900">{assistant.name}</span>
                                     {isSelected && (

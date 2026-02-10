@@ -111,7 +111,7 @@ interface ChatSimulatorProps {
   isIncognito?: boolean;
   projects?: Project[];
   onMoveToProject?: (chatId: string, projectId: string) => void;
-  bookmarkedAssistants?: string[];
+  favoritedAssistants?: string[];
   assistantType?: string;
   assistantName?: string; // Display name of the custom assistant being used
   onFirstUserMessage?: () => void; // Called when the first user message appears (simulator mode)
@@ -151,7 +151,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   isIncognito = false,
   projects = [],
   onMoveToProject,
-  bookmarkedAssistants = [],
+  favoritedAssistants = [],
   assistantType,
   assistantName,
   onFirstUserMessage,
@@ -1083,7 +1083,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   onSendMessage?.(message);
                 }}
                 autoFocus={true}
-                bookmarkedAssistants={bookmarkedAssistants}
+                bookmarkedAssistants={favoritedAssistants}
                 assistantType={assistantType}
                 disabled={isProcessingRichResponse || awaitingDecision}
               />

@@ -11,6 +11,8 @@ export interface Assistant {
   classification: string;
   type: 'Official' | 'Community' | 'Developer';
   assistantType: string; // Used for routing/chat creation
+  canEdit?: boolean; // Whether current user can edit this assistant
+  isOwned?: boolean; // Whether this is the user's own assistant (for "My Assistants" tab)
 }
 
 // Define all assistants
@@ -39,6 +41,8 @@ const allAssistants = {
     classification: 'C(CE)/SN',
     type: 'Developer' as const,
     assistantType: 'query',
+    isOwned: false,
+    canEdit: true, // Shared with edit permissions
   },
   transcribe: {
     id: 'transcribe',
@@ -51,6 +55,8 @@ const allAssistants = {
     classification: 'R/SN',
     type: 'Official' as const,
     assistantType: 'transcribe',
+    isOwned: true,
+    canEdit: true,
   },
   deepResearch: {
     id: 'deep-research',
@@ -63,6 +69,8 @@ const allAssistants = {
     classification: 'C(CE)/SN',
     type: 'Official' as const,
     assistantType: 'deep-research-ai',
+    isOwned: true,
+    canEdit: true,
   },
   powerpoint: {
     id: 'powerpoint',
@@ -87,6 +95,8 @@ const allAssistants = {
     classification: 'C(CE)/SN',
     type: 'Official' as const,
     assistantType: 'parliamentary',
+    isOwned: true,
+    canEdit: true,
   },
   interAgencyMemo: {
     id: 'inter-agency-memo',
@@ -98,6 +108,8 @@ const allAssistants = {
     uses: '10.3k',
     classification: 'C(CE)/SN',
     type: 'Official' as const,
+    isOwned: true,
+    canEdit: true,
     assistantType: 'memo',
   },
 

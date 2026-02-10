@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus } from 'lucide-react';
+import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, Heart, Pin, ExternalLink, MoreHorizontal } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 import {
@@ -17,7 +18,7 @@ import {
   roleBasedAssistants
 } from '../data/assistants';
 
-const filterTabs = ['All', 'My Assistants', 'Shared with Me', 'Community'];
+const allFilterTabs = ['All', 'Favourites', 'My Assistants', 'Shared with Me', 'Community'];
 
 // Helper to get type icon
 const getTypeIcon = (type: string) => {
@@ -38,15 +39,32 @@ interface ExplorePageProps {
   fontStyle: FontStyle;
   onStartAssistantChat: (assistantName: string, assistantType: string) => void;
   userRole?: string;
-  bookmarkedAssistants?: string[];
-  onToggleBookmark?: (assistantId: string) => void;
+  favoritedAssistants?: string[];
+  pinnedAssistants?: string[];
+  onToggleFavorite?: (assistantId: string) => void;
+  onTogglePin?: (assistantId: string) => void;
 }
 
-export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userRole, bookmarkedAssistants = [], onToggleBookmark }: ExplorePageProps) {
+export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userRole, favoritedAssistants = [], pinnedAssistants = [], onToggleFavorite, onTogglePin }: ExplorePageProps) {
   const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+
+  // Only show Favourites tab when user has favorites
+  const filterTabs = favoritedAssistants.length > 0
+    ? allFilterTabs
+    : allFilterTabs.filter(t => t !== 'Favourites');
+
+  // Handle unfavourite with auto-switch to All tab if last favorite is removed
+  const handleToggleFavorite = (assistantId: string) => {
+    const isFavorited = favoritedAssistants.includes(assistantId);
+    if (isFavorited && favoritedAssistants.length === 1 && activeFilter === 'Favourites') {
+      // Unfavouriting the last favorite while on Favourites tab - switch to All
+      setActiveFilter('All');
+    }
+    onToggleFavorite?.(assistantId);
+  };
 
   // Gather all assistants from all sources
   const allRoleAssistants = Object.values(roleBasedAssistants).flat();
@@ -58,11 +76,16 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   );
 
   // Apply filter tabs
-  if (activeFilter === 'My Assistants') {
-    filteredAssistants = filteredAssistants.filter(a => bookmarkedAssistants.includes(a.id));
+  if (activeFilter === 'Favourites') {
+    filteredAssistants = filteredAssistants.filter(a =>
+      favoritedAssistants.includes(a.id)
+    );
+  } else if (activeFilter === 'My Assistants') {
+    // Filter for assistants owned by the user
+    filteredAssistants = filteredAssistants.filter(a => a.isOwned === true);
   } else if (activeFilter === 'Shared with Me') {
-    // Filter for shared assistants (placeholder - can be based on assistant owner or other criteria)
-    filteredAssistants = filteredAssistants.filter(a => a.type === 'Developer');
+    // Filter for shared assistants (not owned by user)
+    filteredAssistants = filteredAssistants.filter(a => a.isOwned === false || (a.isOwned === undefined && a.type !== 'Community'));
   } else if (activeFilter === 'Community') {
     filteredAssistants = filteredAssistants.filter(a => a.type === 'Community');
   }
@@ -80,7 +103,8 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   // Component to render assistant cards - simplified
   const renderAssistantCard = (assistant: Assistant) => {
     const IconComponent = assistant.icon;
-    const isBookmarked = bookmarkedAssistants.includes(assistant.id);
+    const isFavorited = favoritedAssistants.includes(assistant.id);
+    const isPinned = pinnedAssistants.includes(assistant.id);
 
     // Lo-fi grayscale styling
     const iconBgColor = 'bg-gray-100';
@@ -93,8 +117,8 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
         onClick={() => onStartAssistantChat(assistant.name, assistant.assistantType)}
       >
         <CardContent className="p-6">
-          {/* Top Right: Classification Pill and Bookmark Icon */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+          {/* Top Right: Classification Pill, Heart Icon, and Ellipsis Menu */}
+          <div className="absolute top-4 right-4 flex items-center gap-1.5">
             {/* Classification Pill */}
             <div className={`px-2 py-1 rounded-full text-xs font-medium border ${
               assistant.classification.includes('C(CE)') || assistant.classification.includes('CCE')
@@ -104,27 +128,61 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
               {assistant.classification.replace('C(CE)/SN', 'CCE/SN')}
             </div>
 
-            {/* Bookmark Icon */}
+            {/* Heart Icon (Favorite) with Tooltip */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onToggleBookmark?.(assistant.id);
+                      handleToggleFavorite(assistant.id);
                     }}
                     className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
                   >
-                    <Bookmark
-                      className={`w-5 h-5 ${isBookmarked ? 'fill-gray-900 text-gray-900' : 'text-gray-400'}`}
+                    <Heart
+                      className={`w-5 h-5 ${
+                        isFavorited
+                          ? 'fill-gray-900 text-gray-900'
+                          : 'text-gray-400'
+                      }`}
                     />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Bookmark</p>
+                  <p>{isFavorited ? 'Unfavourite' : 'Favourite'}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+
+            {/* Ellipsis Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <MoreHorizontal className="w-5 h-5 text-gray-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onTogglePin?.(assistant.id);
+                }}>
+                  <Pin className="w-4 h-4 mr-1.5" />
+                  {isPinned ? 'Unpin from sidebar' : 'Pin to sidebar'}
+                </DropdownMenuItem>
+                {assistant.canEdit && (
+                  <DropdownMenuItem onClick={(e) => {
+                    e.stopPropagation();
+                    // TODO: Navigate to studio with assistant
+                  }}>
+                    <ExternalLink className="w-4 h-4 mr-1.5" />
+                    Edit on Studio
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Icon Container */}

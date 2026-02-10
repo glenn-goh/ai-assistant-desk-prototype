@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Settings, Trash2, FolderOpen, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Pin, Pencil, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
@@ -51,9 +51,10 @@ interface ChatSidebarProps {
   viewedSimulations?: string[];
   simulationInstances?: Array<{ instanceId: string; simulationId: string }>;
   startedSimulations?: string[];
-  bookmarkedAssistants?: string[];
+  favoritedAssistants?: string[];
+  pinnedAssistants?: string[];
   previewChat?: Chat | null;
-  onToggleBookmark?: (assistantId: string) => void;
+  onTogglePin?: (assistantId: string) => void;
 }
 
 export function ChatSidebar({
@@ -94,9 +95,10 @@ export function ChatSidebar({
   viewedSimulations = [],
   simulationInstances = [],
   startedSimulations = [],
-  bookmarkedAssistants = [],
+  favoritedAssistants = [],
+  pinnedAssistants = [],
   previewChat = null,
-  onToggleBookmark,
+  onTogglePin,
 }: ChatSidebarProps) {
   const [recentChatsOpen, setRecentChatsOpen] = useState(true);
   const [customAssistantsOpen, setCustomAssistantsOpen] = useState(true);
@@ -125,50 +127,40 @@ export function ChatSidebar({
   // Get assistants user has interacted with
   const interactedAssistants = uniqueAssistants.filter(a => chattedAssistantTypes.has(a.assistantType));
 
-  // Build the custom assistants list
-  let recommendedAssistants: import('../data/assistants').Assistant[] = [];
+  // Build the custom assistants list with pin-first ordering
+  let displayedAssistants: import('../data/assistants').Assistant[] = [];
 
-  // Only show section if user has bookmarked or chatted with custom assistants
-  const hasCustomAssistants = bookmarkedAssistants.length > 0 || interactedAssistants.length > 0;
+  const hasCustomAssistants = (pinnedAssistants?.length ?? 0) > 0 || interactedAssistants.length > 0;
 
   if (hasCustomAssistants) {
-    // First, add bookmarked assistants (in order of bookmarking, max 3)
-    const bookmarkedList = bookmarkedAssistants
+    // 1. Add pinned assistants first (unlimited)
+    const pinnedList = (pinnedAssistants ?? [])
       .map(id => uniqueAssistants.find(a => a.id === id))
-      .filter((a): a is import('../data/assistants').Assistant => a !== undefined)
-      .slice(0, 3);
+      .filter((a): a is import('../data/assistants').Assistant => a !== undefined);
 
-    recommendedAssistants = [...bookmarkedList];
+    displayedAssistants = [...pinnedList];
 
-    // Then, add recently used non-bookmarked assistants (up to max 5 total)
-    const bookmarkedAssistantTypes = new Set(
-      bookmarkedList.map(a => a.assistantType)
-    );
-    const remainingSlots = 5 - recommendedAssistants.length;
+    // 2. Add recently used non-pinned assistants (unlimited)
+    const pinnedAssistantTypes = new Set(pinnedList.map(a => a.assistantType));
 
-    if (remainingSlots > 0) {
-      // Get chats with custom assistants, most recent first
-      // Exclude assistants that are already bookmarked (by assistantType)
-      const recentChatsWithAssistants = chats
-        .filter(chat => chat.assistantType && !bookmarkedAssistantTypes.has(chat.assistantType))
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    const recentChatsWithAssistants = chats
+      .filter(chat => chat.assistantType && !pinnedAssistantTypes.has(chat.assistantType))
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-      // Get unique assistant types from recent chats
-      const seenTypes = new Set<string>();
-      const recentAssistants: import('../data/assistants').Assistant[] = [];
+    const seenTypes = new Set<string>();
+    const recentAssistants: import('../data/assistants').Assistant[] = [];
 
-      for (const chat of recentChatsWithAssistants) {
-        if (chat.assistantType && !seenTypes.has(chat.assistantType) && recentAssistants.length < remainingSlots) {
-          const assistant = uniqueAssistants.find(a => a.assistantType === chat.assistantType);
-          if (assistant) {
-            recentAssistants.push(assistant);
-            seenTypes.add(chat.assistantType);
-          }
+    for (const chat of recentChatsWithAssistants) {
+      if (chat.assistantType && !seenTypes.has(chat.assistantType)) {
+        const assistant = uniqueAssistants.find(a => a.assistantType === chat.assistantType);
+        if (assistant) {
+          recentAssistants.push(assistant);
+          seenTypes.add(chat.assistantType);
         }
       }
-
-      recommendedAssistants = [...recommendedAssistants, ...recentAssistants];
     }
+
+    displayedAssistants = [...displayedAssistants, ...recentAssistants];
   }
 
   const handleDragStart = (e: React.DragEvent, chatId: string) => {
@@ -443,36 +435,53 @@ export function ChatSidebar({
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="space-y-0.5 mt-0.5">
-                          {recommendedAssistants.map(assistant => {
+                          {displayedAssistants.map((assistant, index) => {
                             const IconComponent = assistant.icon;
-                            const isBookmarked = bookmarkedAssistants.includes(assistant.id);
+                            const isPinned = pinnedAssistants?.includes(assistant.id);
+                            const showDivider = index === (pinnedAssistants?.length ?? 0) - 1
+                              && index < displayedAssistants.length - 1
+                              && (pinnedAssistants?.length ?? 0) > 0;
+
                             return (
-                              <div
-                                key={assistant.id}
-                                className="group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal hover:bg-gray-200"
-                              >
-                                <IconComponent className="w-4 h-4 text-gray-500" />
-                                <span
-                                  className="truncate flex-1 ml-2"
-                                  onClick={() => onStartAssistantChat?.(assistant.name, assistant.assistantType)}
-                                >
-                                  {assistant.name}
-                                </span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    onToggleBookmark?.(assistant.id);
-                                  }}
-                                  className={`flex-shrink-0 p-1 hover:bg-gray-300 rounded transition-colors ${
-                                    isBookmarked ? '' : 'opacity-0 group-hover:opacity-100'
-                                  }`}
-                                  title={isBookmarked ? 'Remove bookmark' : 'Bookmark assistant'}
-                                >
-                                  <Bookmark
-                                    className={`w-3.5 h-3.5 text-gray-500 ${isBookmarked ? 'fill-gray-500' : ''}`}
-                                  />
-                                </button>
-                              </div>
+                              <React.Fragment key={assistant.id}>
+                                <div className="group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal hover:bg-gray-200">
+                                  <IconComponent className="w-4 h-4 text-gray-500" />
+                                  <span
+                                    className="truncate flex-1 ml-2"
+                                    onClick={() => onStartAssistantChat?.(assistant.name, assistant.assistantType)}
+                                  >
+                                    {assistant.name}
+                                  </span>
+
+                                  {/* Ellipsis menu - only for pinned */}
+                                  {isPinned && (
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <button
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-300 rounded transition-colors"
+                                        >
+                                          <MoreHorizontal className="w-3.5 h-3.5 text-gray-500" />
+                                        </button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                                        <DropdownMenuItem onClick={(e) => {
+                                          e.stopPropagation();
+                                          onTogglePin?.(assistant.id);
+                                        }}>
+                                          <Pin className="w-4 h-4 mr-1.5" />
+                                          Unpin from sidebar
+                                        </DropdownMenuItem>
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
+                                  )}
+                                </div>
+
+                                {/* Visual divider between pinned and recently used */}
+                                {showDivider && (
+                                  <div className="h-px bg-gray-200 mx-2 my-1" />
+                                )}
+                              </React.Fragment>
                             );
                           })}
                         </div>
