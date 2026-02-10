@@ -1123,7 +1123,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         <div className={`flex flex-col h-full bg-white overflow-hidden transition-opacity duration-75 ${panelContentVisible ? 'opacity-100' : 'opacity-0'}`}>
           {/* Canvas Header with Toolbar */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 bg-white h-[52px]">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0 flex-1">
               {selectedArtifact && (
                 <button
                   onClick={() => setSelectedArtifact(null)}
@@ -1153,7 +1153,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 />
               ) : (
                 <h2
-                  className="text-sm font-semibold text-gray-900 cursor-pointer"
+                  className="text-sm font-semibold text-gray-900 cursor-pointer truncate"
                   onDoubleClick={() => {
                     if (selectedArtifact) {
                       setEditCanvasTitleValue(selectedArtifact.title);
@@ -1170,66 +1170,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             <div className="flex items-center gap-1">
               {/* Canvas Toolbar - only when viewing artifact */}
               {selectedArtifact && (
-                <TooltipProvider>
-                  <div className="flex items-center gap-1">
-                    {/* Copy */}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleCopyArtifact}
-                          className="h-8 w-8 p-0"
-                        >
-                          {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Copy content</p>
-                      </TooltipContent>
-                    </Tooltip>
-
-                    {/* Divider */}
-                    <div className="h-5 w-px bg-gray-100 mx-1" />
-
-                    {/* Undo/Redo */}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handlePrevVersion}
-                          disabled={getCurrentVersion() <= 1}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Undo2 className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Undo</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleNextVersion}
-                          disabled={getCurrentVersion() >= 3}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Redo2 className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Redo</p>
-                      </TooltipContent>
-                    </Tooltip>
-
-                    {/* Divider */}
-                    <div className="h-5 w-px bg-gray-100 mx-1" />
-
-                    {/* Download as .docx button */}
+                <div className="flex items-center gap-1">
+                    {/* Save as .docx button */}
                     <Button
                       variant="outline"
                       size="sm"
@@ -1237,10 +1179,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       className="h-8 px-3 gap-2 border-gray-300"
                     >
                       <Download className="w-4 h-4" />
-                      <span className="text-xs">Download as .docx</span>
+                      <span className="text-xs">Save as .docx</span>
                     </Button>
                   </div>
-                </TooltipProvider>
               )}
 
               <button
