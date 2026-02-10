@@ -1,5 +1,5 @@
 import { useState, KeyboardEvent, useRef, useEffect } from 'react';
-import { ArrowUp, Paperclip, SlidersHorizontal, Search, FolderOpen, Shield, ChevronDown, ChevronRight, Globe, Sparkles, PanelRight, Bot, Plus, Check } from 'lucide-react';
+import { ArrowUp, Paperclip, SlidersHorizontal, Search, FolderOpen, Shield, ChevronDown, ChevronRight, Globe, Sparkles, PanelRight, Bot, Plus, Check, Workflow } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { Button } from './ui/button';
 import {
@@ -62,6 +62,7 @@ export function MessageInput({
 
   const tools = [
     { id: 'web-search', name: 'Web Search', icon: Globe },
+    { id: 'flowcharts-diagrams', name: 'Flowcharts and diagrams', icon: Workflow },
   ];
 
   const [selectedTools, setSelectedTools] = useState<string[]>(tools.map(t => t.id));
