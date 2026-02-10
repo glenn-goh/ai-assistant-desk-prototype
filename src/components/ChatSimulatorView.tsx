@@ -14,6 +14,7 @@ import { AssistantSwitchBadge } from './chat/AssistantSwitchBadge';
 import { ArtifactCard, getFileIcon } from './chat/ArtifactCard';
 import { DecisionCard } from './chat/DecisionCard';
 import { SkeletonLoader } from './chat/SkeletonLoader';
+import MermaidDiagram from './MermaidDiagram';
 import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
 
 // Type definitions
@@ -118,7 +119,7 @@ interface ChatSimulatorProps {
   pendingBotResponses?: BotResponse[];
   onDecisionMade?: (value: string) => void;
   onRichResponseComplete?: () => void;
-  onCommitRichContent?: (textContent: string) => void;
+  onCommitRichContent?: (textContent: string, richContent?: any[]) => void;
 }
 
 // Simulated reasoning content for thinking states
@@ -256,7 +257,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       window.removeEventListener('resize', calculateSpacer);
       clearTimeout(timer);
     };
-  }, [displayedMessages, interactiveMessages, interactiveDisplayedMessages, currentThought, currentReasoning, showThinkingDots, searchingAssistant]);
+  }, [displayedMessages, interactiveMessages, interactiveDisplayedMessages, currentThought, currentReasoning, showThinkingDots, searchingAssistant, showOutputPanel]);
 
   // Setup form submission handler when artifact changes (simulator only)
   useEffect(() => {
@@ -504,6 +505,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         await sleep(response.delayMs ? response.delayMs / 1.5 : 500);
         if (richResponseAbortRef.current) return;
         setInteractiveDisplayedMessages(prev => [...prev, { type: 'text', content: response.content }]);
+      } else if (response.type === 'artifact') {
+        await sleep(response.delayMs ? response.delayMs / 1.5 : 500);
+        if (richResponseAbortRef.current) return;
+        setInteractiveDisplayedMessages(prev => [...prev, { type: 'artifact', data: response }]);
+        setSelectedArtifact(response);
+        setShowOutputPanel(true);
+      } else if (response.type === 'mermaid') {
+        await sleep(response.delayMs ? response.delayMs / 1.5 : 500);
+        if (richResponseAbortRef.current) return;
+        setInteractiveDisplayedMessages(prev => [...prev, { type: 'mermaid', chart: response.chart }]);
       }
     }
 
@@ -537,6 +548,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     if (!isInteractive || !pendingBotResponses || pendingBotResponses.length === 0) return;
     processInteractiveBotResponses(pendingBotResponses);
   }, [pendingBotResponses]);
+
+  // Auto-select artifact when it appears in interactive displayed messages
+  useEffect(() => {
+    if (!isInteractive) return;
+    const latestArtifact = [...interactiveDisplayedMessages].reverse().find(m => m.type === 'artifact');
+    if (latestArtifact && (!selectedArtifact || selectedArtifact.title !== latestArtifact.data.title)) {
+      setSelectedArtifact(latestArtifact.data);
+      setShowOutputPanel(true);
+    }
+  }, [interactiveDisplayedMessages]);
 
   // Clear interactive rich response state on chat switch (skip initial mount)
   const isInitialMount = useRef(true);
@@ -726,6 +747,49 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                             </TooltipProvider>
                           </div>
                         </div>
+                      ) : msg.richContent ? (
+                        <div className="space-y-8">
+                          {msg.richContent.map((rich: any, ridx: number) => (
+                            <div key={`${msg.id}-rich-${ridx}`}>
+                              {rich.type === 'thinking' && (
+                                <ReasoningBlock
+                                  id={parseInt(msg.id) + ridx}
+                                  reasoning={rich.reasoning || []}
+                                  doneSummary={rich.doneSummary}
+                                  tags={rich.tags}
+                                  isExpanded={expandedThinkingIds.has(parseInt(msg.id) + ridx)}
+                                  onToggle={toggleThinkingExpanded}
+                                />
+                              )}
+                              {rich.type === 'text' && (
+                                <TextResponseBlock
+                                  messageId={`${msg.id}-rich-${ridx}`}
+                                  content={rich.content}
+                                  copiedMessageId={copiedMessageId}
+                                  feedbackState={feedbackMessageId}
+                                  onCopy={handleCopyMessage}
+                                  onFeedback={handleFeedback}
+                                />
+                              )}
+                              {rich.type === 'mermaid' && (
+                                <div className="my-4 bg-white rounded-xl border border-gray-200 p-4 inline-block" style={{ maxWidth: '400px' }}>
+                                  <MermaidDiagram chart={rich.chart} maxWidth="400px" />
+                                </div>
+                              )}
+                              {rich.type === 'artifact' && (
+                                <ArtifactCard
+                                  title={rich.data.title}
+                                  description={rich.data.description}
+                                  fileType={rich.data.fileType}
+                                  onSelect={() => {
+                                    setSelectedArtifact(rich.data);
+                                    setShowOutputPanel(true);
+                                  }}
+                                />
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       ) : (
                         <TextResponseBlock
                           messageId={msg.id}
@@ -787,6 +851,22 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                               onCopy={handleCopyMessage}
                               onFeedback={handleFeedback}
                             />
+                          )}
+                          {msg.type === 'artifact' && (
+                            <ArtifactCard
+                              title={msg.data.title}
+                              description={msg.data.description}
+                              fileType={msg.data.fileType}
+                              onSelect={() => {
+                                setSelectedArtifact(msg.data);
+                                setShowOutputPanel(true);
+                              }}
+                            />
+                          )}
+                          {msg.type === 'mermaid' && (
+                            <div className="my-4 bg-white rounded-xl border border-gray-200 p-4 inline-block" style={{ maxWidth: '400px' }}>
+                              <MermaidDiagram chart={msg.chart} maxWidth="400px" />
+                            </div>
                           )}
                           {msg.type === 'userDecision' && (
                             <div className="flex justify-end items-start gap-2 ml-24">
@@ -991,8 +1071,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     const textItems = interactiveDisplayedMessages
                       .filter((m: any) => m.type === 'text')
                       .map((m: any) => m.content);
-                    if (textItems.length > 0 && onCommitRichContent) {
-                      onCommitRichContent(textItems.join('\n\n'));
+                    if (onCommitRichContent) {
+                      onCommitRichContent(
+                        textItems.join('\n\n') || '',
+                        interactiveDisplayedMessages
+                      );
                     }
                     setInteractiveDisplayedMessages([]);
                   }
@@ -1171,16 +1254,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
           {/* Output Content */}
           <div className="flex-1 overflow-auto" ref={outputContentRef}>
-            {isInteractive ? (
-              /* Interactive mode - simple empty state */
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center py-12 text-gray-500">
-                  <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p className="text-sm">No output canvas generated yet</p>
-                  <p className="text-xs mt-1">Canvases created during the chat will appear here</p>
-                </div>
-              </div>
-            ) : selectedArtifact ? (
+            {selectedArtifact ? (
               <div className="h-full bg-white">
                 <div className="p-8 max-w-4xl mx-auto">
                   {/* Artifact Header */}
@@ -1195,7 +1269,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   </div>
 
                   {/* Artifact Content */}
-                  <div className="prose prose-sm max-w-none prose-lofi" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
+                  {selectedArtifact.fileType === 'chart' ? (
+                    <MermaidDiagram chart={selectedArtifact.content} />
+                  ) : (
+                    <div className="prose prose-sm max-w-none prose-lofi" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
+                  )}
 
                 </div>
               </div>
@@ -1204,9 +1282,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 <div className="mb-4">
                   <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">List of Canvas</h3>
 
-                  {displayedMessages.filter(m => m.type === 'artifact').length > 0 ? (
+                  {(() => {
+                    const allArtifacts = [
+                      ...displayedMessages.filter(m => m.type === 'artifact'),
+                      ...interactiveDisplayedMessages.filter(m => m.type === 'artifact'),
+                    ];
+                    return allArtifacts.length > 0 ? (
                     <div className="space-y-2">
-                      {displayedMessages.filter(m => m.type === 'artifact').map((msg, idx) => (
+                      {allArtifacts.map((msg, idx) => (
                         <button
                           key={idx}
                           onClick={() => setSelectedArtifact(msg.data)}
@@ -1231,7 +1314,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       <p className="text-sm">No output canvas generated yet</p>
                       <p className="text-xs mt-1">Canvases created during the chat will appear here</p>
                     </div>
-                  )}
+                  );
+                  })()}
                 </div>
               </div>
             )}

@@ -31,6 +31,7 @@ import { marketingSoftwareAorData } from './data/marketing-software-aor';
 import { pqResponseDataV2 } from './data/pq-response-mnd-v2';
 import { canvasDemoData } from './data/canvas-demo';
 import { getWebSearchResponses } from './data/interactive-web-search';
+import { getDiagramInChatResponses, getDiagramInCanvasResponses } from './data/interactive-diagram';
 
 export interface Message {
   id: string;
@@ -39,6 +40,7 @@ export interface Message {
   timestamp: Date;
   hasFile?: boolean;
   fileName?: string;
+  richContent?: any[];
 }
 
 export interface Chat {
@@ -88,6 +90,19 @@ function detectWebSearchKeyword(message: string): string | null {
     if (match?.[1]) {
       return match[1].trim();
     }
+  }
+  return null;
+}
+
+function detectDiagramKeyword(message: string): 'chat' | 'canvas' | null {
+  const lower = message.toLowerCase();
+  // Check "in chat" patterns first (more specific)
+  if (lower.includes('diagram in chat') || lower.includes('flowchart in chat')) {
+    return 'chat';
+  }
+  // Then check general patterns
+  if (lower.includes('diagram in canvas') || lower.includes('diagram') || lower.includes('flowchart')) {
+    return 'canvas';
   }
   return null;
 }
@@ -270,19 +285,23 @@ export default function App() {
         currentChatId = newId;
       }
     } else {
-      // Update existing chat with user message
-      currentChats = chats.map(chat => {
-        if (chat.id === activeChatId) {
-          const updatedMessages = [...chat.messages, userMessage];
-          return {
-            ...chat,
-            messages: updatedMessages,
-            title: chat.messages.length === 0 ? content.slice(0, 30) : chat.title,
-          };
-        }
-        return chat;
+      // Update existing chat with user message (updater pattern to preserve any
+      // just-committed rich content from the previous assistant response)
+      setChats(prevChats => {
+        const updated = prevChats.map(chat => {
+          if (chat.id === activeChatId) {
+            const updatedMessages = [...chat.messages, userMessage];
+            return {
+              ...chat,
+              messages: updatedMessages,
+              title: chat.messages.length === 0 ? content.slice(0, 30) : chat.title,
+            };
+          }
+          return chat;
+        });
+        currentChats = updated;
+        return updated;
       });
-      setChats(currentChats);
     }
 
     // Check for web search keywords — trigger rich response pipeline instead of mock response
@@ -291,6 +310,14 @@ export default function App() {
       const responses = getWebSearchResponses(searchTerm);
       setPendingSearchTerm(searchTerm);
       setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
+    // Check for diagram/flowchart keywords — trigger diagram response pipeline
+    const diagramMode = detectDiagramKeyword(content);
+    if (diagramMode) {
+      const responses = diagramMode === 'chat' ? getDiagramInChatResponses() : getDiagramInCanvasResponses();
+      setPendingBotResponses(responses);
       return;
     }
 
@@ -403,6 +430,14 @@ export default function App() {
       const responses = getWebSearchResponses(searchTerm);
       setPendingSearchTerm(searchTerm);
       setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
+    // Check for diagram/flowchart keywords — trigger diagram response pipeline
+    const diagramMode = detectDiagramKeyword(message);
+    if (diagramMode) {
+      const responses = diagramMode === 'chat' ? getDiagramInChatResponses() : getDiagramInCanvasResponses();
+      setPendingBotResponses(responses);
       return;
     }
 
@@ -598,13 +633,14 @@ export default function App() {
     setPendingBotResponses([]);
   };
 
-  const handleCommitRichContent = (textContent: string) => {
+  const handleCommitRichContent = (textContent: string, richContent?: any[]) => {
     if (!activeChatId) return;
     const aiMessage: Message = {
       id: (Date.now() + 1).toString(),
       role: 'assistant',
       content: textContent,
       timestamp: new Date(),
+      richContent,
     };
 
     if (incognitoChat && activeChatId === incognitoChat.id) {

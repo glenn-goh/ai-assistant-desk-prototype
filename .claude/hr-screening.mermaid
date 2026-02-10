@@ -1,0 +1,11 @@
+flowchart TD
+    A[📋 Job Posting] --> B[📥 Applications Received]
+    B --> C{Meets Minimum Qualifications?}
+    C -- No --> D[❌ Rejected]
+    C -- Yes --> E[🔍 Background Check]
+    E --> F{Passed?}
+    F -- No --> D
+    F -- Yes --> G[🗣️ Interview]
+    G --> H{Selected?}
+    H -- No --> D
+    H -- Yes --> I[✅ Offer & Onboarding]
