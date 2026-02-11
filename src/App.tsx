@@ -990,6 +990,12 @@ export default function App() {
                   setStartedSimulations(prev => [...prev, activeChatId]);
                 }
               }}
+              favoritedAssistants={favoritedAssistants}
+              onToggleFavorite={handleToggleFavorite}
+              toolAssistants={toolAssistants}
+              onAddToTools={handleAddToTools}
+              onRemoveFromTools={handleRemoveFromTools}
+              onReplaceToolAssistant={handleReplaceToolAssistant}
             />
           </div>
         ) : (
