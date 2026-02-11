@@ -471,7 +471,7 @@ export const getAssistantsForRole = (role?: string): Assistant[] => {
 
 // Helper function to find an assistant by name
 export const getAssistantByName = (name: string): Assistant | undefined => {
-  return topRatedAssistants.find(a => a.name === name);
+  return Object.values(allAssistants).find(a => a.name === name);
 };
 
 // Helper function to map classification codes to full text
