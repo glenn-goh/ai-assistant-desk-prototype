@@ -23,6 +23,9 @@ function getFileIcon(fileType: string) {
 }
 
 export function ArtifactCard({ title, description, fileType, onSelect }: ArtifactCardProps) {
+  // Hidden for MVP - canvas/artifact feature disabled
+  return null;
+  /* Original render
   return (
     <div>
       <button
@@ -41,6 +44,7 @@ export function ArtifactCard({ title, description, fileType, onSelect }: Artifac
       </button>
     </div>
   );
+  */
 }
 
 // Re-export for use in canvas panel

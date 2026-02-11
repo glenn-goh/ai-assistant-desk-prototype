@@ -220,7 +220,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             Temporary
           </span>
         )}
-        {/* Ellipsis Menu - only show for existing chats, non-incognito, and non-CCE */}
+        {/* Ellipsis Menu - commented out (Move to project disabled)
         {isInteractive && !isNewChat && chatId && !isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -257,6 +257,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        */}
+        {/* Expand canvas button - commented out
         {!showOutputPanel && (
           <TooltipProvider>
             <Tooltip>
@@ -274,6 +276,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             </Tooltip>
           </TooltipProvider>
         )}
+        */}
       </div>
       {assistant && (
         <ReplaceToolModal

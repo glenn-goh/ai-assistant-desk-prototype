@@ -328,7 +328,7 @@ export function ChatSidebar({
                     </Tooltip>
                   </TooltipProvider>
 
-                  {/* New Project Button */}
+                  {/* New Project Button - Original
                   <Button
                     data-tour="new-project"
                     className="w-full justify-start gap-2 px-2 h-9 text-sm mt-1"
@@ -337,6 +337,18 @@ export function ChatSidebar({
                   >
                     <FolderPlus className="w-4 h-4" />
                     <span className="flex-1 text-left">New Project</span>
+                  </Button>
+                  */}
+                  {/* New Project Button - Disabled */}
+                  <Button
+                    data-tour="new-project"
+                    className="w-full justify-start gap-2 px-2 h-9 text-sm mt-1 opacity-50 cursor-not-allowed"
+                    variant="ghost"
+                    disabled
+                  >
+                    <FolderPlus className="w-4 h-4" />
+                    <span className="flex-1 text-left">New Project</span>
+                    <span className="text-xs text-gray-400">Coming soon</span>
                   </Button>
 
                   {/* Explore Assistants Button */}

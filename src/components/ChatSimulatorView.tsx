@@ -188,7 +188,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [editCanvasTitleValue, setEditCanvasTitleValue] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [searchingAssistant, setSearchingAssistant] = useState(false);
-  const [showOutputPanel, setShowOutputPanel] = useState(false);
+  // const [showOutputPanel, setShowOutputPanel] = useState(false);
+  const showOutputPanel = false;
+  const setShowOutputPanel = (_: boolean) => {};
   const [panelContentVisible, setPanelContentVisible] = useState(false);
   const [expandedThinkingIds, setExpandedThinkingIds] = useState<Set<number>>(new Set());
   const [artifactVersions, setArtifactVersions] = useState<{[key: string]: number}>({});
