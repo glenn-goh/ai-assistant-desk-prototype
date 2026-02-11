@@ -62,8 +62,8 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
             </Tooltip>
           </TooltipProvider>
 
-          {/* Ellipsis Menu */}
-          <DropdownMenu>
+          {/* HIDDEN: Ellipsis Menu */}
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
                 onClick={(e) => e.stopPropagation()}
@@ -81,14 +81,13 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
               {assistant.canEdit && (
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
-                  // TODO: Navigate to studio with assistant
                 }}>
                   <ExternalLink className="w-4 h-4 mr-1.5" />
                   Edit on Studio
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
 
         {/* Icon Container */}

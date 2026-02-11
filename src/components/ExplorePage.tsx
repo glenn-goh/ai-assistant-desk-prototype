@@ -115,6 +115,10 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
     );
   }
 
+  // MVP-lite: Show only PQ and HR assistants
+  const allowedAssistantIds = ['parliamentary-drafter', 'workday-shortlister'];
+  filteredAssistants = filteredAssistants.filter(a => allowedAssistantIds.includes(a.id));
+
   // Render assistant card using shared component
   const renderAssistantCard = (assistant: Assistant) => (
     <AssistantCard
@@ -131,7 +135,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   return (
     <div className={`flex-1 flex flex-col bg-gray-100 ${font.base}`}>
       {/* Header */}
-      <div className="flex flex-col gap-4 p-4 bg-gray-100 border-b border-gray-200">
+      <div className="flex flex-col gap-4 p-4 bg-gray-100">{/* HIDDEN: border-b border-gray-200 */}
         <div className="max-w-7xl mx-auto w-full px-4">
           <div className="flex items-center justify-between mb-4">
             <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>Explore Assistants</h1>
@@ -144,8 +148,8 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
             </Button>
           </div>
 
-          {/* Search Bar */}
-          <div className="relative mb-4">
+          {/* HIDDEN: Search Bar */}
+          {/* <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <Input
               placeholder="Search assistants..."
@@ -153,10 +157,10 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 bg-white"
             />
-          </div>
+          </div> */}
 
-          {/* Filter Tabs */}
-          <div className="flex gap-2">
+          {/* HIDDEN: Filter Tabs */}
+          {/* <div className="flex gap-2">
             {filterTabs.map(tab => (
               <button
                 key={tab}
@@ -170,7 +174,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                 {tab}
               </button>
             ))}
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -178,13 +182,15 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
       <div className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex gap-6">
-            {/* Assistants Grid - Responsive columns, max 3, min 250px */}
+            {/* Assistants Grid - MVP-lite: 2 columns */}
+            {/* COMMENTED: 3-column layout for easy reversion */}
+            {/* gridTemplateColumns: 'repeat(auto-fill, minmax(max(250px, calc((100% - 3rem) / 3)), 1fr))', */}
             <div className="flex-1 space-y-12 min-w-0">
               {filteredAssistants.length > 0 ? (
                 <div
                   className="grid gap-6"
                   style={{
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(max(250px, calc((100% - 3rem) / 3)), 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(max(250px, calc((100% - 1.5rem) / 2)), 1fr))',
                     maxWidth: `${filteredAssistants.length * 280 + (filteredAssistants.length - 1) * 24}px`
                   }}
                 >
