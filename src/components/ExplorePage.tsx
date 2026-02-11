@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, Heart, Pin, ExternalLink, MoreHorizontal, X, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, Heart, Pin, ExternalLink, MoreHorizontal, X, ChevronLeft, ChevronRight, SlidersHorizontal, Share2 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
@@ -182,6 +182,11 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+                  <Share2 className="w-4 h-4 mr-1.5" />
+                  Share
+                  <span className="ml-auto text-xs text-gray-400">Coming soon</span>
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={(e) => {
                   e.stopPropagation();
                   onTogglePin?.(assistant.id);

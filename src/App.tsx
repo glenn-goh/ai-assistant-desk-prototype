@@ -745,7 +745,7 @@ export default function App() {
     setFavoritedAssistants(prev => {
       const updated = prev.includes(assistantId)
         ? prev.filter(id => id !== assistantId)
-        : [...prev, assistantId];
+        : [assistantId, ...prev]; // Add to beginning (latest first)
       localStorage.setItem('favoritedAssistants', JSON.stringify(updated));
       return updated;
     });
