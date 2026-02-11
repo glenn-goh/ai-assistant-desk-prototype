@@ -1,7 +1,12 @@
 import React, { useState } from 'react';
-import { FileText, EyeOff, MoreHorizontal, FolderPlus } from 'lucide-react';
+import { FileText, EyeOff, MoreHorizontal, FolderPlus, ChevronDown } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { AssistantCard } from './AssistantCard';
+import { ReplaceToolModal } from './ReplaceToolModal';
+import type { Assistant } from '../data/assistants';
+import { topRatedAssistants, essentialAssistants, roleBasedAssistants } from '../data/assistants';
 import type { Project } from '../types/project';
 import { IncognitoIcon } from './IncognitoIcon';
 
@@ -31,6 +36,15 @@ interface ChatHeaderProps {
   projects: Project[];
   onMoveToProject?: (chatId: string, projectId: string) => void;
 
+  // Assistant card popover
+  assistant?: Assistant;
+  isFavorited?: boolean;
+  onToggleFavorite?: (assistantId: string) => void;
+  toolAssistants?: string[];
+  onAddToTools?: (assistantId: string) => void;
+  onRemoveFromTools?: (assistantId: string) => void;
+  onReplaceToolAssistant?: (oldAssistantId: string, newAssistantId: string) => void;
+
   // Canvas toggle
   showOutputPanel: boolean;
   onShowOutputPanel: () => void;
@@ -50,12 +64,32 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onSendTemporaryToggle,
   projects,
   onMoveToProject,
+  assistant,
+  isFavorited = false,
+  onToggleFavorite,
+  toolAssistants = [],
+  onAddToTools,
+  onRemoveFromTools,
+  onReplaceToolAssistant,
   showOutputPanel,
   onShowOutputPanel,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitleValue, setEditTitleValue] = useState('');
   const [isTemporaryChat, setIsTemporaryChat] = useState(false);
+  const [replaceModalOpen, setReplaceModalOpen] = useState(false);
+
+  const isInTools = assistant ? toolAssistants.includes(assistant.id) : false;
+
+  const handleToggleTools = (assistantId: string) => {
+    if (toolAssistants.includes(assistantId)) {
+      onRemoveFromTools?.(assistantId);
+    } else if (toolAssistants.length >= 3) {
+      setReplaceModalOpen(true);
+    } else {
+      onAddToTools?.(assistantId);
+    }
+  };
 
   const handleTemporaryToggle = () => {
     const newValue = !isTemporaryChat;
@@ -128,7 +162,29 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               {displayTitle}
             </span>
             {subtitle && (
-              <span className="text-xs text-gray-500">{subtitle}</span>
+              assistant ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="flex items-center gap-0.5 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
+                      {subtitle}
+                      <ChevronDown className="w-3 h-3" />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="start" sideOffset={12} className="w-80 p-0 bg-white border border-gray-300 rounded-lg shadow-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <AssistantCard
+                      assistant={assistant}
+                      isFavorited={isFavorited}
+                      onToggleFavorite={onToggleFavorite || (() => {})}
+                      onStartChat={() => {}}
+                      viewOnly
+                      isInTools={isInTools}
+                      onToggleTools={handleToggleTools}
+                    />
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <span className="text-xs text-gray-500">{subtitle}</span>
+              )
             )}
           </div>
         )}
@@ -219,6 +275,21 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </TooltipProvider>
         )}
       </div>
+      {assistant && (
+        <ReplaceToolModal
+          open={replaceModalOpen}
+          onOpenChange={setReplaceModalOpen}
+          currentTools={toolAssistants
+            .map(id => [...topRatedAssistants, ...essentialAssistants, ...Object.values(roleBasedAssistants).flat()]
+              .find(a => a.id === id))
+            .filter(Boolean) as Assistant[]}
+          newAssistant={assistant}
+          onReplace={(oldId, newId) => {
+            onReplaceToolAssistant?.(oldId, newId);
+            setReplaceModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

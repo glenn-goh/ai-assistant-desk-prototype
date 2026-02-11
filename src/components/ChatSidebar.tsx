@@ -115,51 +115,12 @@ export function ChatSidebar({
     new Map(allAvailableAssistants.map(a => [a.id, a])).values()
   );
 
-  // Find custom assistants user has chatted with (from chat history)
-  const chattedAssistantTypes = new Set(
-    chats
-      .filter(chat => chat.assistantType) // Only chats with custom assistants
-      .map(chat => chat.assistantType)
-  );
+  // Build the custom assistants list — only favourited assistants
+  const displayedAssistants = (favoritedAssistants ?? [])
+    .map(id => uniqueAssistants.find(a => a.id === id))
+    .filter((a): a is import('../data/assistants').Assistant => a !== undefined);
 
-  // Get assistants user has interacted with
-  const interactedAssistants = uniqueAssistants.filter(a => chattedAssistantTypes.has(a.assistantType));
-
-  // Build the custom assistants list with favourites-first ordering
-  let displayedAssistants: import('../data/assistants').Assistant[] = [];
-
-  const hasCustomAssistants = (favoritedAssistants?.length ?? 0) > 0 || interactedAssistants.length > 0;
-
-  if (hasCustomAssistants) {
-    // 1. Add favourited assistants first (latest favourite at top, preserving array order)
-    const favoritedList = (favoritedAssistants ?? [])
-      .map(id => uniqueAssistants.find(a => a.id === id))
-      .filter((a): a is import('../data/assistants').Assistant => a !== undefined);
-
-    displayedAssistants = [...favoritedList];
-
-    // 2. Add recently used non-favourited assistants
-    const favoritedAssistantTypes = new Set(favoritedList.map(a => a.assistantType));
-
-    const recentChatsWithAssistants = chats
-      .filter(chat => chat.assistantType && !favoritedAssistantTypes.has(chat.assistantType))
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-
-    const seenTypes = new Set<string>();
-    const recentAssistants: import('../data/assistants').Assistant[] = [];
-
-    for (const chat of recentChatsWithAssistants) {
-      if (chat.assistantType && !seenTypes.has(chat.assistantType)) {
-        const assistant = uniqueAssistants.find(a => a.assistantType === chat.assistantType);
-        if (assistant) {
-          recentAssistants.push(assistant);
-          seenTypes.add(chat.assistantType);
-        }
-      }
-    }
-
-    displayedAssistants = [...displayedAssistants, ...recentAssistants];
-  }
+  const hasCustomAssistants = displayedAssistants.length > 0;
 
   const handleDragStart = (e: React.DragEvent, chatId: string) => {
     e.dataTransfer.setData('chatId', chatId);
@@ -333,7 +294,7 @@ export function ChatSidebar({
                   <PanelLeft className="w-5 h-5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="right">
+              <TooltipContent side="bottom">
                 <p>Collapse sidebar</p>
               </TooltipContent>
             </Tooltip>

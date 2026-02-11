@@ -16,6 +16,7 @@ import { DecisionCard } from './chat/DecisionCard';
 import { SkeletonLoader } from './chat/SkeletonLoader';
 import MermaidDiagram from './MermaidDiagram';
 import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
+import { getAssistantByName } from '../data/assistants';
 
 // Type definitions
 interface ChatSimulation {
@@ -112,6 +113,11 @@ interface ChatSimulatorProps {
   projects?: Project[];
   onMoveToProject?: (chatId: string, projectId: string) => void;
   favoritedAssistants?: string[];
+  onToggleFavorite?: (assistantId: string) => void;
+  toolAssistants?: string[];
+  onAddToTools?: (assistantId: string) => void;
+  onRemoveFromTools?: (assistantId: string) => void;
+  onReplaceToolAssistant?: (oldAssistantId: string, newAssistantId: string) => void;
   assistantType?: string;
   assistantName?: string; // Display name of the custom assistant being used
   onFirstUserMessage?: () => void; // Called when the first user message appears (simulator mode)
@@ -153,6 +159,11 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   projects = [],
   onMoveToProject,
   favoritedAssistants = [],
+  onToggleFavorite,
+  toolAssistants = [],
+  onAddToTools,
+  onRemoveFromTools,
+  onReplaceToolAssistant,
   assistantType,
   assistantName,
   onFirstUserMessage,
@@ -163,6 +174,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onNavigateToExplore,
 }) => {
   const isInteractive = mode === 'interactive';
+  const currentAssistantName = isInteractive ? assistantName : data?.assistantName;
+  const assistantObj = currentAssistantName ? getAssistantByName(currentAssistantName) : undefined;
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
@@ -704,6 +717,13 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           onRenameChat={onRenameChat}
           projects={projects}
           onMoveToProject={onMoveToProject}
+          assistant={assistantObj}
+          isFavorited={assistantObj ? favoritedAssistants.includes(assistantObj.id) : false}
+          onToggleFavorite={onToggleFavorite}
+          toolAssistants={toolAssistants}
+          onAddToTools={onAddToTools}
+          onRemoveFromTools={onRemoveFromTools}
+          onReplaceToolAssistant={onReplaceToolAssistant}
           showOutputPanel={showOutputPanel}
           onShowOutputPanel={() => setShowOutputPanel(true)}
         />

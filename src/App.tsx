@@ -1008,6 +1008,11 @@ export default function App() {
               projects={projects}
               onMoveToProject={handleAddChatToProject}
               favoritedAssistants={favoritedAssistants}
+              onToggleFavorite={handleToggleFavorite}
+              toolAssistants={toolAssistants}
+              onAddToTools={handleAddToTools}
+              onRemoveFromTools={handleRemoveFromTools}
+              onReplaceToolAssistant={handleReplaceToolAssistant}
               assistantType={activeChat?.assistantType}
               assistantName={activeChat?.assistantName}
               pendingBotResponses={pendingBotResponses}
