@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - MVP
+      - MVP-lite
 
 permissions:
   contents: read
@@ -53,10 +54,27 @@ jobs:
       - name: Build MVP branch
         run: npm run build
 
-      - name: Combine builds
+      - name: Move MVP build to temp location
         run: |
           mkdir -p /tmp/pages/mvp
           mv build/* /tmp/pages/mvp/
+
+      - name: Checkout MVP-lite branch
+        uses: actions/checkout@v4
+        with:
+          ref: MVP-lite
+          clean: false
+
+      - name: Install dependencies for MVP-lite
+        run: npm ci
+
+      - name: Build MVP-lite branch
+        run: npm run build
+
+      - name: Combine builds
+        run: |
+          mkdir -p /tmp/pages/mvp-lite
+          mv build/* /tmp/pages/mvp-lite/
           mkdir -p build
           mv /tmp/pages/* build/
 
@@ -114,6 +132,7 @@ jobs:
               <div class="buttons">
                 <a href="./index.html">Main Version</a>
                 <a href="./mvp/">MVP Version</a>
+                <a href="./mvp-lite/">MVP-lite Version</a>
               </div>
             </div>
           </body>
@@ -126,7 +145,7 @@ jobs:
           path: ./build
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/MVP' || github.ref == 'refs/heads/MVP-lite'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
