@@ -28,7 +28,7 @@ interface MessageInputProps {
   showTypingHint?: boolean;
   placeholder?: string;
   autoFocus?: boolean;
-  bookmarkedAssistants?: string[];
+  toolAssistants?: string[];
   assistantType?: string;
   onNavigateToExplore?: () => void;
 }
@@ -47,7 +47,7 @@ export function MessageInput({
   showTypingHint = false,
   placeholder,
   autoFocus = false,
-  bookmarkedAssistants = [],
+  toolAssistants = [],
   assistantType,
   onNavigateToExplore
 }: MessageInputProps) {
@@ -68,7 +68,7 @@ export function MessageInput({
   ];
 
   const [selectedTools, setSelectedTools] = useState<string[]>(tools.map(t => t.id));
-  const [selectedAssistants, setSelectedAssistants] = useState<string[]>([]);
+  const [selectedAssistants, setSelectedAssistants] = useState<string[]>(toolAssistants);
   const [selectedLibraries, setSelectedLibraries] = useState<string[]>([]);
   const [isLibraryPopoverOpen, setIsLibraryPopoverOpen] = useState(false);
   const [isToolsPopoverOpen, setIsToolsPopoverOpen] = useState(false);
@@ -95,9 +95,9 @@ export function MessageInput({
     new Map(allAvailableAssistants.map(a => [a.id, a])).values()
   );
 
-  // Filter to only show bookmarked assistants
+  // Filter to only show tool assistants
   const assistants = uniqueAssistants
-    .filter(a => bookmarkedAssistants.includes(a.id))
+    .filter(a => toolAssistants.includes(a.id))
     .map(a => ({ id: a.id, name: a.name }));
 
   const libraries = [
@@ -161,6 +161,11 @@ export function MessageInput({
       inputRef.current?.focus();
     }
   }, [autoTypeText, autoFocus]);
+
+  // Sync selectedAssistants with toolAssistants
+  useEffect(() => {
+    setSelectedAssistants(toolAssistants);
+  }, [toolAssistants]);
 
   // Handle typing animation like ChatSimulator
   const handleTypingKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -321,32 +326,25 @@ export function MessageInput({
                           <ChevronRight className="w-4 h-4 text-gray-400" />
                         </button>
                         {/* Submenu */}
-                        <div className="absolute left-full top-0 ml-1 w-80 bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
-                            {/* Header */}
-                            <div className="p-3 border-b bg-white dark:bg-gray-900">
-                              <h3 className="font-medium text-xs">Custom Assistants ({selectedAssistants.length}/3)</h3>
-                              <p className="text-xs text-muted-foreground">
-                                Select up to 3 assistants to use in this chat. Favorite an assistant in the{' '}
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setIsToolsPopoverOpen(false);
-                                    onNavigateToExplore?.();
-                                  }}
-                                  className="text-xs underline hover:text-gray-900"
-                                >
-                                  Explore Assistants
-                                </button>{' '}
-                                page to see it here.
-                              </p>
-                            </div>
+                        <div className="absolute left-full top-0 ml-1 w-[250px] bg-white border-2 border-gray-900 rounded-lg shadow-lg opacity-0 invisible group-hover/assistants:opacity-100 group-hover/assistants:visible transition-all z-[100]">
                           <div className="p-2 max-h-[300px] overflow-y-auto bg-white dark:bg-gray-900">
                             {assistants.length === 0 ? (
                               <div className="px-3 py-4 text-center">
                                 <p className="text-xs text-gray-500">
-                                  Favourite a custom assistant for it to appear here
+                                  Add an assistant from{' '}
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      setIsToolsPopoverOpen(false);
+                                      onNavigateToExplore?.();
+                                    }}
+                                    className="text-xs underline hover:text-gray-900 text-gray-500 hover:text-gray-900"
+                                  >
+                                    Explore Assistants
+                                  </button>{' '}
+                                  to your tools to see it here
                                 </p>
                               </div>
                             ) : (
