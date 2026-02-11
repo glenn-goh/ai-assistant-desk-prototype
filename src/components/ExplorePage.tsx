@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, Heart, Pin, ExternalLink, MoreHorizontal } from 'lucide-react';
+import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, Heart, ExternalLink, MoreHorizontal, Share2 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
@@ -40,12 +40,10 @@ interface ExplorePageProps {
   onStartAssistantChat: (assistantName: string, assistantType: string) => void;
   userRole?: string;
   favoritedAssistants?: string[];
-  pinnedAssistants?: string[];
   onToggleFavorite?: (assistantId: string) => void;
-  onTogglePin?: (assistantId: string) => void;
 }
 
-export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userRole, favoritedAssistants = [], pinnedAssistants = [], onToggleFavorite, onTogglePin }: ExplorePageProps) {
+export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userRole, favoritedAssistants = [], onToggleFavorite }: ExplorePageProps) {
   const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
   const [searchQuery, setSearchQuery] = useState('');
@@ -104,7 +102,6 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   const renderAssistantCard = (assistant: Assistant) => {
     const IconComponent = assistant.icon;
     const isFavorited = favoritedAssistants.includes(assistant.id);
-    const isPinned = pinnedAssistants.includes(assistant.id);
 
     // Lo-fi grayscale styling
     const iconBgColor = 'bg-gray-100';
@@ -165,12 +162,10 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
-                  onTogglePin?.(assistant.id);
-                }}>
-                  <Pin className="w-4 h-4 mr-1.5" />
-                  {isPinned ? 'Unpin from sidebar' : 'Pin to sidebar'}
+                <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
+                  <Share2 className="w-4 h-4 mr-1.5" />
+                  Share
+                  <span className="ml-auto text-xs text-gray-400">Coming soon</span>
                 </DropdownMenuItem>
                 {assistant.canEdit && (
                   <DropdownMenuItem onClick={(e) => {

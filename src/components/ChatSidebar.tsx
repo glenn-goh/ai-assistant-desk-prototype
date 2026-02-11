@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, FolderOpen, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Pin, Pencil, Bookmark } from 'lucide-react';
+import { Settings, Trash2, FolderOpen, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Heart, Pencil, Bookmark } from 'lucide-react';
 import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
@@ -52,9 +52,8 @@ interface ChatSidebarProps {
   simulationInstances?: Array<{ instanceId: string; simulationId: string }>;
   startedSimulations?: string[];
   favoritedAssistants?: string[];
-  pinnedAssistants?: string[];
+  onToggleFavorite?: (assistantId: string) => void;
   previewChat?: Chat | null;
-  onTogglePin?: (assistantId: string) => void;
 }
 
 export function ChatSidebar({
@@ -96,9 +95,8 @@ export function ChatSidebar({
   simulationInstances = [],
   startedSimulations = [],
   favoritedAssistants = [],
-  pinnedAssistants = [],
+  onToggleFavorite,
   previewChat = null,
-  onTogglePin,
 }: ChatSidebarProps) {
   const [recentChatsOpen, setRecentChatsOpen] = useState(true);
   const [customAssistantsOpen, setCustomAssistantsOpen] = useState(true);
@@ -127,24 +125,24 @@ export function ChatSidebar({
   // Get assistants user has interacted with
   const interactedAssistants = uniqueAssistants.filter(a => chattedAssistantTypes.has(a.assistantType));
 
-  // Build the custom assistants list with pin-first ordering
+  // Build the custom assistants list with favourites-first ordering
   let displayedAssistants: import('../data/assistants').Assistant[] = [];
 
-  const hasCustomAssistants = (pinnedAssistants?.length ?? 0) > 0 || interactedAssistants.length > 0;
+  const hasCustomAssistants = (favoritedAssistants?.length ?? 0) > 0 || interactedAssistants.length > 0;
 
   if (hasCustomAssistants) {
-    // 1. Add pinned assistants first (unlimited)
-    const pinnedList = (pinnedAssistants ?? [])
+    // 1. Add favourited assistants first (latest favourite at top, preserving array order)
+    const favoritedList = (favoritedAssistants ?? [])
       .map(id => uniqueAssistants.find(a => a.id === id))
       .filter((a): a is import('../data/assistants').Assistant => a !== undefined);
 
-    displayedAssistants = [...pinnedList];
+    displayedAssistants = [...favoritedList];
 
-    // 2. Add recently used non-pinned assistants (unlimited)
-    const pinnedAssistantTypes = new Set(pinnedList.map(a => a.assistantType));
+    // 2. Add recently used non-favourited assistants
+    const favoritedAssistantTypes = new Set(favoritedList.map(a => a.assistantType));
 
     const recentChatsWithAssistants = chats
-      .filter(chat => chat.assistantType && !pinnedAssistantTypes.has(chat.assistantType))
+      .filter(chat => chat.assistantType && !favoritedAssistantTypes.has(chat.assistantType))
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     const seenTypes = new Set<string>();
@@ -437,10 +435,11 @@ export function ChatSidebar({
                         <div className="space-y-0.5 mt-0.5">
                           {displayedAssistants.map((assistant, index) => {
                             const IconComponent = assistant.icon;
-                            const isPinned = pinnedAssistants?.includes(assistant.id);
-                            const showDivider = index === (pinnedAssistants?.length ?? 0) - 1
+                            const isFavorited = favoritedAssistants?.includes(assistant.id);
+                            const favoritedCount = favoritedAssistants?.length ?? 0;
+                            const showDivider = index === favoritedCount - 1
                               && index < displayedAssistants.length - 1
-                              && (pinnedAssistants?.length ?? 0) > 0;
+                              && favoritedCount > 0;
 
                             return (
                               <React.Fragment key={assistant.id}>
@@ -453,8 +452,8 @@ export function ChatSidebar({
                                     {assistant.name}
                                   </span>
 
-                                  {/* Ellipsis menu - only for pinned */}
-                                  {isPinned && (
+                                  {/* Ellipsis menu - only for favourited */}
+                                  {isFavorited && (
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
                                         <button
@@ -467,17 +466,17 @@ export function ChatSidebar({
                                       <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
                                         <DropdownMenuItem onClick={(e) => {
                                           e.stopPropagation();
-                                          onTogglePin?.(assistant.id);
+                                          onToggleFavorite?.(assistant.id);
                                         }}>
-                                          <Pin className="w-4 h-4 mr-1.5" />
-                                          Unpin from sidebar
+                                          <Heart className="w-4 h-4 mr-1.5" />
+                                          Unfavourite
                                         </DropdownMenuItem>
                                       </DropdownMenuContent>
                                     </DropdownMenu>
                                   )}
                                 </div>
 
-                                {/* Visual divider between pinned and recently used */}
+                                {/* Visual divider between favourited and recently used */}
                                 {showDivider && (
                                   <div className="h-px bg-gray-200 mx-2 my-1" />
                                 )}
