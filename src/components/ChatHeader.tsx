@@ -258,6 +258,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </DropdownMenu>
         )}
         */}
+        {/* Expand canvas button - commented out
         {!showOutputPanel && (
           <TooltipProvider>
             <Tooltip>
@@ -275,6 +276,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             </Tooltip>
           </TooltipProvider>
         )}
+        */}
       </div>
       {assistant && (
         <ReplaceToolModal
