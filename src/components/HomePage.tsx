@@ -84,7 +84,8 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
         <div className="flex flex-col w-full max-w-chat mx-auto px-6">
           {/* Welcome Header */}
           <div className="pb-8">
-            {isIncognito ? (
+            {/* HIDDEN: Incognito mode header */}
+            {/* {isIncognito ? (
               <div>
                 <h1 className="text-2xl mb-1 tracking-tight font-semibold text-gray-900" style={{ fontSize: '2rem' }}>
                   Incognito chat
@@ -96,11 +97,11 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                   </p>
                 </div>
               </div>
-            ) : (
+            ) : ( */}
               <h1 className="text-2xl mb-1 tracking-tight font-semibold text-gray-900" style={{ fontSize: '2rem' }}>
                 Good {today.getHours() < 12 ? 'Morning' : today.getHours() < 18 ? 'Afternoon' : 'Evening'}, {userProfile.name.split(' ')[0]}
               </h1>
-            )}
+            {/* )} */}
           </div>
 
           {/* Data Classification Selector */}
@@ -158,8 +159,8 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
               This setting cannot be changed once the chat begins.
             </p>
 
-            {/* Incognito Toggle - Only for R/SN */}
-            {classificationType === 'rsn' && (
+            {/* HIDDEN: Incognito Toggle - Only for R/SN */}
+            {/* {classificationType === 'rsn' && (
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -179,7 +180,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            )}
+            )} */}
           </div>
 
           {/* Chat Input Section */}

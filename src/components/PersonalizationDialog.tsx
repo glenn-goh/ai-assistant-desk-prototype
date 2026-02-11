@@ -133,20 +133,18 @@ export function PersonalizationDialog({
               </DialogDescription>
             </DialogHeader>
 
-        <Tabs defaultValue="accounts" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+        {/* HIDDEN: Tabs wrapper (no longer needed with single section) */}
+        {/* <Tabs defaultValue="accounts" className="w-full">
+          <TabsList className="grid w-full grid-cols-1">
             <TabsTrigger value="accounts" className="flex items-center gap-2">
               <User className="w-4 h-4" />
               Accounts
             </TabsTrigger>
-            <TabsTrigger value="memories" className="flex items-center gap-2">
-              <Brain className="w-4 h-4" />
-              Personalisation
-            </TabsTrigger>
           </TabsList>
+          <TabsContent value="accounts" className="space-y-6 mt-6"> */}
 
-          {/* Accounts Tab */}
-          <TabsContent value="accounts" className="space-y-6 mt-6">
+        {/* Accounts Section */}
+        <div className="space-y-6 mt-6">
             {/* Profile Information */}
             <div className="space-y-4">
               <h3 className="font-semibold">Profile Information</h3>
@@ -188,16 +186,15 @@ export function PersonalizationDialog({
                 onOpenChange?.(false);
               }}>Save Changes</Button>
             </div>
-          </TabsContent>
+        </div>
+        {/* </TabsContent> */}
 
-          {/* Personalisation Tab */}
-          <TabsContent value="memories" className="space-y-6 mt-6">
-            {/* AI Personalisation Header */}
+          {/* HIDDEN: Personalisation Tab */}
+          {/* <TabsContent value="memories" className="space-y-6 mt-6">
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-4">AI personalisation</h3>
             </div>
 
-            {/* Preferred AI Style and Tone */}
             <div className="space-y-2">
               <Label htmlFor="ai-style">Preferred AI style and tone</Label>
               <p className="text-sm text-gray-500">Set the style and tone of how your AI Assistant responds to you.</p>
@@ -223,7 +220,6 @@ export function PersonalizationDialog({
               )}
             </div>
 
-            {/* Custom Instructions */}
             <div className="space-y-2">
               <Label htmlFor="custom-instructions">Custom Instructions</Label>
               <Textarea
@@ -237,7 +233,6 @@ export function PersonalizationDialog({
 
             <Separator />
 
-            {/* Memories Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Memories</h3>
@@ -256,7 +251,6 @@ export function PersonalizationDialog({
 
             <div className="flex justify-end pt-4">
               <Button onClick={() => {
-                // Save personalisation changes
                 onUpdateProfile({
                   ...userProfile,
                   customInstructions: customInstructions,
@@ -267,8 +261,8 @@ export function PersonalizationDialog({
                 onOpenChange?.(false);
               }}>Save Changes</Button>
             </div>
-          </TabsContent>
-        </Tabs>
+          </TabsContent> */}
+        {/* </Tabs> */}
           </>
         )}
       </DialogContent>

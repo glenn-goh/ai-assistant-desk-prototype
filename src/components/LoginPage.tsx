@@ -26,7 +26,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                             Welcome to the
                         </p>
                         <h1 className="text-gray-900 text-2xl font-bold leading-tight">
-                            AI Assistant Desk (MVP)
+                            AI Assistant Desk (MVP-LITE)
                         </h1>
                     </div>
 
