@@ -974,6 +974,7 @@ export default function App() {
         favoritedAssistants={favoritedAssistants}
         pinnedAssistants={pinnedAssistants}
         previewChat={previewChat}
+        onToggleFavorite={handleToggleFavorite}
         onTogglePin={handleTogglePin}
       />}
 

@@ -187,13 +187,6 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                   Share
                   <span className="ml-auto text-xs text-gray-400">Coming soon</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
-                  onTogglePin?.(assistant.id);
-                }}>
-                  <Pin className="w-4 h-4 mr-1.5" />
-                  {isPinned ? 'Unpin from sidebar' : 'Pin to sidebar'}
-                </DropdownMenuItem>
                 {assistant.canEdit && (
                   <DropdownMenuItem onClick={(e) => {
                     e.stopPropagation();
