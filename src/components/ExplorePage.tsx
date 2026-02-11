@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, Heart, ExternalLink, MoreHorizontal, Share2 } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
+import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
+import { AssistantCard } from './AssistantCard';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
 import {
@@ -98,106 +96,15 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
     );
   }
 
-  // Component to render assistant cards - simplified
-  const renderAssistantCard = (assistant: Assistant) => {
-    const IconComponent = assistant.icon;
-    const isFavorited = favoritedAssistants.includes(assistant.id);
-
-    // Lo-fi grayscale styling
-    const iconBgColor = 'bg-gray-100';
-    const iconColor = 'text-gray-700';
-
-    return (
-      <Card
-        key={assistant.id}
-        className="hover:shadow-md transition-all duration-300 cursor-pointer group border border-gray-300 shadow-sm bg-white overflow-hidden relative"
-        onClick={() => onStartAssistantChat(assistant.name, assistant.assistantType)}
-      >
-        <CardContent className="p-6">
-          {/* Top Right: Classification Pill, Heart Icon, and Ellipsis Menu */}
-          <div className="absolute top-4 right-4 flex items-center gap-1.5">
-            {/* Classification Pill */}
-            <div className={`px-2 py-1 rounded-full text-xs font-medium border ${
-              assistant.classification.includes('C(CE)') || assistant.classification.includes('CCE')
-                ? 'bg-gray-100 text-gray-900 border-gray-300'
-                : 'bg-gray-50 text-gray-900 border-gray-200'
-              }`}>
-              {assistant.classification.replace('C(CE)/SN', 'CCE/SN')}
-            </div>
-
-            {/* Heart Icon (Favorite) with Tooltip */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleToggleFavorite(assistant.id);
-                    }}
-                    className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                  >
-                    <Heart
-                      className={`w-5 h-5 ${
-                        isFavorited
-                          ? 'fill-gray-900 text-gray-900'
-                          : 'text-gray-400'
-                      }`}
-                    />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{isFavorited ? 'Unfavourite' : 'Favourite'}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {/* Ellipsis Menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <MoreHorizontal className="w-5 h-5 text-gray-400" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
-                  <Share2 className="w-4 h-4 mr-1.5" />
-                  Share
-                  <span className="ml-auto text-xs text-gray-400">Coming soon</span>
-                </DropdownMenuItem>
-                {assistant.canEdit && (
-                  <DropdownMenuItem onClick={(e) => {
-                    e.stopPropagation();
-                    // TODO: Navigate to studio with assistant
-                  }}>
-                    <ExternalLink className="w-4 h-4 mr-1.5" />
-                    Edit on Studio
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Icon Container */}
-          <div className={`w-12 h-12 rounded-lg ${iconBgColor} flex items-center justify-center flex-shrink-0 mb-4`}>
-            <IconComponent className={`w-6 h-6 ${iconColor}`} />
-          </div>
-
-          {/* Content */}
-          <div className="mb-4">
-            <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
-              {assistant.name}
-            </h3>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              {assistant.description}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
+  const renderAssistantCard = (assistant: Assistant) => (
+    <AssistantCard
+      key={assistant.id}
+      assistant={assistant}
+      isFavorited={favoritedAssistants.includes(assistant.id)}
+      onToggleFavorite={handleToggleFavorite}
+      onStartChat={onStartAssistantChat}
+    />
+  );
 
   return (
     <div className={`flex-1 flex flex-col bg-gray-100 ${font.base}`}>
