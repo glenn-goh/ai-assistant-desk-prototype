@@ -17,14 +17,14 @@ interface AssistantCardProps {
 
 export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStartChat, viewOnly, isInTools, onToggleTools }: AssistantCardProps) {
   const IconComponent = assistant.icon;
+  const hasToolsButton = !!onToggleTools;
 
   return (
     <Card
       key={assistant.id}
-      className={`transition-all duration-300 group border border-gray-300 shadow-sm bg-white overflow-hidden relative ${viewOnly ? '' : 'hover:shadow-md cursor-pointer'}`}
-      onClick={viewOnly ? undefined : () => onStartChat(assistant.name, assistant.assistantType)}
+      className={`transition-all duration-300 group border border-gray-300 shadow-sm bg-white overflow-hidden relative ${hasToolsButton ? 'flex flex-col' : ''} ${viewOnly ? '' : 'hover:shadow-md'}`}
     >
-      <CardContent className="p-6">
+      <CardContent className={`p-6 ${hasToolsButton ? 'flex flex-col flex-1' : ''}`}>
         {/* Top Right: Classification Pill, Heart Icon, and Ellipsis Menu */}
         <div className="absolute top-4 right-4 flex items-center gap-1.5">
           {/* Classification Pill */}
@@ -97,7 +97,10 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
         </div>
 
         {/* Content */}
-        <div className="mb-4">
+        <div
+          className={hasToolsButton ? 'flex-1 cursor-pointer' : 'mb-4'}
+          onClick={viewOnly ? undefined : () => onStartChat(assistant.name, assistant.assistantType)}
+        >
           <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
             {assistant.name}
           </h3>
@@ -115,7 +118,7 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
             }}
             variant={isInTools ? "default" : "outline"}
             size="sm"
-            className={`self-start ${isInTools ? 'bg-gray-900 text-white hover:bg-gray-700' : 'border-gray-300'}`}
+            className={`mt-4 self-start ${isInTools ? 'bg-gray-900 text-white hover:bg-gray-700' : 'border-gray-300'}`}
           >
             {isInTools ? 'Remove from tools' : 'Add to tools'}
           </Button>
