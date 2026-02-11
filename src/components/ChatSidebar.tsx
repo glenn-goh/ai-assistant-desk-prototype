@@ -333,7 +333,7 @@ export function ChatSidebar({
                   <PanelLeft className="w-5 h-5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="right">
+              <TooltipContent side="bottom">
                 <p>Collapse sidebar</p>
               </TooltipContent>
             </Tooltip>

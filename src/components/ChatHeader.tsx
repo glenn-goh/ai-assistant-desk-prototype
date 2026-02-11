@@ -170,7 +170,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                       <ChevronDown className="w-3 h-3" />
                     </button>
                   </PopoverTrigger>
-                  <PopoverContent align="start" sideOffset={12} className="w-80 p-0 bg-white border border-gray-300 rounded-lg shadow-lg">
+                  <PopoverContent align="start" sideOffset={12} className="w-80 p-0 bg-white border border-gray-300 rounded-lg shadow-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
                     <AssistantCard
                       assistant={assistant}
                       isFavorited={isFavorited}
