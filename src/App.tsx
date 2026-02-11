@@ -144,10 +144,6 @@ export default function App() {
     const stored = localStorage.getItem('favoritedAssistants');
     return stored ? JSON.parse(stored) : [];
   });
-  const [pinnedAssistants, setPinnedAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('pinnedAssistants');
-    return stored ? JSON.parse(stored) : [];
-  });
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations (base IDs, for non-assistant simulation launches)
   const [simulationInstances, setSimulationInstances] = useState<Array<{ instanceId: string; simulationId: string }>>([]);  // Each simulation chat instance
   const [startedSimulations, setStartedSimulations] = useState<string[]>([]); // Track simulation instance IDs that have had first user message
@@ -741,18 +737,8 @@ export default function App() {
     setFavoritedAssistants(prev => {
       const updated = prev.includes(assistantId)
         ? prev.filter(id => id !== assistantId)
-        : [...prev, assistantId];
+        : [assistantId, ...prev];
       localStorage.setItem('favoritedAssistants', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const handleTogglePin = (assistantId: string) => {
-    setPinnedAssistants(prev => {
-      const updated = prev.includes(assistantId)
-        ? prev.filter(id => id !== assistantId)
-        : [...prev, assistantId];
-      localStorage.setItem('pinnedAssistants', JSON.stringify(updated));
       return updated;
     });
   };
@@ -943,9 +929,8 @@ export default function App() {
         simulationInstances={simulationInstances}
         startedSimulations={startedSimulations}
         favoritedAssistants={favoritedAssistants}
-        pinnedAssistants={pinnedAssistants}
+        onToggleFavorite={handleToggleFavorite}
         previewChat={previewChat}
-        onTogglePin={handleTogglePin}
       />}
 
       {activeView === 'chat' ? (
@@ -995,9 +980,7 @@ export default function App() {
           onStartAssistantChat={handleStartAssistantChat}
           userRole={userProfile?.role}
           favoritedAssistants={favoritedAssistants}
-          pinnedAssistants={pinnedAssistants}
           onToggleFavorite={handleToggleFavorite}
-          onTogglePin={handleTogglePin}
         />
       ) : activeView === 'studio' ? (
         <StudioPage
