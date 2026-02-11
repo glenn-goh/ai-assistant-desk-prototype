@@ -1,5 +1,6 @@
 import { Heart, ExternalLink, MoreHorizontal, Share2 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
+import { Button } from './ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { Assistant } from '../data/assistants';
@@ -9,16 +10,19 @@ interface AssistantCardProps {
   isFavorited: boolean;
   onToggleFavorite: (assistantId: string) => void;
   onStartChat: (assistantName: string, assistantType: string) => void;
+  viewOnly?: boolean;
+  isInTools?: boolean;
+  onToggleTools?: (assistantId: string) => void;
 }
 
-export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStartChat }: AssistantCardProps) {
+export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStartChat, viewOnly, isInTools, onToggleTools }: AssistantCardProps) {
   const IconComponent = assistant.icon;
 
   return (
     <Card
       key={assistant.id}
-      className="hover:shadow-md transition-all duration-300 cursor-pointer group border border-gray-300 shadow-sm bg-white overflow-hidden relative"
-      onClick={() => onStartChat(assistant.name, assistant.assistantType)}
+      className={`transition-all duration-300 group border border-gray-300 shadow-sm bg-white overflow-hidden relative ${viewOnly ? '' : 'hover:shadow-md cursor-pointer'}`}
+      onClick={viewOnly ? undefined : () => onStartChat(assistant.name, assistant.assistantType)}
     >
       <CardContent className="p-6">
         {/* Top Right: Classification Pill, Heart Icon, and Ellipsis Menu */}
@@ -33,7 +37,7 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
           </div>
 
           {/* Heart Icon (Favorite) with Tooltip */}
-          <TooltipProvider>
+          <TooltipProvider delayDuration={300}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <button
@@ -101,6 +105,21 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
             {assistant.description}
           </p>
         </div>
+
+        {/* Add to tools button */}
+        {onToggleTools && (
+          <Button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleTools(assistant.id);
+            }}
+            variant={isInTools ? "default" : "outline"}
+            size="sm"
+            className={`self-start ${isInTools ? 'bg-gray-900 text-white hover:bg-gray-700' : 'border-gray-300'}`}
+          >
+            {isInTools ? 'Remove from tools' : 'Add to tools'}
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
