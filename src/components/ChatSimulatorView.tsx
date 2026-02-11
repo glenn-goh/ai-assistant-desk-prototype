@@ -111,7 +111,7 @@ interface ChatSimulatorProps {
   isIncognito?: boolean;
   projects?: Project[];
   onMoveToProject?: (chatId: string, projectId: string) => void;
-  bookmarkedAssistants?: string[];
+  favoritedAssistants?: string[];
   assistantType?: string;
   assistantName?: string; // Display name of the custom assistant being used
   onFirstUserMessage?: () => void; // Called when the first user message appears (simulator mode)
@@ -120,6 +120,7 @@ interface ChatSimulatorProps {
   onDecisionMade?: (value: string) => void;
   onRichResponseComplete?: () => void;
   onCommitRichContent?: (textContent: string, richContent?: any[]) => void;
+  onNavigateToExplore?: () => void;
 }
 
 // Simulated reasoning content for thinking states
@@ -151,7 +152,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   isIncognito = false,
   projects = [],
   onMoveToProject,
-  bookmarkedAssistants = [],
+  favoritedAssistants = [],
   assistantType,
   assistantName,
   onFirstUserMessage,
@@ -159,6 +160,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onDecisionMade,
   onRichResponseComplete,
   onCommitRichContent,
+  onNavigateToExplore,
 }) => {
   const isInteractive = mode === 'interactive';
   const [displayedMessages, setDisplayedMessages] = useState<any[]>([]);
@@ -1083,9 +1085,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   onSendMessage?.(message);
                 }}
                 autoFocus={true}
-                bookmarkedAssistants={bookmarkedAssistants}
+                bookmarkedAssistants={favoritedAssistants}
                 assistantType={assistantType}
                 disabled={isProcessingRichResponse || awaitingDecision}
+                onNavigateToExplore={onNavigateToExplore}
               />
             ) : (
               /* Simulator mode - auto-type input */
@@ -1096,6 +1099,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 autoTypeText={getCurrentTargetText()}
                 disabled={!isTyping}
                 assistantType={assistantType}
+                onNavigateToExplore={onNavigateToExplore}
               />
             )}
             {/* Disclaimer - only show when chat has started */}

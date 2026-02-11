@@ -17,8 +17,9 @@ interface HomePageProps {
   userProfile: import('../App').UserProfile;
   onSelectSimulation?: (simulationId: string) => void;
   onStartChat?: (message: string, classificationType?: 'rsn' | 'cce-sn' | 'cce-sh', isIncognito?: boolean) => void;
-  bookmarkedAssistants?: string[];
+  favoritedAssistants?: string[];
   onIncognitoChange?: (isIncognito: boolean) => void;
+  onNavigateToExplore?: () => void;
 }
 
 // Predefined prompts based on user role
@@ -55,7 +56,7 @@ const getPromptSuggestions = (role: string) => {
   }
 };
 
-export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSidebarOpen, userProfile, onSelectSimulation, onStartChat, bookmarkedAssistants = [], onIncognitoChange }: HomePageProps) {
+export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSidebarOpen, userProfile, onSelectSimulation, onStartChat, favoritedAssistants = [], onIncognitoChange, onNavigateToExplore }: HomePageProps) {
   const [inputValue, setInputValue] = useState('');
   const [classificationType, setClassificationType] = useState<'rsn' | 'cce-sn'>('rsn');
   const [isIncognito, setIsIncognito] = useState(false);
@@ -197,7 +198,8 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                 value={inputValue}
                 onChange={setInputValue}
                 autoFocus={true}
-                bookmarkedAssistants={bookmarkedAssistants}
+                bookmarkedAssistants={favoritedAssistants}
+                onNavigateToExplore={onNavigateToExplore}
               />
             </div>
 

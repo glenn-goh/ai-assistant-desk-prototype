@@ -12,7 +12,6 @@ import { ChatSimulatorView } from './components/ChatSimulatorView';
 import { ChatHeader } from './components/ChatHeader';
 import { ProjectPage } from './components/ProjectPage';
 import { WalkthroughTour } from './components/WalkthroughTour';
-import { SwapBookmarkModal } from './components/SwapBookmarkModal';
 import { Error404Page } from './components/Error404Page';
 import { Error500Page } from './components/Error500Page';
 import { MaintenancePage } from './components/MaintenancePage';
@@ -141,14 +140,19 @@ export default function App() {
   const [homeResetKey, setHomeResetKey] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [bookmarkedAssistants, setBookmarkedAssistants] = useState<string[]>([]); // Store assistant IDs
+  const [favoritedAssistants, setFavoritedAssistants] = useState<string[]>(() => {
+    const stored = localStorage.getItem('favoritedAssistants');
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [pinnedAssistants, setPinnedAssistants] = useState<string[]>(() => {
+    const stored = localStorage.getItem('pinnedAssistants');
+    return stored ? JSON.parse(stored) : [];
+  });
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations (base IDs, for non-assistant simulation launches)
   const [simulationInstances, setSimulationInstances] = useState<Array<{ instanceId: string; simulationId: string }>>([]);  // Each simulation chat instance
   const [startedSimulations, setStartedSimulations] = useState<string[]>([]); // Track simulation instance IDs that have had first user message
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
-  const [swapBookmarkModalOpen, setSwapBookmarkModalOpen] = useState(false);
-  const [pendingBookmarkAssistantId, setPendingBookmarkAssistantId] = useState<string | null>(null);
   const [pendingBotResponses, setPendingBotResponses] = useState<any[]>([]);
   const [pendingSearchTerm, setPendingSearchTerm] = useState<string>('');
   const [showExitIncognitoDialog, setShowExitIncognitoDialog] = useState(false);
@@ -715,6 +719,10 @@ export default function App() {
     setActiveView('chat');
   };
 
+  const handleNavigateToExplore = () => {
+    setActiveView('explore');
+  };
+
   const handleCreateProject = (name: string) => {
     const newProject: Project = {
       id: Date.now().toString(),
@@ -729,30 +737,24 @@ export default function App() {
     setActiveView('project');
   };
 
-  const handleToggleBookmark = (assistantId: string) => {
-    setBookmarkedAssistants(prev => {
-      if (prev.includes(assistantId)) {
-        // Unbookmark
-        return prev.filter(id => id !== assistantId);
-      } else {
-        // Check if already at limit
-        if (prev.length >= 3) {
-          // Open swap modal
-          setPendingBookmarkAssistantId(assistantId);
-          setSwapBookmarkModalOpen(true);
-          return prev; // Don't add yet
-        }
-        // Add bookmark
-        return [...prev, assistantId];
-      }
+  const handleToggleFavorite = (assistantId: string) => {
+    setFavoritedAssistants(prev => {
+      const updated = prev.includes(assistantId)
+        ? prev.filter(id => id !== assistantId)
+        : [...prev, assistantId];
+      localStorage.setItem('favoritedAssistants', JSON.stringify(updated));
+      return updated;
     });
   };
 
-  const handleSwapBookmark = (oldAssistantId: string, newAssistantId: string) => {
-    setBookmarkedAssistants(prev => {
-      return prev.map(id => id === oldAssistantId ? newAssistantId : id);
+  const handleTogglePin = (assistantId: string) => {
+    setPinnedAssistants(prev => {
+      const updated = prev.includes(assistantId)
+        ? prev.filter(id => id !== assistantId)
+        : [...prev, assistantId];
+      localStorage.setItem('pinnedAssistants', JSON.stringify(updated));
+      return updated;
     });
-    setPendingBookmarkAssistantId(null);
   };
 
   const handleAddChatToProject = (chatId: string, projectId: string) => {
@@ -940,9 +942,10 @@ export default function App() {
         viewedSimulations={viewedSimulations}
         simulationInstances={simulationInstances}
         startedSimulations={startedSimulations}
-        bookmarkedAssistants={bookmarkedAssistants}
+        favoritedAssistants={favoritedAssistants}
+        pinnedAssistants={pinnedAssistants}
         previewChat={previewChat}
-        onToggleBookmark={handleToggleBookmark}
+        onTogglePin={handleTogglePin}
       />}
 
       {activeView === 'chat' ? (
@@ -974,13 +977,14 @@ export default function App() {
               isIncognito={isIncognitoMode}
               projects={projects}
               onMoveToProject={handleAddChatToProject}
-              bookmarkedAssistants={bookmarkedAssistants}
+              favoritedAssistants={favoritedAssistants}
               assistantType={activeChat?.assistantType}
               assistantName={activeChat?.assistantName}
               pendingBotResponses={pendingBotResponses}
               onDecisionMade={handleDecisionMade}
               onRichResponseComplete={handleRichResponseComplete}
               onCommitRichContent={handleCommitRichContent}
+              onNavigateToExplore={handleNavigateToExplore}
             />
           </div>
         )
@@ -990,8 +994,10 @@ export default function App() {
           fontStyle={fontStyle}
           onStartAssistantChat={handleStartAssistantChat}
           userRole={userProfile?.role}
-          bookmarkedAssistants={bookmarkedAssistants}
-          onToggleBookmark={handleToggleBookmark}
+          favoritedAssistants={favoritedAssistants}
+          pinnedAssistants={pinnedAssistants}
+          onToggleFavorite={handleToggleFavorite}
+          onTogglePin={handleTogglePin}
         />
       ) : activeView === 'studio' ? (
         <StudioPage
@@ -1035,8 +1041,9 @@ export default function App() {
             isSidebarOpen={isSidebarOpen}
             userProfile={userProfile}
             onSelectSimulation={handleSelectSimulation}
-            bookmarkedAssistants={bookmarkedAssistants}
+            favoritedAssistants={favoritedAssistants}
             onIncognitoChange={setIsHomeIncognito}
+            onNavigateToExplore={handleNavigateToExplore}
           />
         </div>
       )}
@@ -1080,30 +1087,6 @@ export default function App() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <SwapBookmarkModal
-        open={swapBookmarkModalOpen}
-        onOpenChange={setSwapBookmarkModalOpen}
-        newAssistant={(() => {
-          if (!pendingBookmarkAssistantId) return null;
-          const allRoleAssistants = Object.values(roleBasedAssistants).flat();
-          const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
-          const uniqueAssistants = Array.from(
-            new Map(allAvailableAssistants.map(a => [a.id, a])).values()
-          );
-          return uniqueAssistants.find(a => a.id === pendingBookmarkAssistantId) || null;
-        })()}
-        bookmarkedAssistants={(() => {
-          const allRoleAssistants = Object.values(roleBasedAssistants).flat();
-          const allAvailableAssistants = [...topRatedAssistants, ...essentialAssistants, ...allRoleAssistants];
-          const uniqueAssistants = Array.from(
-            new Map(allAvailableAssistants.map(a => [a.id, a])).values()
-          );
-          return bookmarkedAssistants
-            .map(id => uniqueAssistants.find(a => a.id === id))
-            .filter((a): a is Assistant => a !== undefined);
-        })()}
-        onSwap={handleSwapBookmark}
-      />
     </div>
   );
 }
