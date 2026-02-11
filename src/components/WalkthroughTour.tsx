@@ -16,12 +16,12 @@ const tourSteps: TourStep[] = [
     content: 'Click here to start a fresh conversation with your personal assistant.',
     position: 'right',
   },
-  {
-    target: '[data-tour="new-project"]',
-    title: 'Organize with Projects',
-    content: 'Create projects to organize your chats by topic or work stream. Drag and drop chats into projects to keep them organized.',
-    position: 'right',
-  },
+  // {
+  //   target: '[data-tour="new-project"]',
+  //   title: 'Organize with Projects',
+  //   content: 'Create projects to organize your chats by topic or work stream. Drag and drop chats into projects to keep them organized.',
+  //   position: 'right',
+  // },
   {
     target: '[data-tour="explore-assistants"]',
     title: 'Explore Assistants',
