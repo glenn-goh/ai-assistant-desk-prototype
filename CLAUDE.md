@@ -133,3 +133,8 @@ Multi-branch GitHub Pages via `.github/workflows/deploy-multi-branch.yml`:
 ### Design Reference
 
 Original Figma design: https://www.figma.com/design/gOkwlIFZzJLoRd3JF1zp8y/AI-Assistant-Desk--UXD-s-edit
+
+
+### Mantine migration 
+Refer to the documentation for moving to use mantine lib instead of tailwind in .claude/mantine-migration. 
+Read MIGRATION-INSTRUCTIONS.md first
