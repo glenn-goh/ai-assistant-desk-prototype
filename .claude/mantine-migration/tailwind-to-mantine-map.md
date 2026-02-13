@@ -1,8 +1,8 @@
-# Tailwind → Mantine Mapping Reference
+# Tailwind → Mantine v8 Mapping Reference
 
-This file is a lookup table for the migration agent. It maps common Tailwind patterns to their Mantine equivalents.
+This file is a lookup table for the migration agent. It maps common Tailwind patterns to their Mantine v8 equivalents.
 
-> **Note:** This is a generic mapping. Once the actual `tailwind.config.js` is analyzed, this file should be updated with project-specific custom values.
+> **Note:** This is a generic mapping. Once the actual `tailwind.config.js` (or Tailwind v4 CSS config) is analyzed, this file should be updated with project-specific custom values.
 
 ---
 
@@ -208,7 +208,9 @@ This file is a lookup table for the migration agent. It maps common Tailwind pat
 | `select-none` | CSS: `user-select: none` |
 | `pointer-events-none` | CSS: `pointer-events: none` |
 
-## Mantine CSS variables reference
+> **v8 note:** Mantine v8 removed `data-hovered` from Menu.Item. Always use `:hover` and `:focus` pseudo-classes instead of `[data-hovered]` attribute selectors.
+
+## Mantine v8 CSS variables reference
 
 Full list at: https://mantine.dev/styles/css-variables-list/
 

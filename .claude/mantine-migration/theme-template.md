@@ -1,11 +1,11 @@
 # Theme File Template
 
-> **Note:** This is a TEMPLATE. Once the actual `tailwind.config.js` is provided, generate the real `src/theme/theme.ts` by mapping the Tailwind custom values into this structure.
+> **Note:** This is a TEMPLATE for **Mantine v8**. Once the actual `tailwind.config.js` is provided, generate the real `src/theme/theme.ts` by mapping the Tailwind custom values into this structure.
 
 ## How to generate theme.ts from tailwind.config.js
 
-1. Read `tailwind.config.js` (or `tailwind.config.ts`)
-2. Extract custom values from `theme.extend` (or `theme`)
+1. Read `tailwind.config.js` (or `tailwind.config.ts`), or for Tailwind CSS v4, read `src/styles/globals.css` for `@theme` directives
+2. Extract custom values from `theme.extend` (or `theme`), or CSS custom properties in v4
 3. Map them into the Mantine `createTheme()` structure below
 
 ### Mapping rules:
@@ -163,6 +163,14 @@ export const theme = createTheme({
         // size: 'lg',
       },
     },
+    // === Mantine v8 defaults to match v7 appearance ===
+    // Switch thumb now shows a check indicator by default in v8.
+    // Uncomment below to disable if you want the v7 plain thumb look:
+    // Switch: {
+    //   defaultProps: {
+    //     withThumbIndicator: false,
+    //   },
+    // },
   },
 
   // === OTHER ===

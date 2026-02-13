@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Migrate a single file from Tailwind CSS to Mantine v7, completely. After this agent runs on a file, that file should have zero Tailwind classes and fully use Mantine components, style props, and CSS Modules with Mantine CSS variables.
+Migrate a single file from Tailwind CSS to Mantine v8, completely. After this agent runs on a file, that file should have zero Tailwind classes and fully use Mantine components, style props, and CSS Modules with Mantine CSS variables.
 
 ## Prerequisites
 
@@ -216,6 +216,14 @@ After converting:
 
 > Note: If the project's Tailwind config has custom spacing, update this mapping accordingly and adjust `theme.ts`.
 
+## Mantine v8-specific migration notes
+
+1. **Menu.Item styling**: v8 removed `data-hovered` attribute. Use `:hover` and `:focus` pseudo-classes in CSS Modules instead of `[data-hovered]` selectors.
+2. **Switch component**: v8 shows a check indicator inside the thumb by default (`withThumbIndicator`). If the design requires a plain thumb, pass `withThumbIndicator={false}`.
+3. **Portal**: `reuseTargetNode` defaults to `true` in v8. This is usually fine, but watch for z-index stacking issues with overlapping portals.
+4. **Popover**: `hideDetached` defaults to `true` — popovers auto-close when the target element leaves the DOM. If you need v7 behavior, set `hideDetached={false}`.
+5. **Dates** (if using `@mantine/dates`): Components now use date strings (`'YYYY-MM-DD'`) instead of `Date` objects.
+
 ## Common mistakes to avoid
 
 1. **Don't nest Mantine layout components unnecessarily** — `<Group>` inside `<Flex>` inside `<Stack>` is usually wrong
@@ -228,8 +236,9 @@ After converting:
 
 After migration, the file should:
 
-- Import from `@mantine/core` (and `@mantine/hooks` if needed)
+- Import from `@mantine/core` v8 (and `@mantine/hooks` if needed)
 - Import its CSS module if one was created
 - Have zero Tailwind utility classes
 - Have zero hardcoded style values (colors, spacing, fonts)
+- Not use `[data-hovered]` selectors (removed in v8 — use `:hover`/`:focus` instead)
 - Look visually identical to before

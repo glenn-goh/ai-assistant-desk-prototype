@@ -2,13 +2,13 @@
 
 ## Project Overview
 
-This is a Vite + React application being migrated from Tailwind CSS to Mantine v7. The goal is zero visual regression with full adoption of Mantine's component library and theming system.
+This is a Vite + React application being migrated from Tailwind CSS to Mantine v8. The goal is zero visual regression with full adoption of Mantine's component library and theming system.
 
 ## Tech Stack
 
 - **Framework:** Vite + React
 - **Styling (current):** Tailwind CSS
-- **Styling (target):** Mantine v7 with CSS Modules
+- **Styling (target):** Mantine v8 with CSS Modules
 - **Icons:** Lucide React (keep as-is, do NOT swap to Tabler)
 - **Language:** TypeScript / JavaScript (match existing)
 
@@ -122,7 +122,16 @@ In CSS Modules, use Mantine's breakpoint variables:
 <Button leftSection={<Search size={16} />}>Search</Button>
 ```
 
-### 8. What NOT to do
+### 8. Mantine v8-specific notes
+
+- **CSS imports**: Use `import '@mantine/core/styles.css'` in the app entry. This bundles all needed global styles. (v8 split internal files into `baseline.css`, `default-css-variables.css`, `global.css` but the combined `styles.css` import still works and is recommended.)
+- **Portal**: `reuseTargetNode` defaults to `true` in v8. If z-index stacking issues appear, set it to `false` in theme config.
+- **Switch**: v8 adds a check indicator inside the thumb by default. To match v7 appearance, set `Switch: { defaultProps: { withThumbIndicator: false } }` in theme components.
+- **Popover**: `hideDetached` defaults to `true` — popovers auto-close when their target leaves the DOM.
+- **Menu**: `data-hovered` attribute was removed from `Menu.Item`. Use `:hover` and `:focus` pseudo-classes in CSS Modules instead.
+- **Dates** (if using `@mantine/dates`): Components now use date strings (`'YYYY-MM-DD'`) instead of `Date` objects. The `DatesProvider` `timezone` option was removed.
+
+### 9. What NOT to do
 
 - Do NOT install `@mantine/tailwind` or any bridge library
 - Do NOT use inline `style={{}}` for things that should be in the theme or CSS modules

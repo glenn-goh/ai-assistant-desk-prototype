@@ -23,7 +23,13 @@
       "WebFetch(domain:github.com)",
       "Bash(npx vite build:*)",
       "Bash(git rebase:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "WebFetch(domain:mantine.dev)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npx playwright install chromium)",
+      "Bash(npx playwright test:*)",
+      "Bash(SCREENSHOT_SUBDIR=after-extraction npx playwright test:*)",
+      "Bash(git status:*)"
     ]
   }
 }

@@ -16,20 +16,21 @@
 - [ ] Visual check — no regressions from extraction
 - [ ] Committed: `refactor: extract reusable components`
 
-## Phase 2 — Mantine Setup
+## Phase 2 — Mantine v8 Setup
 
-- [ ] Mantine packages installed:
-  - [ ] `@mantine/core`
-  - [ ] `@mantine/hooks`
-  - [ ] `@mantine/form` (if forms are used)
-  - [ ] `@mantine/notifications` (if toasts/notifications are used)
-  - [ ] `@mantine/modals` (if modal manager needed)
-- [ ] PostCSS plugin configured: `postcss-preset-mantine`
+- [ ] Mantine v8 packages installed:
+  - [ ] `@mantine/core@^8`
+  - [ ] `@mantine/hooks@^8`
+  - [ ] `@mantine/form@^8` (if forms are used)
+  - [ ] `@mantine/notifications@^8` (if toasts/notifications are used)
+  - [ ] `@mantine/modals@^8` (if modal manager needed)
+- [ ] PostCSS plugins installed and configured: `postcss-preset-mantine`, `postcss-simple-vars`
 - [ ] `src/theme/theme.ts` created from Tailwind config analysis
 - [ ] `MantineProvider` wraps app in root component
-- [ ] Mantine CSS imported in main entry file
+- [ ] Mantine CSS imported in main entry file (`import '@mantine/core/styles.css'`)
+- [ ] v8 component defaults reviewed (Switch `withThumbIndicator`, Portal `reuseTargetNode`, Popover `hideDetached`)
 - [ ] `npm run dev` passes
-- [ ] Committed: `chore: add Mantine and create theme config`
+- [ ] Committed: `chore: add Mantine v8 and create theme config`
 
 ## Phase 3 — File-by-file Migration
 
@@ -70,11 +71,11 @@
 
 - [ ] All component files have zero Tailwind classes (verified by grep)
 - [ ] `tailwindcss` package removed
-- [ ] `tailwind.config.js` / `tailwind.config.ts` deleted
-- [ ] PostCSS Tailwind plugin removed from `postcss.config.js`
+- [ ] `tailwind.config.js` / `tailwind.config.ts` deleted (or for Tailwind v4: CSS `@theme`/`@import "tailwindcss"` directives removed)
+- [ ] PostCSS Tailwind plugin removed from `postcss.config.js` (replaced by `postcss-preset-mantine` + `postcss-simple-vars`)
 - [ ] `@tailwind` directives removed from CSS files
 - [ ] `autoprefixer` removed (if only used for Tailwind)
-- [ ] Tailwind-related dev dependencies removed
+- [ ] Tailwind-related dev dependencies removed (`@tailwindcss/vite`, etc.)
 - [ ] `npm run dev` passes
 - [ ] Committed: `chore: remove Tailwind CSS`
 
