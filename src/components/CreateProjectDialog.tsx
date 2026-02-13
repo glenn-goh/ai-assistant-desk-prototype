@@ -3,7 +3,7 @@ import { Info } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
-import { Label } from './ui/label';
+import { FormField } from './shared';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -43,10 +43,7 @@ export function CreateProjectDialog({
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="project-name" className="text-gray-700">
-                Project Name
-              </Label>
+            <FormField label="Project Name" htmlFor="project-name" labelClassName="text-gray-700">
               <Input
                 id="project-name"
                 placeholder="Enter project name..."
@@ -55,7 +52,7 @@ export function CreateProjectDialog({
                 className="bg-white border-gray-300"
                 autoFocus
               />
-            </div>
+            </FormField>
 
             {/* Project scope info */}
             <div className="flex items-start gap-2 p-3 bg-gray-100 rounded-lg border border-gray-300">

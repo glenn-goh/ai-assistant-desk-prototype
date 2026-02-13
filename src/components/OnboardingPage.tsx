@@ -3,6 +3,7 @@ import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { FormField } from './shared';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Checkbox } from './ui/checkbox';
 import { Card, CardContent } from './ui/card';
@@ -93,11 +94,11 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
 
               <div className="space-y-6">
                 {/* Name */}
-                <div>
-                  <Label htmlFor="name">What would you like us to call you?</Label>
-                  <p className="text-xs text-gray-500 mt-1 mb-2">
-                    Choose something you're comfortable with—your first name, nickname, or preferred title.
-                  </p>
+                <FormField
+                  label="What would you like us to call you?"
+                  htmlFor="name"
+                  helperText="Choose something you're comfortable with—your first name, nickname, or preferred title."
+                >
                   <Input
                     id="name"
                     value={name}
@@ -105,16 +106,16 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                     placeholder="e.g., Jayden, Jay, Mr. Tan"
                     className="bg-white border-gray-300"
                   />
-                </div>
+                </FormField>
 
                 <Separator className="bg-gray-300" />
 
                 {/* Job Role */}
-                <div>
-                  <Label htmlFor="job-role">Which best describes your primary job role?</Label>
-                  <p className="text-xs text-gray-500 mt-1 mb-2">
-                    This helps the AI understand your professional context.
-                  </p>
+                <FormField
+                  label="Which best describes your primary job role?"
+                  htmlFor="job-role"
+                  helperText="This helps the AI understand your professional context."
+                >
                   <Select value={jobRole} onValueChange={setJobRole}>
                     <SelectTrigger id="job-role" className="bg-white border-gray-300">
                       <SelectValue placeholder="Select your job role" />
@@ -138,7 +139,7 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                       className="mt-2 bg-white border-gray-300"
                     />
                   )}
-                </div>
+                </FormField>
 
                 <Separator className="bg-gray-300" />
 

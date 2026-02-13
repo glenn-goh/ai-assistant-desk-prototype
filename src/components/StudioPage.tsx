@@ -1,7 +1,7 @@
 import { Plus, Bot, Settings as SettingsIcon, Wand2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { FormField } from './shared';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
@@ -51,24 +51,22 @@ export function StudioPage({ colorTheme, fontStyle }: StudioPageProps) {
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Assistant Name */}
-              <div className="space-y-2">
-                <Label htmlFor="assistant-name" className="text-xs">Assistant Name</Label>
+              <FormField label="Assistant Name" htmlFor="assistant-name" labelClassName="text-xs">
                 <Input
                   id="assistant-name"
                   placeholder="e.g., Marketing Expert, Code Reviewer, Transcribe Workspace..."
                   className={`text-xs ${theme.inputBorder} ${font.input}`}
                 />
-              </div>
+              </FormField>
 
               {/* Description */}
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-xs">Description</Label>
+              <FormField label="Description" htmlFor="description" labelClassName="text-xs">
                 <Textarea
                   id="description"
                   placeholder="Describe what your assistant does and how it helps users..."
                   className={`${theme.inputBorder} ${font.input} min-h-[120px] text-xs`}
                 />
-              </div>
+              </FormField>
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
-import { IconContainer, SearchInput, FilterTabs, EmptyState } from './shared';
+import { IconContainer, SearchInput, FilterTabs, EmptyState, ClassificationBadge } from './shared';
 import { Card, CardContent } from './ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import type { Assistant } from '../data/assistants';
@@ -163,9 +163,7 @@ export function SelectAssistantsModal({
                             </p>
                             {/* Classification Badge */}
                             <div className="mt-2">
-                              <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium border bg-gray-50 text-gray-900 border-gray-200">
-                                {assistant.classification.replace('C(CE)/SN', 'CCE/SN')}
-                              </span>
+                              <ClassificationBadge classification={assistant.classification} size="sm" />
                             </div>
                           </div>
 

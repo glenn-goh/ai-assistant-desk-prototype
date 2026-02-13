@@ -3,3 +3,7 @@ export { ListItemRow } from './ListItemRow';
 export { SearchInput } from './SearchInput';
 export { FilterTabs } from './FilterTabs';
 export { EmptyState } from './EmptyState';
+export { TooltipIconButton } from './TooltipIconButton';
+export { EditableText } from './EditableText';
+export { FormField } from './FormField';
+export { ClassificationBadge } from './ClassificationBadge';

@@ -2,6 +2,7 @@ import { User, Brain, Bell, ArrowLeft, MoreHorizontal, Trash2 } from 'lucide-rea
 import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Label } from './ui/label';
+import { FormField } from './shared';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Input } from './ui/input';
@@ -161,8 +162,7 @@ export function PersonalizationDialog({
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+              <FormField label="Name" htmlFor="name">
                 <Input
                   id="name"
                   value={callMeName}
@@ -170,12 +170,11 @@ export function PersonalizationDialog({
                   placeholder="Enter your name"
                   className="bg-white"
                 />
-              </div>
+              </FormField>
 
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <FormField label="Email" htmlFor="email">
                 <Input id="email" value={userProfile.email} disabled className="bg-gray-100 cursor-not-allowed" />
-              </div>
+              </FormField>
             </div>
 
             <div className="flex justify-end pt-4">
@@ -198,9 +197,11 @@ export function PersonalizationDialog({
             </div>
 
             {/* Preferred AI Style and Tone */}
-            <div className="space-y-2">
-              <Label htmlFor="ai-style">Preferred AI style and tone</Label>
-              <p className="text-sm text-gray-500">Set the style and tone of how your AI Assistant responds to you.</p>
+            <FormField
+              label="Preferred AI style and tone"
+              htmlFor="ai-style"
+              helperText="Set the style and tone of how your AI Assistant responds to you."
+            >
               <Select value={aiStyle} onValueChange={setAiStyle}>
                 <SelectTrigger id="ai-style">
                   <SelectValue />
@@ -221,11 +222,10 @@ export function PersonalizationDialog({
                   className="mt-2"
                 />
               )}
-            </div>
+            </FormField>
 
             {/* Custom Instructions */}
-            <div className="space-y-2">
-              <Label htmlFor="custom-instructions">Custom Instructions</Label>
+            <FormField label="Custom Instructions" htmlFor="custom-instructions">
               <Textarea
                 id="custom-instructions"
                 placeholder="e.g., Always provide sources, use Singapore English spelling, include relevant policy references..."
@@ -233,7 +233,7 @@ export function PersonalizationDialog({
                 value={customInstructions}
                 onChange={(e) => setCustomInstructions(e.target.value)}
               />
-            </div>
+            </FormField>
 
             <Separator />
 

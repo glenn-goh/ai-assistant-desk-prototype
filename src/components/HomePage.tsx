@@ -4,7 +4,7 @@ import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
 import { Shield, ShieldCheck, ChevronDown } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { TooltipIconButton } from './shared';
 import { Separator } from './ui/separator';
 import { IncognitoIcon } from './IncognitoIcon';
 
@@ -160,25 +160,16 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
 
             {/* Incognito Toggle - Only for R/SN */}
             {classificationType === 'rsn' && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => {
-                        const newValue = !isIncognito;
-                        setIsIncognito(newValue);
-                        onIncognitoChange?.(newValue);
-                      }}
-                      className="p-2 rounded-lg transition-colors ml-auto text-gray-500 hover:text-gray-700 hover:bg-gray-200"
-                    >
-                      <IncognitoIcon className="w-5 h-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>{isIncognito ? 'Exit incognito mode' : 'Enable incognito mode'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <TooltipIconButton
+                icon={IncognitoIcon}
+                tooltip={isIncognito ? 'Exit incognito mode' : 'Enable incognito mode'}
+                onClick={() => {
+                  const newValue = !isIncognito;
+                  setIsIncognito(newValue);
+                  onIncognitoChange?.(newValue);
+                }}
+                className="p-2 rounded-lg transition-colors ml-auto text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+              />
             )}
           </div>
 

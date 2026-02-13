@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { TooltipIconButton, EditableText } from './shared';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { SearchChatsModal } from './SearchChatsModal';
@@ -105,7 +106,6 @@ export function ChatSidebar({
   const [dragOverProjectId, setDragOverProjectId] = useState<string | null>(null);
   const [hoveredSection, setHoveredSection] = useState<string | null>(null);
   const [editingChatId, setEditingChatId] = useState<string | null>(null);
-  const [editChatName, setEditChatName] = useState('');
   const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
   // Get all available assistants
@@ -202,60 +202,18 @@ export function ChatSidebar({
       <div className="flex flex-col h-screen w-[52px] border-r border-gray-300 bg-gray-100 flex-shrink-0">
         {/* Expand button */}
         <div className="px-2 py-3 flex justify-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={onClose}
-                  className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
-                >
-                  <PanelLeft className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Expand sidebar</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipIconButton icon={PanelLeft} tooltip="Expand sidebar" onClick={onClose} side="right" />
         </div>
 
         {/* Collapsed icons */}
         <div className="flex flex-col items-center gap-1 px-2 py-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={onNewChat}
-                  className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-700"
-                >
-                  <SquarePen className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>New Chat (⇧⌘O)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipIconButton icon={SquarePen} tooltip="New Chat (⇧⌘O)" onClick={onNewChat} side="right" className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-700" />
 
         </div>
 
         {/* Settings at bottom */}
         <div className="mt-auto px-2 py-3 border-t border-gray-300 flex justify-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={onSettingsOpen}
-                  className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
-                >
-                  <Settings className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>Settings</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipIconButton icon={Settings} tooltip="Settings" onClick={onSettingsOpen} side="right" />
         </div>
 
         {/* Search Modal */}
@@ -284,21 +242,7 @@ export function ChatSidebar({
           <h2 className="text-lg font-bold text-gray-900">
             AI Assistant Desk (MVP)
           </h2>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={onClose}
-                  className="p-1 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700"
-                >
-                  <PanelLeft className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                <p>Collapse sidebar</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipIconButton icon={PanelLeft} tooltip="Collapse sidebar" onClick={onClose} side="bottom" className="p-1 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700" />
         </div>
 
         {/* Scrollable Content Area */}
@@ -547,7 +491,6 @@ export function ChatSidebar({
                             if (entry.type === 'chat') {
                               const chat = filteredChats.find(c => c.id === entry.key);
                               if (!chat) return null;
-                              const displayTitle = chat.title.length > 24 ? chat.title.substring(0, 24) + '...' : chat.title;
                               const isEditing = editingChatId === chat.id;
 
                               return (
@@ -559,49 +502,33 @@ export function ChatSidebar({
                                   onClick={() => !isEditing && onSelectChat(chat.id)}
                                   title={chat.title}
                                 >
-                                  {isEditing ? (
-                                    <input
-                                      type="text"
-                                      value={editChatName}
-                                      onChange={(e) => setEditChatName(e.target.value)}
-                                      onBlur={() => {
-                                        if (editChatName.trim() && onRenameChat) {
-                                          onRenameChat(chat.id, editChatName.trim());
-                                        }
-                                        setEditingChatId(null);
-                                      }}
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          if (editChatName.trim() && onRenameChat) {
-                                            onRenameChat(chat.id, editChatName.trim());
-                                          }
-                                          setEditingChatId(null);
-                                        } else if (e.key === 'Escape') {
-                                          setEditingChatId(null);
-                                        }
-                                      }}
-                                      onClick={(e) => e.stopPropagation()}
-                                      className="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                                      autoFocus
-                                    />
-                                  ) : (
-                                    <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                                      <span
-                                        className="truncate text-gray-900"
-                                        onDoubleClick={(e) => {
-                                          e.stopPropagation();
-                                          setEditChatName(chat.title);
-                                          setEditingChatId(chat.id);
-                                        }}
-                                        title="Double-click to rename"
-                                      >
-                                        {displayTitle}
-                                      </span>
-                                      <span className="text-xs text-gray-500 truncate">
-                                        {chat.assistantName || 'My AI Assistant'}
-                                      </span>
-                                    </div>
-                                  )}
+                                  <EditableText
+                                    value={chat.title}
+                                    onSave={(newName) => onRenameChat?.(chat.id, newName)}
+                                    editing={editingChatId === chat.id}
+                                    onEditingChange={(editing) => {
+                                      if (editing) setEditingChatId(chat.id);
+                                      else setEditingChatId(null);
+                                    }}
+                                    inputClassName="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                                    renderDisplay={({ value: title, onDoubleClick }) => (
+                                      <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                                        <span
+                                          className="truncate text-gray-900"
+                                          onDoubleClick={(e) => {
+                                            e.stopPropagation();
+                                            onDoubleClick();
+                                          }}
+                                          title="Double-click to rename"
+                                        >
+                                          {title.length > 24 ? title.substring(0, 24) + '...' : title}
+                                        </span>
+                                        <span className="text-xs text-gray-500 truncate">
+                                          {chat.assistantName || 'My AI Assistant'}
+                                        </span>
+                                      </div>
+                                    )}
+                                  />
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -609,7 +536,7 @@ export function ChatSidebar({
                                       </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditChatName(chat.title); setEditingChatId(chat.id); }} className="hover:bg-gray-100">
+                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingChatId(chat.id); }} className="hover:bg-gray-100">
                                         <Pencil className="w-4 h-4 mr-2" /> Rename
                                       </DropdownMenuItem>
                                       <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setChatToDelete(chat.id); }} className="text-red-500 hover:bg-gray-100">

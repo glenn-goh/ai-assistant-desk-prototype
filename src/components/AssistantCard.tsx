@@ -1,7 +1,7 @@
 import { Heart, ExternalLink, MoreHorizontal, Share2 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
-import { IconContainer } from './shared';
+import { IconContainer, ClassificationBadge } from './shared';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { Assistant } from '../data/assistants';
@@ -29,13 +29,7 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
         {/* Top Right: Classification Pill, Heart Icon, and Ellipsis Menu */}
         <div className="absolute top-4 right-4 flex items-center gap-1.5">
           {/* Classification Pill */}
-          <div className={`px-2 py-1 rounded-full text-xs font-medium border ${
-            assistant.classification.includes('C(CE)') || assistant.classification.includes('CCE')
-              ? 'bg-gray-100 text-gray-900 border-gray-300'
-              : 'bg-gray-50 text-gray-900 border-gray-200'
-            }`}>
-            {assistant.classification.replace('C(CE)/SN', 'CCE/SN')}
-          </div>
+          <ClassificationBadge classification={assistant.classification} />
 
           {/* Heart Icon (Favorite) with Tooltip */}
           <TooltipProvider delayDuration={300}>

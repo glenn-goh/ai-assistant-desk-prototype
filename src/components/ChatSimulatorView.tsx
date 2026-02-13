@@ -4,7 +4,7 @@ import { MessageInput } from './MessageInput';
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
 import type { ImperativePanelHandle } from 'react-resizable-panels';
 import { Button } from './ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { TooltipIconButton, EditableText } from './shared';
 import type { Project } from '../types/project';
 import { ChatHeader } from './ChatHeader';
 import { MessageActions } from './chat/MessageActions';
@@ -184,8 +184,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [currentReasoning, setCurrentReasoning] = useState<Array<string | { text: string; icon: string }>>([]);
   const [showThinkingDots, setShowThinkingDots] = useState(false);
   const [selectedArtifact, setSelectedArtifact] = useState<ArtifactResponse | null>(null);
-  const [isEditingCanvasTitle, setIsEditingCanvasTitle] = useState(false);
-  const [editCanvasTitleValue, setEditCanvasTitleValue] = useState('');
   const [isComplete, setIsComplete] = useState(false);
   const [searchingAssistant, setSearchingAssistant] = useState(false);
   const [showOutputPanel, setShowOutputPanel] = useState(false);
@@ -752,21 +750,13 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                             {msg.content}
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={() => handleCopyMessage(msg.id, msg.content)}
-                                    className="p-1.5 hover:bg-gray-100 rounded"
-                                  >
-                                    <Copy className="w-4 h-4 text-gray-400" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Copy</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <TooltipIconButton
+                              icon={Copy}
+                              tooltip="Copy"
+                              onClick={() => handleCopyMessage(msg.id, msg.content)}
+                              className="p-1.5 hover:bg-gray-100 rounded"
+                              iconClassName="w-4 h-4 text-gray-400"
+                            />
                           </div>
                         </div>
                       ) : msg.richContent ? (
@@ -944,21 +934,13 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                             {msg.text}
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <button
-                                    onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
-                                    className="p-1.5 hover:bg-gray-100 rounded"
-                                  >
-                                    <Copy className="w-4 h-4 text-gray-400" />
-                                  </button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Copy</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
+                            <TooltipIconButton
+                              icon={Copy}
+                              tooltip="Copy"
+                              onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
+                              className="p-1.5 hover:bg-gray-100 rounded"
+                              iconClassName="w-4 h-4 text-gray-400"
+                            />
                           </div>
                         </div>
                       )}
@@ -1156,38 +1138,18 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   <ArrowLeft className="w-4 h-4" />
                 </button>
               )}
-              {isEditingCanvasTitle && selectedArtifact ? (
-                <input
-                  type="text"
-                  value={editCanvasTitleValue}
-                  onChange={(e) => setEditCanvasTitleValue(e.target.value)}
-                  onBlur={() => {
+              {selectedArtifact ? (
+                <EditableText
+                  value={selectedArtifact.title}
+                  onSave={() => {
                     // In a real implementation, this would update the artifact title
-                    setIsEditingCanvasTitle(false);
                   }}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setIsEditingCanvasTitle(false);
-                    } else if (e.key === 'Escape') {
-                      setIsEditingCanvasTitle(false);
-                    }
-                  }}
-                  className="text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
-                  autoFocus
+                  as="h2"
+                  className="text-sm font-semibold text-gray-900 cursor-pointer truncate"
+                  inputClassName="text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
                 />
               ) : (
-                <h2
-                  className="text-sm font-semibold text-gray-900 cursor-pointer truncate"
-                  onDoubleClick={() => {
-                    if (selectedArtifact) {
-                      setEditCanvasTitleValue(selectedArtifact.title);
-                      setIsEditingCanvasTitle(true);
-                    }
-                  }}
-                  title={selectedArtifact ? "Double-click to rename" : undefined}
-                >
-                  {selectedArtifact ? selectedArtifact.title : 'Canvas'}
-                </h2>
+                <h2 className="text-sm font-semibold text-gray-900 truncate">Canvas</h2>
               )}
             </div>
 

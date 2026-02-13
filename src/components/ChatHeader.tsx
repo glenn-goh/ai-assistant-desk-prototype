@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, EyeOff, MoreHorizontal, FolderPlus, ChevronDown } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { TooltipIconButton, EditableText, ClassificationBadge } from './shared';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
 import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { AssistantCard } from './AssistantCard';
@@ -74,8 +74,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   showOutputPanel,
   onShowOutputPanel,
 }) => {
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [editTitleValue, setEditTitleValue] = useState('');
   const [isTemporaryChat, setIsTemporaryChat] = useState(false);
   const [replaceModalOpen, setReplaceModalOpen] = useState(false);
 
@@ -123,95 +121,70 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               Incognito chat
             </span>
           </div>
-        ) : isEditingTitle && isInteractive ? (
-          <input
-            type="text"
-            value={editTitleValue}
-            onChange={(e) => setEditTitleValue(e.target.value)}
-            onBlur={() => {
-              if (editTitleValue.trim() && chatId && onRenameChat) {
-                onRenameChat(chatId, editTitleValue.trim());
-              }
-              setIsEditingTitle(false);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                if (editTitleValue.trim() && chatId && onRenameChat) {
-                  onRenameChat(chatId, editTitleValue.trim());
-                }
-                setIsEditingTitle(false);
-              } else if (e.key === 'Escape') {
-                setIsEditingTitle(false);
-              }
-            }}
-            className="text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
-            autoFocus
-          />
         ) : (
-          <div className="flex flex-col gap-0.5 group/title">
-            <span
-              className="text-sm font-medium text-gray-900 cursor-pointer"
-              onDoubleClick={() => {
-                if (isInteractive && onRenameChat) {
-                  setEditTitleValue(interactiveTitle || 'New Chat');
-                  setIsEditingTitle(true);
-                }
-              }}
-              title="Double-click to rename"
-            >
-              {displayTitle}
-            </span>
-            {subtitle && (
-              assistant ? (
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="flex items-center gap-0.5 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
-                      {subtitle}
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent align="start" sideOffset={12} className="w-80 p-0 bg-white border border-gray-300 rounded-lg shadow-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
-                    <AssistantCard
-                      assistant={assistant}
-                      isFavorited={isFavorited}
-                      onToggleFavorite={onToggleFavorite || (() => {})}
-                      onStartChat={() => {}}
-                      viewOnly
-                      isInTools={isInTools}
-                      onToggleTools={handleToggleTools}
-                    />
-                  </PopoverContent>
-                </Popover>
-              ) : (
-                <span className="text-xs text-gray-500">{subtitle}</span>
-              )
+          <EditableText
+            value={displayTitle || 'New Chat'}
+            onSave={(newTitle) => {
+              if (chatId && onRenameChat) onRenameChat(chatId, newTitle);
+            }}
+            renderDisplay={({ value: title, onDoubleClick }) => (
+              <div className="flex flex-col gap-0.5 group/title">
+                <span
+                  className="text-sm font-medium text-gray-900 cursor-pointer"
+                  onDoubleClick={() => {
+                    if (isInteractive && onRenameChat) onDoubleClick();
+                  }}
+                  title="Double-click to rename"
+                >
+                  {title}
+                </span>
+                {subtitle && (
+                  assistant ? (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="flex items-center gap-0.5 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
+                          {subtitle}
+                          <ChevronDown className="w-3 h-3" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" sideOffset={12} className="w-80 p-0 bg-white border border-gray-300 rounded-lg shadow-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+                        <AssistantCard
+                          assistant={assistant}
+                          isFavorited={isFavorited}
+                          onToggleFavorite={onToggleFavorite || (() => {})}
+                          onStartChat={() => {}}
+                          viewOnly
+                          isInTools={isInTools}
+                          onToggleTools={handleToggleTools}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  ) : (
+                    <span className="text-xs text-gray-500">{subtitle}</span>
+                  )
+                )}
+              </div>
             )}
-          </div>
+          />
         )}
         {classificationType && (
-          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300">
-            {classificationLabel}
-          </span>
+          <ClassificationBadge
+            classification={classificationType}
+            label={classificationLabel}
+            className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300"
+          />
         )}
       </div>
       <div className="flex items-center gap-1">
         {/* Temporary Chat Toggle - only show when new chat and no messages */}
         {!isIncognito && isInteractive && isNewChat && !hasUserMessage && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={handleTemporaryToggle}
-                  className={`p-1.5 rounded-lg transition-colors ${isTemporaryChat ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-                >
-                  <EyeOff className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isTemporaryChat ? 'Temporary chat enabled - no memory, not saved' : 'Enable temporary chat'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipIconButton
+            icon={EyeOff}
+            tooltip={isTemporaryChat ? 'Temporary chat enabled - no memory, not saved' : 'Enable temporary chat'}
+            onClick={handleTemporaryToggle}
+            className={`p-1.5 rounded-lg transition-colors ${isTemporaryChat ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+            iconClassName="w-4 h-4"
+          />
         )}
         {/* Show indicator when temporary chat is active */}
         {isTemporaryChat && hasUserMessage && (
@@ -258,21 +231,12 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           </DropdownMenu>
         )}
         {!showOutputPanel && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={onShowOutputPanel}
-                  className="text-gray-700 hover:text-gray-900 rounded-lg p-1 transition-colors"
-                >
-                  <FileText className="w-5 h-5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Expand canvas</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <TooltipIconButton
+            icon={FileText}
+            tooltip="Expand canvas"
+            onClick={onShowOutputPanel}
+            className="text-gray-700 hover:text-gray-900 rounded-lg p-1 transition-colors"
+          />
         )}
       </div>
       {assistant && (
