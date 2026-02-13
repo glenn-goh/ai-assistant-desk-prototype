@@ -1,6 +1,7 @@
 import { Heart, ExternalLink, MoreHorizontal, Share2 } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
+import { IconContainer } from './shared';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { Assistant } from '../data/assistants';
@@ -92,9 +93,7 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
         </div>
 
         {/* Icon Container */}
-        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0 mb-4">
-          <IconComponent className="w-6 h-6 text-gray-700" />
-        </div>
+        <IconContainer icon={IconComponent} size="lg" className="mb-4" />
 
         {/* Content */}
         <div

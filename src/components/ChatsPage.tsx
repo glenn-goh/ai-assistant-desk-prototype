@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Search, MessageSquare, MoreHorizontal, Trash2 } from 'lucide-react';
-import { Input } from './ui/input';
+import { MessageSquare, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Button } from './ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
+import { ListItemRow, SearchInput, EmptyState } from './shared';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import type { Chat } from '../App';
 import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
@@ -75,103 +76,82 @@ export function ChatsPage({
       <div className="flex-1 overflow-auto">
         <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
           {/* Search Bar */}
-          <div className="relative max-w-2xl mx-auto w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              placeholder="Search chats..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={`pl-10 text-sm py-6 rounded-xl ${theme.inputBorder} ${font.input} bg-white shadow-sm`}
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search chats..."
+            className="max-w-2xl mx-auto w-full"
+            inputClassName={`text-sm py-6 rounded-xl ${theme.inputBorder} ${font.input} shadow-sm`}
+          />
 
           {/* Chat List */}
           <div className="space-y-2">
             {/* Demo Simulations */}
             {filteredSimulations.map((simulation) => (
-              <div
+              <ListItemRow
                 key={simulation.id}
+                icon={MessageSquare}
+                title={simulation.title}
+                subtitle={simulation.preview}
                 onClick={() => onSelectSimulation(simulation.id)}
-                className="flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-gray-200"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-5 h-5 text-gray-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900 truncate">
-                    {simulation.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 truncate">
-                    {simulation.preview}
-                  </p>
-                </div>
-                <div className="text-xs text-gray-400 flex-shrink-0">
-                  Demo
-                </div>
-              </div>
+                rightContent={<div className="text-xs text-gray-400 flex-shrink-0">Demo</div>}
+              />
             ))}
 
             {/* Regular Chats */}
             {filteredChats.map((chat) => (
-              <div
+              <ListItemRow
                 key={chat.id}
+                icon={MessageSquare}
+                title={chat.title}
+                subtitle={
+                  chat.messages.length > 0
+                    ? chat.messages[chat.messages.length - 1].content.slice(0, 60) + '...'
+                    : 'No messages yet'
+                }
                 onClick={() => onSelectChat(chat.id)}
-                className="group flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-gray-200"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-5 h-5 text-gray-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900 truncate">
-                    {chat.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 truncate">
-                    {chat.messages.length > 0
-                      ? chat.messages[chat.messages.length - 1].content.slice(0, 60) + '...'
-                      : 'No messages yet'}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400 flex-shrink-0">
-                    {formatDate(chat.createdAt)}
-                  </span>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDeleteChat(chat.id);
-                        }}
-                        className="text-red-500 hover:bg-gray-100"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
+                className="group"
+                rightContent={
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400 flex-shrink-0">
+                      {formatDate(chat.createdAt)}
+                    </span>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                        <DropdownMenuItem
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteChat(chat.id);
+                          }}
+                          className="text-red-500 hover:bg-gray-100"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                }
+              />
             ))}
 
             {/* Empty State */}
             {filteredChats.length === 0 && filteredSimulations.length === 0 && (
-              <div className="text-center py-12">
-                <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No chats found</h3>
-                <p className="text-sm text-gray-500">
-                  {searchQuery ? 'Try a different search term' : 'Start a new chat to get started'}
-                </p>
-              </div>
+              <EmptyState
+                icon={MessageSquare}
+                title="No chats found"
+                description={searchQuery ? 'Try a different search term' : 'Start a new chat to get started'}
+              />
             )}
           </div>
         </div>

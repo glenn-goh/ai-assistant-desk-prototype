@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowLeft, Folder as ProjectIcon, MessageSquare, MoreHorizontal, Trash2, SquarePen, Settings, Upload, FileText, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import { ListItemRow, EmptyState } from './shared';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
@@ -136,62 +137,57 @@ export function ProjectPage({
 
             {projectChats.length > 0 ? (
               projectChats.map((chat) => (
-              <div
+              <ListItemRow
                 key={chat.id}
+                icon={MessageSquare}
+                title={chat.title}
+                subtitle={
+                  chat.messages.length > 0
+                    ? chat.messages[chat.messages.length - 1].content.slice(0, 60) + '...'
+                    : 'No messages yet'
+                }
                 onClick={() => onSelectChat(chat.id)}
-                className="group flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-gray-200"
-              >
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-5 h-5 text-gray-600" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-medium text-gray-900 truncate">
-                    {chat.title}
-                  </h3>
-                  <p className="text-sm text-gray-500 truncate">
-                    {chat.messages.length > 0
-                      ? chat.messages[chat.messages.length - 1].content.slice(0, 60) + '...'
-                      : 'No messages yet'}
-                  </p>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRemoveChatFromProject(project.id, chat.id);
-                      }}
-                      className="hover:bg-gray-100"
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Remove from project
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+                className="group"
+                rightContent={
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+                      <DropdownMenuItem
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRemoveChatFromProject(project.id, chat.id);
+                        }}
+                        className="hover:bg-gray-100"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Remove from project
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                }
+              />
             ))
           ) : (
-            <div className="text-center py-12">
-              <ProjectIcon className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">This project is empty</h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Start a new chat or drag existing chats here to organize them
-              </p>
-              <Button onClick={() => onStartNewChatInProject?.(project.id)} className="gap-2">
-                <SquarePen className="w-4 h-4" />
-                Start New Chat
-              </Button>
-            </div>
+            <EmptyState
+              icon={ProjectIcon}
+              title="This project is empty"
+              description="Start a new chat or drag existing chats here to organize them"
+              action={
+                <Button onClick={() => onStartNewChatInProject?.(project.id)} className="gap-2">
+                  <SquarePen className="w-4 h-4" />
+                  Start New Chat
+                </Button>
+              }
+            />
           )}
           </div>
         </div>

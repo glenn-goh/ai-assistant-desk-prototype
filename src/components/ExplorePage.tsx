@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Search, Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, X, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
+import { Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, X, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
-import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { IconContainer, SearchInput, FilterTabs, EmptyState } from './shared';
 import { AssistantCard } from './AssistantCard';
 import { ReplaceToolModal } from './ReplaceToolModal';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
@@ -145,32 +145,19 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
           </div>
 
           {/* Search Bar */}
-          <div className="relative mb-4">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search assistants..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search assistants..."
+            className="mb-4"
+          />
 
           {/* Filter Tabs */}
-          <div className="flex gap-2">
-            {filterTabs.map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveFilter(tab)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  activeFilter === tab
-                    ? 'bg-gray-900 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
+          <FilterTabs
+            tabs={filterTabs}
+            activeTab={activeFilter}
+            onTabChange={setActiveFilter}
+          />
         </div>
       </div>
 
@@ -191,19 +178,11 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                   {filteredAssistants.map(renderAssistantCard)}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  {activeFilter === 'Favourites' && favoritedAssistants.length === 0 ? (
-                    <>
-                      <p className="text-gray-500 text-sm">Nothing here yet.</p>
-                      <p className="text-gray-400 text-xs mt-1">Favorite an assistant to see it listed on this page.</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="text-gray-500 text-sm">No assistants found</p>
-                      <p className="text-gray-400 text-xs mt-1">Try adjusting your search or filters</p>
-                    </>
-                  )}
-                </div>
+                <EmptyState
+                  compact
+                  title={activeFilter === 'Favourites' && favoritedAssistants.length === 0 ? 'Nothing here yet.' : 'No assistants found'}
+                  description={activeFilter === 'Favourites' && favoritedAssistants.length === 0 ? 'Favorite an assistant to see it listed on this page.' : 'Try adjusting your search or filters'}
+                />
               )}
             </div>
 
@@ -268,9 +247,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                                 >
                                   <CardContent className="!p-3">
                                     <div className="flex items-start gap-2">
-                                      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                                        <IconComponent className="w-4 h-4 text-gray-700" />
-                                      </div>
+                                      <IconContainer icon={IconComponent} size="sm" />
                                       <div className="flex-1 min-w-0">
                                         <h3 className="text-xs font-semibold text-gray-900 truncate mb-0.5">
                                           {toolAssistant.name}

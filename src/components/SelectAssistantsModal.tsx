@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Search, Check, X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Input } from './ui/input';
 import { Button } from './ui/button';
+import { IconContainer, SearchInput, FilterTabs, EmptyState } from './shared';
 import { Card, CardContent } from './ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 import type { Assistant } from '../data/assistants';
@@ -98,33 +98,20 @@ export function SelectAssistantsModal({
         {/* Search and Filters */}
         <div className="px-6 py-3 border-b border-gray-200 space-y-3">
           {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search assistants..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white"
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search assistants..."
+          />
 
           {/* Tabs and Show Selected Button */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex gap-2">
-              {filterTabs.map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveFilter(tab)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    activeFilter === tab
-                      ? 'bg-gray-900 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+            <FilterTabs
+              tabs={filterTabs}
+              activeTab={activeFilter}
+              onTabChange={setActiveFilter}
+              size="sm"
+            />
 
             {/* Show Selected Toggle */}
             <button
@@ -164,9 +151,7 @@ export function SelectAssistantsModal({
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           {/* Icon */}
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                            <IconComponent className="w-5 h-5 text-gray-700" />
-                          </div>
+                          <IconContainer icon={IconComponent} size="md" />
 
                           {/* Content */}
                           <div className="flex-1 min-w-0">
@@ -218,10 +203,7 @@ export function SelectAssistantsModal({
               })}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-gray-500 text-sm">No assistants found</p>
-              <p className="text-gray-400 text-xs mt-1">Try adjusting your search or filters</p>
-            </div>
+            <EmptyState compact title="No assistants found" description="Try adjusting your search or filters" />
           )}
         </div>
 

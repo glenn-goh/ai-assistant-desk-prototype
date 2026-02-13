@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Search, MessageSquare } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Input } from './ui/input';
+import { SearchInput } from './shared';
 import type { Chat } from '../App';
 
 // Demo simulations that can be searched
@@ -61,16 +61,13 @@ export function SearchChatsModal({
 
         <div className="space-y-4">
           {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search chats..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white border-gray-300"
-              autoFocus
-            />
-          </div>
+          <SearchInput
+            value={searchQuery}
+            onChange={setSearchQuery}
+            placeholder="Search chats..."
+            inputClassName="border-gray-300"
+            autoFocus
+          />
 
           {/* Results */}
           <div className="max-h-[300px] overflow-y-auto space-y-1">

@@ -3,6 +3,7 @@ import { Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
+import { IconContainer } from './shared';
 import type { Assistant } from '../data/assistants';
 
 interface ReplaceToolModalProps {
@@ -55,9 +56,7 @@ export function ReplaceToolModal({
           <Card className="border-2 border-gray-900 bg-white">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <NewAssistantIcon className="w-5 h-5 text-gray-700" />
-                </div>
+                <IconContainer icon={NewAssistantIcon} size="md" />
                 <div className="flex-1 min-w-0">
                   <h3 className="text-sm font-semibold text-gray-900 mb-1">
                     {newAssistant.name}
@@ -90,9 +89,7 @@ export function ReplaceToolModal({
                 >
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                        <IconComponent className="w-5 h-5 text-gray-700" />
-                      </div>
+                      <IconContainer icon={IconComponent} size="md" />
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-semibold text-gray-900 mb-1">
                           {assistant.name}
