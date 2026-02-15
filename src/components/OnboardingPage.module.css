@@ -1,0 +1,84 @@
+.page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--mantine-color-gray-1);
+  padding: var(--mantine-spacing-md);
+}
+
+.card {
+  width: 100%;
+  max-width: 42rem;
+}
+
+.stepContent {
+  padding: var(--mantine-spacing-xl);
+}
+
+.styleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--mantine-spacing-sm);
+}
+
+.styleOption {
+  position: relative;
+  padding: var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-md);
+  border: 2px solid var(--mantine-color-gray-3);
+  text-align: left;
+  transition: all 150ms ease;
+  background: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.styleOption:hover {
+  border-color: var(--mantine-color-gray-4);
+}
+
+.styleOptionSelected {
+  border-color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-0);
+}
+
+.checkIcon {
+  position: absolute;
+  top: var(--mantine-spacing-xs);
+  right: var(--mantine-spacing-xs);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-gray-9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.activityItem {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.footer {
+  padding: var(--mantine-spacing-lg);
+  border-top: 1px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-gray-1);
+}
+
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+}
+
+.footerButtons {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+}

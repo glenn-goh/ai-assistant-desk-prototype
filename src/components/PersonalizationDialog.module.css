@@ -1,0 +1,57 @@
+.profileCard {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-gray-0);
+  border-radius: var(--mantine-radius-md);
+}
+
+.avatar {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background-color: var(--mantine-color-gray-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.memoryItem {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--mantine-spacing-sm);
+  background-color: var(--mantine-color-gray-0);
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+}
+
+.memoryItem:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.menuButton {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.memoryItem:hover .menuButton {
+  opacity: 1;
+}
+
+.backButton {
+  padding: 4px;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backButton:hover {
+  background-color: var(--mantine-color-gray-2);
+}

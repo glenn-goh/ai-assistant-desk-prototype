@@ -247,34 +247,16 @@ export const theme = createTheme({
 });
 
 // ═══════════════════════════════════════════════════════════════
-// STYLE REFERENCE — Custom CSS that needs migration
+// CUSTOM CSS REFERENCE
 // ═══════════════════════════════════════════════════════════════
 //
-// These custom styles from globals.css will need CSS Module equivalents:
+// Global styles in src/styles/globals.css:
+//   .prose-lofi   — grayscale filter + typography overrides for artifact content
+//   .shimmer-text — shimmer animation for thinking state
+//   @keyframes dotBounce — thinking indicator dots
+//   @keyframes shimmer   — gradient sweep for shimmer-text
 //
-// 1. .max-w-chat          → max-width: 700px (chat content constraint)
-// 2. .border-wireframe    → 1px solid gray-900 (lo-fi bold border)
-// 3. .border-wireframe-2  → 2px solid gray-900 (lo-fi thick border)
-// 4. .border-wireframe-light → 1px solid gray-300 (light border)
-// 5. .hover-subtle:hover  → bg gray-100 on hover
-// 6. .prose-lofi          → grayscale filter + prose overrides for artifact content
-// 7. .shimmer-text        → shimmer animation for thinking state
-// 8. @keyframes dotBounce → thinking indicator dots (translateY -12px)
-// 9. @keyframes shimmer   → gradient sweep 1.2s linear infinite
-// 10. [data-slot="resizable-panel"] → flex transition 200ms ease-out
-//
-// ═══════════════════════════════════════════════════════════════
-// PERSONALIZATION THEMES — Future work
-// ═══════════════════════════════════════════════════════════════
-//
-// The app supports 8 color themes (ColorTheme) and 3 font styles (FontStyle)
-// via PersonalizationDialog. These are currently implemented as Tailwind class
-// maps in src/lib/theme-utils.ts.
-//
-// ColorTheme variants: dark, light, minimal, singapore-red, pastel-pink,
-//   army-green, rainbow, national-day
-// FontStyle variants: modern (default), seniors (larger), compact (smaller)
-//
-// Migration approach: Create separate Mantine theme objects per ColorTheme,
-// swap via MantineProvider's theme prop. FontStyle can adjust fontSizes
-// and heading sizes dynamically.
+// Personalization themes (src/lib/theme-utils.ts):
+//   8 ColorTheme variants returning CSSProperties objects
+//   3 FontStyle variants (modern, seniors, compact)
+

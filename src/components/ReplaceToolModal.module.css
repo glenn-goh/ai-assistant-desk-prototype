@@ -1,0 +1,61 @@
+.previewSection {
+  padding: var(--mantine-spacing-xl);
+  padding-top: var(--mantine-spacing-md);
+  padding-bottom: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-gray-0);
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.previewCard {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-md);
+}
+
+.cardContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.selectSection {
+  padding: var(--mantine-spacing-xl);
+  padding-top: var(--mantine-spacing-lg);
+}
+
+.toolCard {
+  cursor: pointer;
+  transition: all 150ms ease;
+  border: 2px solid var(--mantine-color-gray-3);
+  background-color: var(--mantine-color-white);
+  padding: var(--mantine-spacing-lg);
+  border-radius: var(--mantine-radius-lg);
+}
+
+.toolCard:hover {
+  border-color: var(--mantine-color-gray-4);
+}
+
+.toolCardSelected {
+  border-color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-0);
+}
+
+.checkIcon {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-gray-9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.footer {
+  padding: var(--mantine-spacing-xl);
+  padding-top: var(--mantine-spacing-lg);
+  border-top: 1px solid var(--mantine-color-gray-2);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-sm);
+}

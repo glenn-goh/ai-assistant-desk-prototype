@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { MessageSquare, MoreHorizontal, Trash2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
+import { Title, Text, Box, Menu, ActionIcon } from '@mantine/core';
 import { ListItemRow, SearchInput, EmptyState } from './shared';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import type { Chat } from '../App';
-import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
+import { getFontClasses } from '../lib/theme-utils';
+import cls from './ChatsPage.module.css';
 
 interface ChatsPageProps {
   colorTheme: ColorTheme;
@@ -35,7 +35,6 @@ export function ChatsPage({
   onDeleteChat,
   onSelectSimulation,
 }: ChatsPageProps) {
-  const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -66,26 +65,26 @@ export function ChatsPage({
   };
 
   return (
-    <div className={`flex-1 flex flex-col bg-gray-100 ${font.base}`}>
+    <Box className={cls.page} style={font.base}>
       {/* Header */}
-      <div className="flex items-center gap-2 p-4 bg-gray-100">
-        <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>Chats</h1>
-      </div>
+      <Box className={cls.header}>
+        <Title order={3} size="h4">Chats</Title>
+      </Box>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <Box className={cls.scrollArea}>
+        <Box className={cls.content}>
           {/* Search Bar */}
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search chats..."
-            className="max-w-2xl mx-auto w-full"
-            inputClassName={`text-sm py-6 rounded-xl ${theme.inputBorder} ${font.input} shadow-sm`}
-          />
+          <Box className={cls.searchWrapper}>
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search chats..."
+            />
+          </Box>
 
           {/* Chat List */}
-          <div className="space-y-2">
+          <Box className={cls.chatList}>
             {/* Demo Simulations */}
             {filteredSimulations.map((simulation) => (
               <ListItemRow
@@ -94,7 +93,7 @@ export function ChatsPage({
                 title={simulation.title}
                 subtitle={simulation.preview}
                 onClick={() => onSelectSimulation(simulation.id)}
-                rightContent={<div className="text-xs text-gray-400 flex-shrink-0">Demo</div>}
+                rightContent={<Text size="xs" c="gray.4" className={cls.dateLabel}>Demo</Text>}
               />
             ))}
 
@@ -110,37 +109,38 @@ export function ChatsPage({
                     : 'No messages yet'
                 }
                 onClick={() => onSelectChat(chat.id)}
-                className="group"
+                className={cls.rowHover}
                 rightContent={
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400 flex-shrink-0">
+                  <Box className={cls.rightContent}>
+                    <Text size="xs" c="gray.4" className={cls.dateLabel}>
                       {formatDate(chat.createdAt)}
-                    </span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
+                    </Text>
+                    <Menu position="bottom-end" withinPortal>
+                      <Menu.Target>
+                        <ActionIcon
+                          variant="subtle"
+                          color="gray"
                           size="sm"
-                          className="opacity-0 group-hover:opacity-100 h-8 w-8 p-0"
+                          className={cls.menuButton}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                        <DropdownMenuItem
+                          <MoreHorizontal size={16} />
+                        </ActionIcon>
+                      </Menu.Target>
+                      <Menu.Dropdown>
+                        <Menu.Item
+                          color="red"
+                          leftSection={<Trash2 size={16} />}
                           onClick={(e) => {
                             e.stopPropagation();
                             onDeleteChat(chat.id);
                           }}
-                          className="text-red-500 hover:bg-gray-100"
                         >
-                          <Trash2 className="w-4 h-4 mr-2" />
                           Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+                        </Menu.Item>
+                      </Menu.Dropdown>
+                    </Menu>
+                  </Box>
                 }
               />
             ))}
@@ -153,9 +153,9 @@ export function ChatsPage({
                 description={searchQuery ? 'Try a different search term' : 'Start a new chat to get started'}
               />
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }

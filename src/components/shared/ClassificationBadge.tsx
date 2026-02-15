@@ -1,3 +1,6 @@
+import { Badge } from '@mantine/core';
+import classes from './ClassificationBadge.module.css';
+
 interface ClassificationBadgeProps {
   classification: string;
   size?: 'sm' | 'md';
@@ -15,19 +18,22 @@ export function ClassificationBadge({
   const isDark = classification.includes('C(CE)') || classification.includes('CCE');
   const displayLabel = label || classification.replace('C(CE)/SN', 'CCE/SN');
 
-  const sizeClasses = size === 'sm'
-    ? 'text-[10px] py-0.5'
-    : 'text-xs py-1';
-
-  const colorClasses = isDark
-    ? 'bg-gray-100 text-gray-900 border-gray-300'
-    : 'bg-gray-50 text-gray-900 border-gray-200';
-
   return (
-    <span
-      className={className || `inline-block px-2 rounded-full font-medium border ${sizeClasses} ${colorClasses}`}
+    <Badge
+      size={size === 'sm' ? 'xs' : 'sm'}
+      variant="outline"
+      color={isDark ? 'gray.3' : 'gray.2'}
+      radius="xl"
+      className={`${classes.badge}${className ? ` ${className}` : ''}`}
+      styles={{
+        root: {
+          color: 'var(--mantine-color-gray-9)',
+          borderColor: isDark ? 'var(--mantine-color-gray-3)' : 'var(--mantine-color-gray-2)',
+          backgroundColor: isDark ? 'var(--mantine-color-gray-1)' : 'var(--mantine-color-gray-0)',
+        },
+      }}
     >
       {displayLabel}
-    </span>
+    </Badge>
   );
 }

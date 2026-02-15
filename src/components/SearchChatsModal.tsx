@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { MessageSquare } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+import { Modal, Stack, Text } from '@mantine/core';
 import { SearchInput } from './shared';
 import type { Chat } from '../App';
+import classes from './SearchChatsModal.module.css';
 
 // Demo simulations that can be searched
 const demoSimulations = [
@@ -53,58 +54,48 @@ export function SearchChatsModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg bg-white border-2 border-gray-900">
-        <DialogHeader>
-          <DialogTitle className="text-gray-900">Search Chats</DialogTitle>
-        </DialogHeader>
+    <Modal opened={open} onClose={() => onOpenChange(false)} title="Search Chats" size="lg">
+      <Stack gap="lg">
+        <SearchInput
+          value={searchQuery}
+          onChange={setSearchQuery}
+          placeholder="Search chats..."
+          autoFocus
+        />
 
-        <div className="space-y-4">
-          {/* Search Input */}
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search chats..."
-            inputClassName="border-gray-300"
-            autoFocus
-          />
+        <div className={classes.results}>
+          {/* Simulations */}
+          {filteredSimulations.map((simulation) => (
+            <button
+              key={simulation.id}
+              onClick={() => handleSelectSimulation(simulation.id)}
+              className={classes.resultItem}
+            >
+              <MessageSquare size={16} color="var(--mantine-color-gray-5)" style={{ flexShrink: 0 }} />
+              <Text size="sm" c="gray.9" lineClamp={1}>{simulation.title}</Text>
+            </button>
+          ))}
 
-          {/* Results */}
-          <div className="max-h-[300px] overflow-y-auto space-y-1">
-            {/* Simulations */}
-            {filteredSimulations.map((simulation) => (
-              <button
-                key={simulation.id}
-                onClick={() => handleSelectSimulation(simulation.id)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
-              >
-                <MessageSquare className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                <span className="text-sm text-gray-900 truncate">{simulation.title}</span>
-              </button>
-            ))}
+          {/* Regular Chats */}
+          {filteredChats.map((chat) => (
+            <button
+              key={chat.id}
+              onClick={() => handleSelectChat(chat.id)}
+              className={classes.resultItem}
+            >
+              <MessageSquare size={16} color="var(--mantine-color-gray-5)" style={{ flexShrink: 0 }} />
+              <Text size="sm" c="gray.9" lineClamp={1}>{chat.title}</Text>
+            </button>
+          ))}
 
-            {/* Regular Chats */}
-            {filteredChats.map((chat) => (
-              <button
-                key={chat.id}
-                onClick={() => handleSelectChat(chat.id)}
-                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 transition-colors text-left"
-              >
-                <MessageSquare className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                <span className="text-sm text-gray-900 truncate">{chat.title}</span>
-              </button>
-            ))}
-
-            {/* Empty State */}
-            {filteredChats.length === 0 && filteredSimulations.length === 0 && searchQuery && (
-              <div className="text-center py-8 text-gray-500">
-                <p className="text-sm">No chats found matching "{searchQuery}"</p>
-              </div>
-            )}
-
-          </div>
+          {/* Empty State */}
+          {filteredChats.length === 0 && filteredSimulations.length === 0 && searchQuery && (
+            <Text size="sm" c="gray.5" ta="center" py="xl">
+              No chats found matching "{searchQuery}"
+            </Text>
+          )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </Stack>
+    </Modal>
   );
 }

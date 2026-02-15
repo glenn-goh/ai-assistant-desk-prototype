@@ -1,0 +1,178 @@
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mantine-color-gray-1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  background-color: var(--mantine-color-gray-1);
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.backButton {
+  padding: 4px;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease, color 150ms ease;
+  color: var(--mantine-color-gray-6);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backButton:hover {
+  background-color: var(--mantine-color-gray-2);
+}
+
+.headerTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  flex: 1;
+}
+
+.contentArea {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+}
+
+.chatColumn {
+  flex: 1;
+  padding: var(--mantine-spacing-md);
+}
+
+.chatColumnInner {
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+.infoBox {
+  background-color: var(--mantine-color-gray-0);
+  border: 1px solid var(--mantine-color-gray-2);
+  border-radius: var(--mantine-radius-md);
+  padding: var(--mantine-spacing-md);
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.chatList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+.rowHover:hover .menuButton {
+  opacity: 1;
+}
+
+.menuButton {
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.sideColumn {
+  width: 20rem;
+  border-left: 1px solid var(--mantine-color-gray-2);
+  background-color: white;
+  padding: var(--mantine-spacing-md);
+  overflow-y: auto;
+}
+
+.sideSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+}
+
+.sideSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.editLink {
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-gray-6);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.editLink:hover {
+  color: var(--mantine-color-gray-9);
+}
+
+.instructionsBox {
+  width: 100%;
+  text-align: left;
+  font-size: var(--mantine-font-size-sm);
+  background-color: var(--mantine-color-gray-0);
+  padding: var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+  border: none;
+  cursor: pointer;
+}
+
+.instructionsBox:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  padding: var(--mantine-spacing-xs);
+  background-color: var(--mantine-color-gray-0);
+  border-radius: var(--mantine-radius-md);
+}
+
+.fileRow:hover .removeFileButton {
+  opacity: 1;
+}
+
+.removeFileButton {
+  opacity: 0;
+  transition: opacity 150ms ease;
+  padding: 4px;
+  border-radius: var(--mantine-radius-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.removeFileButton:hover {
+  background-color: var(--mantine-color-gray-2);
+}
+
+.radioOption {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm);
+  border: 1px solid var(--mantine-color-gray-2);
+  border-radius: var(--mantine-radius-md);
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.radioOption:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.dialogFileRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  padding: var(--mantine-spacing-xs);
+  background-color: var(--mantine-color-gray-0);
+  border-radius: var(--mantine-radius-sm);
+}

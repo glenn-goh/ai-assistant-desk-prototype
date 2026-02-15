@@ -1,0 +1,12 @@
+.addButton {
+  width: 100%;
+  border-style: dashed;
+  border-width: 2px;
+  border-color: var(--mantine-color-gray-3);
+  color: var(--mantine-color-gray-5);
+}
+
+.addButton:hover {
+  border-color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-1);
+}

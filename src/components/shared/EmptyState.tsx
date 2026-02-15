@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { Stack, Text, Title } from '@mantine/core';
 
 interface EmptyStateProps {
   icon?: LucideIcon;
@@ -11,20 +12,20 @@ interface EmptyStateProps {
 export function EmptyState({ icon: Icon, title, description, action, compact }: EmptyStateProps) {
   if (compact) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-center">
-        <p className="text-gray-500 text-sm">{title}</p>
-        {description && <p className="text-gray-400 text-xs mt-1">{description}</p>}
+      <Stack align="center" justify="center" py="xl" gap={4}>
+        <Text size="sm" c="gray.5">{title}</Text>
+        {description && <Text size="xs" c="gray.4">{description}</Text>}
         {action}
-      </div>
+      </Stack>
     );
   }
 
   return (
-    <div className="text-center py-12">
-      {Icon && <Icon className="w-12 h-12 text-gray-300 mx-auto mb-4" />}
-      <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
-      {description && <p className="text-sm text-gray-500 mb-4">{description}</p>}
+    <Stack align="center" py="xl" gap="sm">
+      {Icon && <Icon size={48} color="var(--mantine-color-gray-3)" />}
+      <Title order={3} size="lg" fw={500} c="gray.9">{title}</Title>
+      {description && <Text size="sm" c="gray.5">{description}</Text>}
       {action}
-    </div>
+    </Stack>
   );
 }

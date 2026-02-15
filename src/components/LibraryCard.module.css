@@ -1,0 +1,68 @@
+.card {
+  padding: var(--mantine-spacing-xl);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  background-color: var(--mantine-color-gray-1);
+}
+
+.nameButton {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  border-radius: var(--mantine-radius-sm);
+  transition: background-color 150ms ease;
+  border: none;
+  background: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.nameButton:hover {
+  background-color: var(--mantine-color-gray-2);
+}
+
+.editIcon {
+  opacity: 0;
+  transition: opacity 150ms ease;
+  flex-shrink: 0;
+}
+
+.nameButton:hover .editIcon {
+  opacity: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 3fr 7fr;
+  gap: var(--mantine-spacing-lg);
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-white);
+  padding: var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-sm);
+  border: 1px solid var(--mantine-color-gray-3);
+  transition: border-color 150ms ease;
+}
+
+.fileRow:hover {
+  border-color: var(--mantine-color-gray-5);
+}
+
+.fileInfo {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  flex: 1;
+  min-width: 0;
+}
+
+.fileDetails {
+  flex: 1;
+  min-width: 0;
+}

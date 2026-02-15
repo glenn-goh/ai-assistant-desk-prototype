@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Info } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
-import { Input } from './ui/input';
-import { Button } from './ui/button';
+import { Modal, TextInput, Button, Stack, Group, Text } from '@mantine/core';
 import { FormField } from './shared';
+import classes from './CreateProjectDialog.module.css';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -27,58 +26,45 @@ export function CreateProjectDialog({
     }
   };
 
-  const handleOpenChange = (open: boolean) => {
-    if (!open) {
-      setProjectName('');
-    }
-    onOpenChange(open);
+  const handleClose = () => {
+    setProjectName('');
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white border-2 border-gray-900">
-        <DialogHeader>
-          <DialogTitle className="text-gray-900">Create New Project</DialogTitle>
-        </DialogHeader>
+    <Modal opened={open} onClose={handleClose} title="Create New Project" size="md">
+      <form onSubmit={handleSubmit}>
+        <Stack gap="lg">
+          <FormField label="Project Name" htmlFor="project-name">
+            <TextInput
+              id="project-name"
+              placeholder="Enter project name..."
+              value={projectName}
+              onChange={(e) => setProjectName(e.currentTarget.value)}
+              autoFocus
+            />
+          </FormField>
 
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <FormField label="Project Name" htmlFor="project-name" labelClassName="text-gray-700">
-              <Input
-                id="project-name"
-                placeholder="Enter project name..."
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="bg-white border-gray-300"
-                autoFocus
-              />
-            </FormField>
-
-            {/* Project scope info */}
-            <div className="flex items-start gap-2 p-3 bg-gray-100 rounded-lg border border-gray-300">
-              <Info className="w-4 h-4 text-gray-700 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-gray-900">
-                Chats within this project will only reference files, custom instructions,
-                and memories from within this project by default. You can change this in
-                project settings after creation.
-              </p>
-            </div>
+          {/* Project scope info */}
+          <div className={classes.infoBox}>
+            <Info size={16} color="var(--mantine-color-gray-7)" style={{ marginTop: 2, flexShrink: 0 }} />
+            <Text size="xs" c="gray.9">
+              Chats within this project will only reference files, custom instructions,
+              and memories from within this project by default. You can change this in
+              project settings after creation.
+            </Text>
           </div>
+        </Stack>
 
-          <DialogFooter className="mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!projectName.trim()}>
-              Create Project
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+        <Group justify="flex-end" mt="xl" gap="sm">
+          <Button variant="outline" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={!projectName.trim()}>
+            Create Project
+          </Button>
+        </Group>
+      </form>
+    </Modal>
   );
 }

@@ -1,0 +1,11 @@
+.display {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+  color: var(--mantine-color-gray-9);
+  cursor: pointer;
+}
+
+.input {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
+}

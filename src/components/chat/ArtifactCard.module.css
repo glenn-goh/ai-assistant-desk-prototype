@@ -1,0 +1,17 @@
+.card {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
+  background-color: var(--mantine-color-white);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.card:hover {
+  background-color: var(--mantine-color-gray-0);
+  border-color: var(--mantine-color-gray-4);
+}

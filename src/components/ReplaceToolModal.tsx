@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Check } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import { Modal, Button, Card, Stack, Text, Box, Group } from '@mantine/core';
 import { IconContainer } from './shared';
 import type { Assistant } from '../data/assistants';
+import cls from './ReplaceToolModal.module.css';
 
 interface ReplaceToolModalProps {
   open: boolean;
@@ -39,92 +38,75 @@ export function ReplaceToolModal({
   const NewAssistantIcon = newAssistant.icon;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-white border-2 border-gray-900 rounded-lg p-0">
-        <DialogHeader className="px-6 py-4 border-b border-gray-200">
-          <DialogTitle className="text-lg font-semibold text-gray-900">
-            Replace a tool
-          </DialogTitle>
-          <p className="text-sm text-gray-500 mt-1">
-            You can only have 3 assistants in your tools. Select which assistant to replace with <span className="font-semibold">{newAssistant.name}</span>.
-          </p>
-        </DialogHeader>
+    <Modal
+      opened={open}
+      onClose={() => onOpenChange(false)}
+      title="Replace a tool"
+      size="lg"
+      padding={0}
+      styles={{ header: { padding: 'var(--mantine-spacing-xl)', paddingBottom: 'var(--mantine-spacing-sm)' } }}
+    >
+      <Text size="sm" c="gray.5" px="xl" mb="md">
+        You can only have 3 assistants in your tools. Select which assistant to replace with <Text span fw={600}>{newAssistant.name}</Text>.
+      </Text>
 
-        {/* New Assistant Preview */}
-        <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
-          <p className="text-xs font-medium text-gray-700 mb-2">Adding:</p>
-          <Card className="border-2 border-gray-900 bg-white">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <IconContainer icon={NewAssistantIcon} size="md" />
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                    {newAssistant.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 line-clamp-2">
-                    {newAssistant.description}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+      {/* New Assistant Preview */}
+      <Box className={cls.previewSection}>
+        <Text size="xs" fw={500} c="gray.7" mb="sm">Adding:</Text>
+        <Card withBorder padding="lg" styles={{ root: { borderWidth: 2, borderColor: 'var(--mantine-color-gray-9)' } }}>
+          <Group className={cls.previewCard}>
+            <IconContainer icon={NewAssistantIcon} size="md" />
+            <Box className={cls.cardContent}>
+              <Text size="sm" fw={600} c="gray.9" mb={4}>{newAssistant.name}</Text>
+              <Text size="xs" c="gray.5" lineClamp={2}>{newAssistant.description}</Text>
+            </Box>
+          </Group>
+        </Card>
+      </Box>
 
-        {/* Current Tools to Replace */}
-        <div className="px-6 py-4">
-          <p className="text-xs font-medium text-gray-700 mb-3">Select one to replace:</p>
-          <div className="space-y-2">
-            {currentTools.map(assistant => {
-              const IconComponent = assistant.icon;
-              const isSelected = selectedToReplace === assistant.id;
-              return (
-                <Card
-                  key={assistant.id}
-                  className={`cursor-pointer transition-all border-2 ${
-                    isSelected
-                      ? 'border-gray-900 bg-gray-50'
-                      : 'border-gray-300 hover:border-gray-400 bg-white'
-                  }`}
-                  onClick={() => setSelectedToReplace(assistant.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <IconContainer icon={IconComponent} size="md" />
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                          {assistant.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 line-clamp-2">
-                          {assistant.description}
-                        </p>
-                      </div>
-                      {isSelected && (
-                        <div className="w-5 h-5 rounded bg-gray-900 flex items-center justify-center flex-shrink-0">
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
+      {/* Current Tools to Replace */}
+      <Box className={cls.selectSection}>
+        <Text size="xs" fw={500} c="gray.7" mb="md">Select one to replace:</Text>
+        <Stack gap="sm">
+          {currentTools.map(assistant => {
+            const IconComponent = assistant.icon;
+            const isSelected = selectedToReplace === assistant.id;
+            return (
+              <Box
+                key={assistant.id}
+                className={`${cls.toolCard} ${isSelected ? cls.toolCardSelected : ''}`}
+                onClick={() => setSelectedToReplace(assistant.id)}
+              >
+                <Group align="flex-start" gap="md">
+                  <IconContainer icon={IconComponent} size="md" />
+                  <Box className={cls.cardContent}>
+                    <Text size="sm" fw={600} c="gray.9" mb={4}>{assistant.name}</Text>
+                    <Text size="xs" c="gray.5" lineClamp={2}>{assistant.description}</Text>
+                  </Box>
+                  {isSelected && (
+                    <Box className={cls.checkIcon}>
+                      <Check size={12} color="white" />
+                    </Box>
+                  )}
+                </Group>
+              </Box>
+            );
+          })}
+        </Stack>
+      </Box>
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-2">
-          <Button variant="ghost" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleConfirmReplace}
-            disabled={!selectedToReplace}
-            className="bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Confirm Replace
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      {/* Footer */}
+      <Box className={cls.footer}>
+        <Button variant="subtle" color="gray" onClick={handleCancel}>
+          Cancel
+        </Button>
+        <Button
+          onClick={handleConfirmReplace}
+          disabled={!selectedToReplace}
+        >
+          Confirm Replace
+        </Button>
+      </Box>
+    </Modal>
   );
 }

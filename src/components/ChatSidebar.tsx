@@ -1,18 +1,14 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, FolderOpen, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Heart, Pencil, Bookmark } from 'lucide-react';
-import { Button } from './ui/button';
-import { ScrollArea } from './ui/scroll-area';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from './ui/dropdown-menu';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Settings, Trash2, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Heart, Pencil, Bookmark } from 'lucide-react';
+import { ScrollArea, Tooltip, Menu, Modal, Text, Box, Button, Collapse } from '@mantine/core';
 import { TooltipIconButton, EditableText } from './shared';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './ui/alert-dialog';
 import { SearchChatsModal } from './SearchChatsModal';
 import { CreateProjectDialog } from './CreateProjectDialog';
 import type { Chat, View } from '../App';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
 import type { Project as ProjectType } from '../types/project';
-import { getAssistantsForRole, roleBasedAssistants, topRatedAssistants, essentialAssistants } from '../data/assistants';
+import { roleBasedAssistants, topRatedAssistants, essentialAssistants } from '../data/assistants';
+import cls from './ChatSidebar.module.css';
 
 interface ChatSidebarProps {
   isOpen: boolean;
@@ -149,7 +145,7 @@ export function ChatSidebar({
   // Section header component with consistent styling
   const SectionHeader = ({
     label,
-    isOpen,
+    isOpen: isSectionOpen,
     sectionId,
     showInfo,
     infoText
@@ -164,33 +160,26 @@ export function ChatSidebar({
 
     return (
       <div
-        className="flex items-center gap-1.5 w-full px-2 py-1.5 rounded-lg transition-colors cursor-pointer"
+        className={cls.sectionHeader}
         onMouseEnter={() => setHoveredSection(sectionId)}
         onMouseLeave={() => setHoveredSection(null)}
       >
-        <span className={`text-xs font-semibold uppercase tracking-wide transition-colors ${isHovered ? 'text-gray-700' : 'text-gray-500'}`}>
+        <span className={cls.sectionLabel}>
           {label}
         </span>
         {/* Info icon - before arrow */}
         {showInfo && (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="cursor-help text-gray-400 hover:text-gray-600" onClick={(e) => e.stopPropagation()}>
-                  <Info className="w-3 h-3" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                <p>{infoText}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip label={infoText} position="right" withArrow>
+            <div className={cls.infoIcon} onClick={(e) => e.stopPropagation()}>
+              <Info size={12} />
+            </div>
+          </Tooltip>
         )}
         {/* Arrow - after info icon */}
-        {!isOpen ? (
-          <ChevronRight className={`w-3 h-3 flex-shrink-0 transition-colors ${isHovered ? 'text-gray-800' : 'text-gray-500'}`} />
+        {!isSectionOpen ? (
+          <ChevronRight size={12} className={cls.sectionChevron} />
         ) : (
-          <ChevronDown className={`w-3 h-3 flex-shrink-0 transition-opacity ${isHovered ? 'opacity-100 text-gray-800' : 'opacity-0'}`} />
+          <ChevronDown size={12} className={`${cls.sectionChevron} ${cls.sectionChevronOpen}`} />
         )}
       </div>
     );
@@ -199,22 +188,21 @@ export function ChatSidebar({
   // Collapsed sidebar view
   if (!isOpen) {
     return (
-      <div className="flex flex-col h-screen w-[52px] border-r border-gray-300 bg-gray-100 flex-shrink-0">
+      <Box className={`${cls.sidebar} ${cls.collapsed}`}>
         {/* Expand button */}
-        <div className="px-2 py-3 flex justify-center">
+        <Box className={cls.collapsedHeader}>
           <TooltipIconButton icon={PanelLeft} tooltip="Expand sidebar" onClick={onClose} side="right" />
-        </div>
+        </Box>
 
         {/* Collapsed icons */}
-        <div className="flex flex-col items-center gap-1 px-2 py-2">
+        <Box className={cls.collapsedIcons}>
           <TooltipIconButton icon={SquarePen} tooltip="New Chat (⇧⌘O)" onClick={onNewChat} side="right" className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-700" />
-
-        </div>
+        </Box>
 
         {/* Settings at bottom */}
-        <div className="mt-auto px-2 py-3 border-t border-gray-300 flex justify-center">
+        <Box className={cls.collapsedFooter}>
           <TooltipIconButton icon={Settings} tooltip="Settings" onClick={onSettingsOpen} side="right" />
-        </div>
+        </Box>
 
         {/* Search Modal */}
         <SearchChatsModal
@@ -223,89 +211,86 @@ export function ChatSidebar({
           chats={chats}
           onSelectChat={(chatId) => {
             onSelectChat(chatId);
-            onSearchModalChange(false);
+            onSearchModalChange?.(false);
           }}
           onSelectSimulation={(simId) => {
             onSelectSimulation?.(simId);
-            onSearchModalChange(false);
+            onSearchModalChange?.(false);
           }}
         />
-      </div>
+      </Box>
     );
   }
 
   return (
     <>
-      <div className="flex flex-col h-screen w-[280px] border-r border-gray-300 bg-gray-100 flex-shrink-0">
+      <Box className={cls.sidebar}>
         {/* App Title */}
-        <div className="px-4 py-3 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">
+        <Box className={cls.appTitle}>
+          <Text size="lg" fw={700} c="gray.9">
             AI Assistant Desk (MVP)
-          </h2>
+          </Text>
           <TooltipIconButton icon={PanelLeft} tooltip="Collapse sidebar" onClick={onClose} side="bottom" className="p-1 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700" />
-        </div>
+        </Box>
 
         {/* Scrollable Content Area */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          <ScrollArea className="h-full">
-            <div className="px-3 py-2">
+        <Box className={cls.scrollContent}>
+          <ScrollArea h="100%">
+            <Box className={cls.innerPadding}>
               {mode === 'desk' ? (
                 <>
                   {/* New Chat Button with shortcut on hover */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          data-tour="new-chat"
-                          className="w-full justify-start gap-2 px-2 h-9 text-sm group"
-                          variant="ghost"
-                          onClick={onNewChat}
-                        >
-                          <SquarePen className="w-4 h-4" />
-                          <span className="flex-1 text-left">New Chat</span>
-                          <span className="text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity">⇧⌘O</span>
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        <p>Start a new chat (⇧⌘O)</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  <Tooltip label="Start a new chat (⇧⌘O)" position="right" withArrow>
+                    <button
+                      data-tour="new-chat"
+                      className={cls.navButton}
+                      onClick={onNewChat}
+                    >
+                      <SquarePen size={16} />
+                      <span style={{ flex: 1, textAlign: 'left' }}>New Chat</span>
+                      <span className={cls.shortcutHint}>⇧⌘O</span>
+                    </button>
+                  </Tooltip>
 
                   {/* New Project Button */}
-                  <Button
+                  <button
                     data-tour="new-project"
-                    className="w-full justify-start gap-2 px-2 h-9 text-sm mt-1"
-                    variant="ghost"
+                    className={cls.navButton}
                     onClick={() => setCreateProjectOpen(true)}
+                    style={{ marginTop: 4 }}
                   >
-                    <FolderPlus className="w-4 h-4" />
-                    <span className="flex-1 text-left">New Project</span>
-                  </Button>
+                    <FolderPlus size={16} />
+                    <span style={{ flex: 1, textAlign: 'left' }}>New Project</span>
+                  </button>
 
                   {/* Explore Assistants Button */}
-                  <Button
+                  <button
                     data-tour="explore-assistants"
-                    className="w-full justify-start gap-2 px-2 h-9 text-sm mt-1"
-                    variant="ghost"
+                    className={cls.navButton}
                     onClick={onExploreClick}
+                    style={{ marginTop: 4 }}
                   >
-                    <Compass className="w-4 h-4" />
-                    <span className="flex-1 text-left">Explore Assistants</span>
-                  </Button>
+                    <Compass size={16} />
+                    <span style={{ flex: 1, textAlign: 'left' }}>Explore Assistants</span>
+                  </button>
 
                   {/* Projects Section - Only show if there are projects */}
                   {projects.length > 0 && (
-                    <Collapsible open={projectsOpen} onOpenChange={setProjectsOpen} className="mt-2" data-tour="projects">
-                      <CollapsibleTrigger className="w-full">
+                    <Box style={{ marginTop: 'var(--mantine-spacing-xs)' }} data-tour="projects">
+                      <button
+                        type="button"
+                        className={cls.sectionHeader}
+                        onClick={() => setProjectsOpen(!projectsOpen)}
+                        style={{ width: '100%' }}
+                      >
                         <SectionHeader
                           label="Projects"
                           isOpen={projectsOpen}
                           sectionId="projects"
                         />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="space-y-0.5 mt-0.5">
+                      </button>
+                      <Collapse in={projectsOpen}>
+                        <Box className={cls.sectionItems}>
                           {projects.map(project => (
                             <button
                               key={project.id}
@@ -313,31 +298,35 @@ export function ChatSidebar({
                               onDragOver={(e) => handleDragOver(e, project.id)}
                               onDragLeave={handleDragLeave}
                               onDrop={(e) => handleDrop(e, project.id)}
-                              className={`w-full flex items-center gap-2 px-2 py-1 rounded-lg transition-colors text-sm font-normal hover:bg-gray-200 text-left ${dragOverProjectId === project.id ? 'bg-gray-300 border-2 border-gray-900 border-dashed' : ''
-                                }`}
+                              className={`${cls.projectItem} ${dragOverProjectId === project.id ? cls.projectItemDragOver : ''}`}
                             >
-                              <Folder className="w-4 h-4 text-gray-500" />
-                              <span className="truncate flex-1">{project.name}</span>
-                              <span className="text-xs text-gray-400">{project.chatIds.length}</span>
+                              <Folder size={16} color="var(--mantine-color-gray-5)" />
+                              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{project.name}</span>
+                              <Text size="xs" c="gray.4">{project.chatIds.length}</Text>
                             </button>
                           ))}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
+                        </Box>
+                      </Collapse>
+                    </Box>
                   )}
 
                   {/* Custom Assistants Section - Only show if user has bookmarked or chatted with assistants */}
                   {hasCustomAssistants && (
-                    <Collapsible open={customAssistantsOpen} onOpenChange={setCustomAssistantsOpen} className="mt-2" data-tour="custom-assistants">
-                      <CollapsibleTrigger className="w-full">
+                    <Box style={{ marginTop: 'var(--mantine-spacing-xs)' }} data-tour="custom-assistants">
+                      <button
+                        type="button"
+                        className={cls.sectionHeader}
+                        onClick={() => setCustomAssistantsOpen(!customAssistantsOpen)}
+                        style={{ width: '100%' }}
+                      >
                         <SectionHeader
                           label="Custom Assistants"
                           isOpen={customAssistantsOpen}
                           sectionId="assistants"
                         />
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="space-y-0.5 mt-0.5">
+                      </button>
+                      <Collapse in={customAssistantsOpen}>
+                        <Box className={cls.sectionItems}>
                           {displayedAssistants.map((assistant, index) => {
                             const IconComponent = assistant.icon;
                             const isFavorited = favoritedAssistants?.includes(assistant.id);
@@ -348,10 +337,10 @@ export function ChatSidebar({
 
                             return (
                               <React.Fragment key={assistant.id}>
-                                <div className="group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal hover:bg-gray-200">
-                                  <IconComponent className="w-4 h-4 text-gray-500" />
+                                <Box className={cls.assistantRow}>
+                                  <IconComponent size={16} color="var(--mantine-color-gray-5)" />
                                   <span
-                                    className="truncate flex-1 ml-2"
+                                    style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, marginLeft: 'var(--mantine-spacing-xs)', cursor: 'pointer' }}
                                     onClick={() => onStartAssistantChat?.(assistant.name, assistant.assistantType)}
                                   >
                                     {assistant.name}
@@ -359,43 +348,51 @@ export function ChatSidebar({
 
                                   {/* Ellipsis menu - only for favourited */}
                                   {isFavorited && (
-                                    <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
+                                    <Menu position="bottom-end" withinPortal>
+                                      <Menu.Target>
                                         <button
                                           onClick={(e) => e.stopPropagation()}
-                                          className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-300 rounded transition-colors"
+                                          className={cls.menuTrigger}
+                                          style={{ padding: 4, borderRadius: 'var(--mantine-radius-sm)', background: 'none', border: 'none', cursor: 'pointer' }}
                                         >
-                                          <MoreHorizontal className="w-3.5 h-3.5 text-gray-500" />
+                                          <MoreHorizontal size={14} color="var(--mantine-color-gray-5)" />
                                         </button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                        <DropdownMenuItem onClick={(e) => {
-                                          e.stopPropagation();
-                                          onToggleFavorite?.(assistant.id);
-                                        }}>
-                                          <Heart className="w-4 h-4 mr-1.5" />
+                                      </Menu.Target>
+                                      <Menu.Dropdown>
+                                        <Menu.Item
+                                          leftSection={<Heart size={16} />}
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            onToggleFavorite?.(assistant.id);
+                                          }}
+                                        >
                                           Unfavourite
-                                        </DropdownMenuItem>
-                                      </DropdownMenuContent>
-                                    </DropdownMenu>
+                                        </Menu.Item>
+                                      </Menu.Dropdown>
+                                    </Menu>
                                   )}
-                                </div>
+                                </Box>
 
                                 {/* Visual divider between favourited and recently used */}
                                 {showDivider && (
-                                  <div className="h-px bg-gray-200 mx-2 my-1" />
+                                  <Box className={cls.divider} />
                                 )}
                               </React.Fragment>
                             );
                           })}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
+                        </Box>
+                      </Collapse>
+                    </Box>
                   )}
 
                   {/* Recent Chats Section - Always at the bottom */}
-                  <Collapsible open={recentChatsOpen} onOpenChange={setRecentChatsOpen} className="mt-2" data-tour="recent-chats">
-                    <CollapsibleTrigger className="w-full">
+                  <Box style={{ marginTop: 'var(--mantine-spacing-xs)' }} data-tour="recent-chats">
+                    <button
+                      type="button"
+                      className={cls.sectionHeader}
+                      onClick={() => setRecentChatsOpen(!recentChatsOpen)}
+                      style={{ width: '100%' }}
+                    >
                       <SectionHeader
                         label="Recent Chats"
                         isOpen={recentChatsOpen}
@@ -403,9 +400,9 @@ export function ChatSidebar({
                         showInfo
                         infoText="Chats are cleared after 90 days. Drag to projects to organize."
                       />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <div className="space-y-0.5 mt-0.5">
+                    </button>
+                    <Collapse in={recentChatsOpen}>
+                      <Box className={cls.sectionItems}>
                         {/* Unified Recent Chats list - all entries sorted by creation time (newest first) */}
                         {(() => {
                           const simMeta: Record<string, { title: string; assistantName?: string }> = {
@@ -449,7 +446,6 @@ export function ChatSidebar({
                           return entries.map(entry => {
                             // --- Simulation entry ---
                             if (entry.type === 'simulation') {
-                              const isInstance = entry.key !== entry.key.replace(/^sim-/, '').replace(/-\d+$/, '');
                               const inst = simulationInstances.find(i => i.instanceId === entry.key);
                               const simId = inst?.simulationId || entry.key;
                               const meta = simMeta[simId];
@@ -458,47 +454,63 @@ export function ChatSidebar({
                               const displayTitle = meta.title.length > 24 ? meta.title.substring(0, 24) + '...' : meta.title;
 
                               return (
-                                <div
+                                <Box
                                   key={entry.key}
-                                  className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${activeChatId === activeChatKey ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                                  className={`${cls.chatRow} ${activeChatId === activeChatKey ? cls.chatRowActive : ''}`}
                                   onClick={() => onSelectSimulation?.(inst ? inst.instanceId : simId)}
                                   title={meta.title}
                                 >
-                                  <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                                    <span className="truncate text-gray-900">{displayTitle}</span>
-                                    <span className="text-xs text-gray-500 truncate">{meta.assistantName || 'My AI Assistant'}</span>
-                                  </div>
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                                        <MoreHorizontal className="w-3 h-3" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                      <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
-                                        <Pencil className="w-4 h-4 mr-2" /> Rename
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={(e) => e.stopPropagation()} className="text-red-500 hover:bg-gray-100 opacity-50 cursor-not-allowed" disabled>
-                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                                  <Box className={cls.chatInfo}>
+                                    <span className={cls.chatTitle}>{displayTitle}</span>
+                                    <span className={cls.chatSubtitle}>{meta.assistantName || 'My AI Assistant'}</span>
+                                  </Box>
+                                  <Menu position="bottom-end" withinPortal>
+                                    <Menu.Target>
+                                      <button
+                                        className={cls.menuTrigger}
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      >
+                                        <MoreHorizontal size={12} />
+                                      </button>
+                                    </Menu.Target>
+                                    <Menu.Dropdown>
+                                      <Menu.Item
+                                        leftSection={<Pencil size={16} />}
+                                        disabled
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        Rename
+                                      </Menu.Item>
+                                      <Menu.Item
+                                        leftSection={<Trash2 size={16} />}
+                                        color="red"
+                                        disabled
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        Delete
+                                      </Menu.Item>
+                                    </Menu.Dropdown>
+                                  </Menu>
+                                </Box>
                               );
                             }
 
                             // --- Regular chat entry ---
                             if (entry.type === 'chat') {
+                              const filteredChats = chats
+                                .filter(c => c.classificationType !== 'cce-sn' && c.classificationType !== 'cce-sh')
+                                .filter(c => !projects?.some(p => p.chatIds.includes(c.id)));
                               const chat = filteredChats.find(c => c.id === entry.key);
                               if (!chat) return null;
                               const isEditing = editingChatId === chat.id;
 
                               return (
-                                <div
+                                <Box
                                   key={chat.id}
                                   draggable={!isEditing}
                                   onDragStart={(e) => handleDragStart(e, chat.id)}
-                                  className={`group flex items-center px-2 py-1 rounded-lg cursor-pointer transition-colors text-sm font-normal ${chat.id === activeChatId ? 'bg-gray-200' : 'hover:bg-gray-200'}`}
+                                  className={`${cls.chatRow} ${chat.id === activeChatId ? cls.chatRowActive : ''}`}
                                   onClick={() => !isEditing && onSelectChat(chat.id)}
                                   title={chat.title}
                                 >
@@ -512,9 +524,9 @@ export function ChatSidebar({
                                     }}
                                     inputClassName="flex-1 bg-white border border-gray-300 rounded px-1 py-0.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-gray-400"
                                     renderDisplay={({ value: title, onDoubleClick }) => (
-                                      <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                                      <Box className={cls.chatInfo}>
                                         <span
-                                          className="truncate text-gray-900"
+                                          className={cls.chatTitle}
                                           onDoubleClick={(e) => {
                                             e.stopPropagation();
                                             onDoubleClick();
@@ -523,28 +535,39 @@ export function ChatSidebar({
                                         >
                                           {title.length > 24 ? title.substring(0, 24) + '...' : title}
                                         </span>
-                                        <span className="text-xs text-gray-500 truncate">
+                                        <span className={cls.chatSubtitle}>
                                           {chat.assistantName || 'My AI Assistant'}
                                         </span>
-                                      </div>
+                                      </Box>
                                     )}
                                   />
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 h-5 w-5 p-0 ml-auto flex-shrink-0" onClick={(e) => e.stopPropagation()}>
-                                        <MoreHorizontal className="w-3 h-3" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingChatId(chat.id); }} className="hover:bg-gray-100">
-                                        <Pencil className="w-4 h-4 mr-2" /> Rename
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setChatToDelete(chat.id); }} className="text-red-500 hover:bg-gray-100">
-                                        <Trash2 className="w-4 h-4 mr-2" /> Delete
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                                  <Menu position="bottom-end" withinPortal>
+                                    <Menu.Target>
+                                      <button
+                                        className={cls.menuTrigger}
+                                        onClick={(e) => e.stopPropagation()}
+                                        style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer', width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      >
+                                        <MoreHorizontal size={12} />
+                                      </button>
+                                    </Menu.Target>
+                                    <Menu.Dropdown>
+                                      <Menu.Item
+                                        leftSection={<Pencil size={16} />}
+                                        onClick={(e) => { e.stopPropagation(); setEditingChatId(chat.id); }}
+                                      >
+                                        Rename
+                                      </Menu.Item>
+                                      <Menu.Item
+                                        leftSection={<Trash2 size={16} />}
+                                        color="red"
+                                        onClick={(e) => { e.stopPropagation(); setChatToDelete(chat.id); }}
+                                      >
+                                        Delete
+                                      </Menu.Item>
+                                    </Menu.Dropdown>
+                                  </Menu>
+                                </Box>
                               );
                             }
 
@@ -557,98 +580,101 @@ export function ChatSidebar({
                           chats.filter(chat => chat.classificationType !== 'cce-sn' && chat.classificationType !== 'cce-sh')
                             .filter(chat => !projects?.some(project => project.chatIds.includes(chat.id)))
                             .length === 0 && (
-                            <div className="px-2 py-4 text-center">
-                              <div className="flex items-center gap-2 justify-center">
-                                <SquarePen className="w-4 h-4 text-gray-400" />
-                                <p className="text-sm text-gray-500">
+                            <Box className={cls.emptyState}>
+                              <Box className={cls.emptyStateContent}>
+                                <SquarePen size={16} color="var(--mantine-color-gray-4)" />
+                                <Text size="sm" c="gray.5">
                                   Start a{' '}
                                   <button
                                     onClick={onNewChat}
-                                    className="text-gray-500 hover:text-gray-700 hover:underline cursor-pointer"
+                                    className={cls.emptyLink}
                                   >
                                     new chat
                                   </button>
                                   {' '}to begin
-                                </p>
-                              </div>
-                            </div>
+                                </Text>
+                              </Box>
+                            </Box>
                           )}
-                      </div>
-                    </CollapsibleContent>
-                  </Collapsible>
+                      </Box>
+                    </Collapse>
+                  </Box>
                 </>
               ) : (
                 <>
                   {/* Studio Mode Sidebar */}
                   <Button
                     onClick={onStudioClick}
-                    className={`w-full justify-start gap-2 px-2 h-9 text-sm ${activeView === 'studio' ? 'bg-gray-700' : ''}`}
-                    variant="outline"
+                    variant={activeView === 'studio' ? 'filled' : 'outline'}
+                    color="gray"
+                    fullWidth
+                    justify="flex-start"
+                    leftSection={<SquarePen size={16} />}
+                    size="sm"
                   >
-                    <SquarePen className="w-4 h-4" />
                     New Assistant
                   </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2 px-2 h-9 text-sm"
+                  <button
+                    className={cls.navButton}
+                    style={{ marginTop: 4 }}
                   >
-                    <Users className="w-4 h-4" />
-                    My Assistants
-                  </Button>
+                    <Users size={16} />
+                    <span style={{ flex: 1, textAlign: 'left' }}>My Assistants</span>
+                  </button>
                 </>
               )}
-            </div>
+            </Box>
           </ScrollArea>
-        </div>
+        </Box>
 
         {/* User Profile Section at Bottom */}
-        <div className="px-3 py-2 border-t border-gray-300 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <Box className={cls.profileSection}>
+          <Box className={cls.profileInfo}>
             {/* Dark grey solid color avatar */}
-            <div className="w-7 h-7 rounded-full bg-gray-600 flex-shrink-0" />
-            <div className="text-left overflow-hidden">
-              <div className="text-sm font-medium text-gray-900">{userProfile.name}</div>
-            </div>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button data-tour="settings" className="p-1.5 rounded-lg hover:bg-gray-200 transition-colors text-gray-700">
+            <Box className={cls.avatar} />
+            <Box style={{ textAlign: 'left', overflow: 'hidden' }}>
+              <Text size="sm" fw={500} c="gray.9">{userProfile.name}</Text>
+            </Box>
+          </Box>
+          <Menu position="top-end" withinPortal>
+            <Menu.Target>
+              <button data-tour="settings" className={cls.settingsButton}>
                 <Settings size={16} />
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-white border-2 border-gray-900 rounded-lg">
-              <DropdownMenuItem onClick={(e) => {
+            </Menu.Target>
+            <Menu.Dropdown style={{ width: 192 }}>
+              <Menu.Item onClick={(e) => {
                 e.stopPropagation();
                 onSettingsOpen();
-              }} className="hover:bg-gray-100">
+              }}>
                 Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
+              </Menu.Item>
+              <Menu.Item onClick={(e) => {
                 e.stopPropagation();
                 onWalkthroughStart?.();
-              }} className="hover:bg-gray-100">
+              }}>
                 Walkthrough Tour
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => {
+              </Menu.Item>
+              <Menu.Item onClick={(e) => {
                 e.stopPropagation();
                 onSignOut();
-              }} className="hover:bg-gray-100">
+              }}>
                 Sign Out
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-xs text-gray-400 hover:bg-gray-100">
-                Privacy Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-xs text-gray-400 hover:bg-gray-100">
-                Terms of Use
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-xs text-gray-400 hover:bg-gray-100">
-                Report Vulnerability
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+              </Menu.Item>
+              <Menu.Divider />
+              <Menu.Item>
+                <Text size="xs" c="gray.4">Privacy Settings</Text>
+              </Menu.Item>
+              <Menu.Item>
+                <Text size="xs" c="gray.4">Terms of Use</Text>
+              </Menu.Item>
+              <Menu.Item>
+                <Text size="xs" c="gray.4">Report Vulnerability</Text>
+              </Menu.Item>
+            </Menu.Dropdown>
+          </Menu>
+        </Box>
+      </Box>
 
       {/* Search Chats Modal */}
       <SearchChatsModal
@@ -667,30 +693,32 @@ export function ChatSidebar({
       />
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={chatToDelete !== null} onOpenChange={(open) => !open && setChatToDelete(null)}>
-        <AlertDialogContent className="bg-white border-2 border-gray-900">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete chat?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete this chat and all its messages. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setChatToDelete(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (chatToDelete) {
-                  onDeleteChat(chatToDelete);
-                  setChatToDelete(null);
-                }
-              }}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Modal
+        opened={chatToDelete !== null}
+        onClose={() => setChatToDelete(null)}
+        title="Delete chat?"
+        centered
+      >
+        <Text size="sm" c="gray.6" mb="md">
+          This will permanently delete this chat and all its messages. This action cannot be undone.
+        </Text>
+        <Box style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--mantine-spacing-xs)' }}>
+          <Button variant="default" onClick={() => setChatToDelete(null)}>
+            Cancel
+          </Button>
+          <Button
+            color="red"
+            onClick={() => {
+              if (chatToDelete) {
+                onDeleteChat(chatToDelete);
+                setChatToDelete(null);
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </Box>
+      </Modal>
     </>
   );
 }

@@ -1,5 +1,5 @@
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import { Button, Card, Stack, Title, Text } from '@mantine/core';
+import classes from './ErrorPage.module.css';
 
 interface MaintenancePageProps {
   onBackToLogin?: () => void;
@@ -7,27 +7,28 @@ interface MaintenancePageProps {
 
 export function MaintenancePage({ onBackToLogin }: MaintenancePageProps) {
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-8 pb-10 space-y-6 text-center">
-          <div className="space-y-2">
-            <h1 className="text-4xl font-bold text-gray-900">Under Maintenance</h1>
-            <p className="text-gray-500 text-sm">
+    <div className={classes.page}>
+      <Card className={classes.card} withBorder shadow="md">
+        <Stack gap="xl" className={classes.cardContent}>
+          <Stack gap="xs" align="center">
+            <Title order={1} fz={36} fw={700} c="gray.9">Under Maintenance</Title>
+            <Text size="sm" c="gray.5">
               We're currently performing scheduled maintenance to improve your experience.
               Please check back shortly.
-            </p>
-            <p className="text-gray-400 text-xs mt-4">
+            </Text>
+            <Text size="xs" c="gray.4" mt="lg">
               Expected completion: TBD
-            </p>
-          </div>
+            </Text>
+          </Stack>
 
           <Button
-            className="w-full h-12"
+            fullWidth
+            size="lg"
             onClick={onBackToLogin || (() => window.location.hash = '')}
           >
             Back to Home
           </Button>
-        </CardContent>
+        </Stack>
       </Card>
     </div>
   );

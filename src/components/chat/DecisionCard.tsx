@@ -1,3 +1,6 @@
+import { Box, Text, Group, Button } from '@mantine/core';
+import classes from './DecisionCard.module.css';
+
 interface DecisionOption {
   label: string;
   value: string;
@@ -13,24 +16,22 @@ interface DecisionCardProps {
 
 export function DecisionCard({ question, options, onSelect, disabled = false }: DecisionCardProps) {
   return (
-    <div className="inline-flex flex-col bg-white border border-gray-300 rounded-lg px-4 py-3">
-      <p className="text-sm text-gray-900 mb-3">{question}</p>
-      <div className="flex items-center gap-2">
+    <Box className={classes.card}>
+      <Text size="sm" c="gray.9" mb="md">{question}</Text>
+      <Group gap="sm">
         {options.map((option) => (
-          <button
+          <Button
             key={option.value}
             onClick={() => !disabled && onSelect(option.value)}
             disabled={disabled}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              option.variant === 'primary'
-                ? 'bg-gray-900 text-white hover:bg-gray-700'
-                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-            } ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+            variant={option.variant === 'primary' ? 'filled' : 'default'}
+            color={option.variant === 'primary' ? 'gray.9' : undefined}
+            size="xs"
           >
             {option.label}
-          </button>
+          </Button>
         ))}
-      </div>
-    </div>
+      </Group>
+    </Box>
   );
 }

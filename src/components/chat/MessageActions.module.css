@@ -1,0 +1,12 @@
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.actions:hover,
+:global(.group):hover .actions {
+  opacity: 1;
+}

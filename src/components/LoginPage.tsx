@@ -1,6 +1,6 @@
 import type { UserProfile } from '../App';
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import { Button, Card, Stack, Title, Text } from '@mantine/core';
+import classes from './LoginPage.module.css';
 
 interface LoginPageProps {
     onLogin: (profile: UserProfile, skipOnboarding: boolean) => void;
@@ -18,68 +18,51 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     };
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
-            <Card className="w-full max-w-md">
-                <CardContent className="p-8 pb-10 space-y-6 text-center">
-                    <div className="space-y-2">
-                        <p className="text-gray-500 text-sm">
+        <div className={classes.page}>
+            <Card className={classes.card} withBorder shadow="md">
+                <Stack gap="xl" className={classes.cardContent}>
+                    <Stack gap="xs" align="center">
+                        <Text size="sm" c="gray.5">
                             Welcome to the
-                        </p>
-                        <h1 className="text-gray-900 text-2xl font-bold leading-tight">
+                        </Text>
+                        <Title order={1} fz={24} fw={700} c="gray.9" lh="tight">
                             AI Assistant Desk (MVP)
-                        </h1>
-                    </div>
+                        </Title>
+                    </Stack>
 
                     <Button
-                        className="w-full h-12"
+                        fullWidth
+                        size="lg"
                         onClick={handleWOGLogin}
                     >
                         Log In with TechPass
                     </Button>
 
-                    <p className="text-sm text-gray-500">
+                    <Text size="sm" c="gray.5">
                         Having trouble logging in?{' '}
                         <a
                             href="#"
-                            className="text-gray-900 hover:text-gray-700 underline"
+                            className={classes.supportLink}
                             onClick={(e) => e.preventDefault()}
                         >
                             Contact support
                         </a>
-                    </p>
-                </CardContent>
+                    </Text>
+                </Stack>
             </Card>
 
             {/* Security Warning */}
-            <div className="w-full max-w-md mt-6">
-                <p className="text-xs text-gray-400 text-center leading-relaxed">
+            <div className={classes.securityWarning}>
+                <Text size="xs" c="gray.4" ta="center" lh="relaxed">
                     This is an internal system used by the Singapore Government. Unauthorised use is strictly prohibited. If you are not authorised, please exit from the system immediately. The use of this system is subject to the Computer Misuse Act.
-                </p>
+                </Text>
             </div>
 
             {/* Error/Maintenance Page Links */}
-            <div className="absolute bottom-4 left-4 flex gap-3">
-                <a
-                    href="#/404"
-                    className="text-gray-300 hover:text-gray-500 underline transition-colors"
-                    style={{ fontSize: '8px' }}
-                >
-                    404
-                </a>
-                <a
-                    href="#/500"
-                    className="text-gray-300 hover:text-gray-500 underline transition-colors"
-                    style={{ fontSize: '8px' }}
-                >
-                    500
-                </a>
-                <a
-                    href="#/maintenance"
-                    className="text-gray-300 hover:text-gray-500 underline transition-colors"
-                    style={{ fontSize: '8px' }}
-                >
-                    Maintenance
-                </a>
+            <div className={classes.debugLinks}>
+                <a href="#/404" className={classes.debugLink}>404</a>
+                <a href="#/500" className={classes.debugLink}>500</a>
+                <a href="#/maintenance" className={classes.debugLink}>Maintenance</a>
             </div>
         </div>
     );

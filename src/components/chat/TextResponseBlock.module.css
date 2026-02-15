@@ -1,0 +1,13 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+  margin-bottom: var(--mantine-spacing-sm);
+}
+
+.content {
+  width: 100%;
+  font-size: var(--mantine-font-size-md);
+  line-height: 1.7;
+  color: var(--mantine-color-gray-9);
+}

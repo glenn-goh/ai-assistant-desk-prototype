@@ -1,11 +1,13 @@
+import { Stack, Skeleton, Box } from '@mantine/core';
+
 export function SkeletonLoader() {
   return (
-    <div className="flex justify-start">
-      <div className="max-w-[80%] space-y-3 py-3">
-        <div className="h-4 bg-gray-100 rounded animate-pulse w-3/4"></div>
-        <div className="h-4 bg-gray-100 rounded animate-pulse w-full"></div>
-        <div className="h-4 bg-gray-100 rounded animate-pulse w-5/6"></div>
-      </div>
-    </div>
+    <Box maw="80%" py="md">
+      <Stack gap="md">
+        <Skeleton height={16} width="75%" />
+        <Skeleton height={16} width="100%" />
+        <Skeleton height={16} width="83%" />
+      </Stack>
+    </Box>
   );
 }

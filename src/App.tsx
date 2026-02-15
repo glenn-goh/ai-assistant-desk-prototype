@@ -16,9 +16,10 @@ import { Error404Page } from './components/Error404Page';
 import { Error500Page } from './components/Error500Page';
 import { MaintenancePage } from './components/MaintenancePage';
 import { ColorTheme, FontStyle } from './components/PersonalizationDialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from './components/ui/alert-dialog';
+import { Modal, Button, Text, Box } from '@mantine/core';
 import { X } from 'lucide-react';
 import type { Project } from './types/project';
+import cls from './App.module.css';
 import type { Assistant } from './data/assistants';
 import { topRatedAssistants, essentialAssistants, roleBasedAssistants } from './data/assistants';
 import { featureOverviewData } from './data/feature-overview';
@@ -900,7 +901,7 @@ export default function App() {
   }
 
   return (
-    <div className={`flex h-screen ${isIncognitoMode ? 'bg-gray-900 pt-10 px-2 pb-2 relative' : 'bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 dark:bg-gradient-to-br dark:from-gray-900 dark:via-purple-950 dark:to-blue-950'}`}>
+    <div className={`${cls.appShell} ${isIncognitoMode ? cls.incognitoShell : cls.normalShell}`}>
       {/* White X button on dark padding for incognito mode */}
       {isIncognitoMode && (
         <button
@@ -911,9 +912,9 @@ export default function App() {
               handleCloseIncognito();
             }
           }}
-          className="absolute top-2 right-4 p-1.5 rounded-lg hover:bg-gray-800 transition-colors text-white z-10"
+          className={cls.incognitoCloseButton}
         >
-          <X className="w-5 h-5" />
+          <X size={20} />
         </button>
       )}
       {!isIncognitoMode && <ChatSidebar
@@ -980,7 +981,7 @@ export default function App() {
 
       {activeView === 'chat' ? (
         isSimulation && simulationData ? (
-          <div className="flex-1 flex flex-col">
+          <Box className={cls.contentArea}>
             <ChatSimulatorView
               key={activeChatId}
               mode="simulator"
@@ -997,9 +998,9 @@ export default function App() {
               onRemoveFromTools={handleRemoveFromTools}
               onReplaceToolAssistant={handleReplaceToolAssistant}
             />
-          </div>
+          </Box>
         ) : (
-          <div className={`flex-1 flex flex-col ${isIncognitoMode ? 'rounded-xl overflow-hidden' : ''}`}>
+          <Box className={`${cls.contentArea} ${isIncognitoMode ? cls.incognitoContent : ''}`}>
             <ChatSimulatorView
               key={activeChatId}
               mode="interactive"
@@ -1027,7 +1028,7 @@ export default function App() {
               onCommitRichContent={handleCommitRichContent}
               onNavigateToExplore={handleNavigateToExplore}
             />
-          </div>
+          </Box>
         )
       ) : activeView === 'explore' ? (
         <ExplorePage
@@ -1076,7 +1077,7 @@ export default function App() {
           onUpdateProject={handleUpdateProject}
         />
       ) : (
-        <div className={`flex-1 flex flex-col ${isIncognitoMode ? 'rounded-xl overflow-hidden' : ''}`}>
+        <Box className={`${cls.contentArea} ${isIncognitoMode ? cls.incognitoContent : ''}`}>
           <HomePage
             key={homeResetKey}
             colorTheme={colorTheme}
@@ -1091,9 +1092,9 @@ export default function App() {
             onIncognitoChange={setIsHomeIncognito}
             onNavigateToExplore={handleNavigateToExplore}
           />
-        </div>
+        </Box>
       )}
-      
+
       <PersonalizationDialog
         colorTheme={colorTheme}
         fontStyle={fontStyle}
@@ -1110,28 +1111,30 @@ export default function App() {
         onClose={() => setIsWalkthroughOpen(false)}
       />
 
-      <AlertDialog open={showExitIncognitoDialog} onOpenChange={setShowExitIncognitoDialog}>
-        <AlertDialogContent className="bg-white border-2 border-gray-900">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Exit incognito mode?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Your incognito chat will not be saved. Are you sure you want to exit?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowExitIncognitoDialog(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                setShowExitIncognitoDialog(false);
-                handleCloseIncognito();
-              }}
-              className="bg-gray-900 text-white hover:bg-gray-700"
-            >
-              Exit
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <Modal
+        opened={showExitIncognitoDialog}
+        onClose={() => setShowExitIncognitoDialog(false)}
+        title="Exit incognito mode?"
+        centered
+      >
+        <Text size="sm" c="gray.6" mb="md">
+          Your incognito chat will not be saved. Are you sure you want to exit?
+        </Text>
+        <Box style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--mantine-spacing-xs)' }}>
+          <Button variant="default" onClick={() => setShowExitIncognitoDialog(false)}>
+            Cancel
+          </Button>
+          <Button
+            color="dark"
+            onClick={() => {
+              setShowExitIncognitoDialog(false);
+              handleCloseIncognito();
+            }}
+          >
+            Exit
+          </Button>
+        </Box>
+      </Modal>
 
     </div>
   );

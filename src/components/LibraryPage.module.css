@@ -1,0 +1,25 @@
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mantine-color-gray-1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-lg);
+  background-color: var(--mantine-color-gray-1);
+}
+
+.scrollArea {
+  flex: 1;
+  overflow: auto;
+}
+
+.content {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: var(--mantine-spacing-xl) var(--mantine-spacing-xl) 2rem;
+}

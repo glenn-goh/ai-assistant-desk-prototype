@@ -1,0 +1,57 @@
+.page {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--mantine-color-gray-1);
+  padding: var(--mantine-spacing-lg);
+  position: relative;
+}
+
+.card {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.cardContent {
+  padding: 2rem;
+  padding-bottom: 2.5rem;
+  text-align: center;
+}
+
+.securityWarning {
+  width: 100%;
+  max-width: 28rem;
+  margin-top: var(--mantine-spacing-xl);
+}
+
+.debugLinks {
+  position: absolute;
+  bottom: var(--mantine-spacing-lg);
+  left: var(--mantine-spacing-lg);
+  display: flex;
+  gap: var(--mantine-spacing-md);
+}
+
+.debugLink {
+  color: var(--mantine-color-gray-3);
+  font-size: 8px;
+  text-decoration: underline;
+  transition: color 150ms ease;
+}
+
+.debugLink:hover {
+  color: var(--mantine-color-gray-5);
+}
+
+.supportLink {
+  color: var(--mantine-color-gray-9);
+  text-decoration: underline;
+  transition: color 150ms ease;
+}
+
+.supportLink:hover {
+  color: var(--mantine-color-gray-7);
+}

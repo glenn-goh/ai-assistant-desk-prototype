@@ -1,0 +1,97 @@
+.page {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mantine-color-gray-1);
+}
+
+.mainContent {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: center;
+}
+
+.innerContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: var(--max-w-chat, 48rem);
+  margin: 0 auto;
+  padding: 0 var(--mantine-spacing-lg);
+}
+
+.welcomeHeader {
+  padding-bottom: var(--mantine-spacing-xl);
+}
+
+.incognitoHint {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  margin-top: var(--mantine-spacing-xs);
+}
+
+.classificationRow {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-md);
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.classificationSelector {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.classificationSelect {
+  width: auto;
+}
+
+.selectOptionContent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-xs) 0;
+}
+
+.selectOptionIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.chatInputWrapper {
+  border-radius: var(--mantine-radius-lg);
+  border: 1px solid var(--mantine-color-gray-3);
+  background-color: white;
+}
+
+.promptSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--mantine-spacing-xs);
+  margin-top: var(--mantine-spacing-xl);
+  transition: opacity 150ms ease;
+}
+
+.promptSuggestionsHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.promptChip {
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  font-size: var(--mantine-font-size-sm);
+  border-radius: 9999px;
+  transition: background-color 150ms ease;
+  background-color: white;
+  border: 1px solid var(--mantine-color-gray-9);
+  color: var(--mantine-color-gray-9);
+  cursor: pointer;
+}
+
+.promptChip:hover {
+  background-color: var(--mantine-color-gray-1);
+}

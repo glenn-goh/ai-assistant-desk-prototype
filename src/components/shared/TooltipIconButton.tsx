@@ -1,8 +1,8 @@
 import React from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, ActionIcon } from '@mantine/core';
 
 interface TooltipIconButtonProps {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; size?: number }>;
   tooltip: string;
   onClick?: (e: React.MouseEvent) => void;
   side?: 'top' | 'right' | 'bottom' | 'left';
@@ -18,22 +18,22 @@ export function TooltipIconButton({
   onClick,
   side = 'top',
   delayDuration,
-  className = 'p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700',
-  iconClassName = 'w-5 h-5',
+  className,
+  iconClassName,
   disabled,
 }: TooltipIconButtonProps) {
   return (
-    <TooltipProvider delayDuration={delayDuration}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button onClick={onClick} className={className} disabled={disabled}>
-            <Icon className={iconClassName} />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side={side}>
-          <p>{tooltip}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <Tooltip label={tooltip} position={side} openDelay={delayDuration}>
+      <ActionIcon
+        onClick={onClick}
+        variant="subtle"
+        color="gray"
+        size="lg"
+        disabled={disabled}
+        className={className}
+      >
+        <Icon size={20} className={iconClassName} />
+      </ActionIcon>
+    </Tooltip>
   );
 }

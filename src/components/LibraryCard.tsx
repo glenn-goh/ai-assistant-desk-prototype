@@ -1,10 +1,8 @@
 import React from 'react';
 import { Folder, Cloud, Database, HardDrive, Trash2, Pencil, FolderOpen, Upload, FileText, X } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Button, TextInput, Select, Stack, Box, Group, Text, ActionIcon, Input } from '@mantine/core';
 import type { DataSource, UploadedFile } from './LibraryManager';
+import cls from './LibraryCard.module.css';
 
 interface LibraryCardProps {
   source: DataSource;
@@ -57,11 +55,10 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
     }
   }, [isEditingName]);
 
-  // Calculate width based on text content
   const getInputWidth = () => {
     const length = editedName.length || 1;
-    const charWidth = 8; // approximate character width in pixels
-    const padding = 24; // padding
+    const charWidth = 8;
+    const padding = 24;
     return Math.max(160, Math.min(length * charWidth + padding, 30 * charWidth + padding));
   };
 
@@ -89,169 +86,138 @@ export function LibraryCard({ source, showDelete, onRemove, onUpdate }: LibraryC
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  const typeOptions = [
+    { value: 'sharepoint', label: 'SharePoint' },
+    { value: 'gdrive', label: 'Google Drive' },
+    { value: 'aws', label: 'AWS S3' },
+    { value: 'local', label: 'Local' },
+    { value: 'upload', label: 'Upload' },
+  ];
+
   return (
-    <div className="space-y-4 p-6 border border-gray-300 rounded-lg bg-gray-100">
-      <div className="flex items-start justify-between">
-        <div className="flex-shrink-0" style={{ minWidth: '160px' }}>
+    <Stack gap="lg" className={cls.card}>
+      <Group justify="space-between" align="flex-start">
+        <Box style={{ flexShrink: 0, minWidth: 160 }}>
           {isEditingName ? (
-            <Input
+            <TextInput
               ref={inputRef}
               value={editedName}
               onChange={handleNameChange}
               onBlur={handleNameBlur}
               onKeyDown={handleNameKeyDown}
               maxLength={30}
-              className="h-8 px-2 bg-white border-gray-300"
+              size="xs"
               style={{ width: `${getInputWidth()}px` }}
             />
           ) : (
-            <button
-              onClick={handleNameClick}
-              className="flex items-center gap-2 group hover:bg-gray-200 px-2 py-1 rounded transition-colors"
-              style={{ minWidth: '160px' }}
-            >
-              <FolderOpen className="w-4 h-4 text-gray-500 flex-shrink-0" />
-              <span className="truncate">{source.name}</span>
-              <Pencil className="w-3.5 h-3.5 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+            <button onClick={handleNameClick} className={cls.nameButton}>
+              <FolderOpen size={16} color="var(--mantine-color-gray-5)" style={{ flexShrink: 0 }} />
+              <Text size="sm" lineClamp={1}>{source.name}</Text>
+              <Pencil size={14} color="var(--mantine-color-gray-5)" className={cls.editIcon} />
             </button>
           )}
-        </div>
+        </Box>
         {showDelete && (
-          <Button
-            variant="ghost"
+          <ActionIcon
+            variant="subtle"
+            color="red"
             size="sm"
             onClick={() => onRemove(source.id)}
-            className="ml-2 h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
           >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+            <Trash2 size={16} />
+          </ActionIcon>
         )}
-      </div>
+      </Group>
 
-      <div className="grid grid-cols-10 gap-4">
-        <div className="col-span-3">
-          <Label htmlFor={`type-${source.id}`} className="text-sm">Type</Label>
+      <Box className={cls.grid}>
+        <Box>
+          <Input.Label size="sm">Type</Input.Label>
           <Select
             value={source.type}
-            onValueChange={(value: 'sharepoint' | 'local' | 'aws' | 'gdrive' | 'upload') => onUpdate(source.id, 'type', value)}
-          >
-            <SelectTrigger className="mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sharepoint">
-                <div className="flex items-center gap-2">
-                  <Database className="w-4 h-4" />
-                  SharePoint
-                </div>
-              </SelectItem>
-              <SelectItem value="gdrive">
-                <div className="flex items-center gap-2">
-                  <HardDrive className="w-4 h-4" />
-                  Google Drive
-                </div>
-              </SelectItem>
-              <SelectItem value="aws">
-                <div className="flex items-center gap-2">
-                  <Cloud className="w-4 h-4" />
-                  AWS S3
-                </div>
-              </SelectItem>
-              <SelectItem value="local">
-                <div className="flex items-center gap-2">
-                  <FolderOpen className="w-4 h-4" />
-                  Local
-                </div>
-              </SelectItem>
-              <SelectItem value="upload">
-                <div className="flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
-                  Upload
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            onChange={(value) => value && onUpdate(source.id, 'type', value)}
+            data={typeOptions}
+            mt="sm"
+            size="sm"
+          />
+        </Box>
 
-        <div className="col-span-7">
+        <Box>
           {source.type === 'upload' ? (
-            <div>
-              <Label className="text-sm">Files</Label>
+            <Box>
+              <Input.Label size="sm">Files</Input.Label>
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-2 w-full"
+                mt="sm"
+                fullWidth
+                leftSection={<Upload size={16} />}
+                size="sm"
               >
-                <Upload className="w-4 h-4 mr-2" />
                 Upload Files
               </Button>
-            </div>
+            </Box>
           ) : (
-            <>
-              <Label htmlFor={`path-${source.id}`} className="text-sm">
+            <Box>
+              <Input.Label size="sm" htmlFor={`path-${source.id}`}>
                 URL or Connection
-              </Label>
-              <Input
+              </Input.Label>
+              <TextInput
                 id={`path-${source.id}`}
                 value={source.path}
-                onChange={(e) => onUpdate(source.id, 'path', e.target.value)}
+                onChange={(e) => onUpdate(source.id, 'path', e.currentTarget.value)}
                 placeholder={
                   source.type === 'sharepoint' ? 'https://yourorg.sharepoint.com' :
                     source.type === 'gdrive' ? 'https://drive.google.com/...' :
                       source.type === 'aws' ? 's3://bucket-name/path' :
                         '/Users/username/documents'
                 }
-                className="mt-2 bg-white border-gray-300"
+                mt="sm"
+                size="sm"
               />
-            </>
+            </Box>
           )}
-        </div>
-      </div>
+        </Box>
+      </Box>
 
       {source.type === 'upload' && (
-        <div className="mt-4">
-          <Input
+        <Box mt="lg">
+          <input
             ref={fileInputRef}
             type="file"
             multiple
             accept=".pdf,.doc,.docx,.txt"
             onChange={handleFileUpload}
-            className="hidden"
+            style={{ display: 'none' }}
           />
           {uploadedFiles.length > 0 ? (
-            <div className="space-y-2">
+            <Stack gap="sm">
               {uploadedFiles.map((file) => (
-                <div
-                  key={file.id}
-                  className="flex items-center justify-between gap-3 bg-white p-3 rounded border border-gray-300 hover:border-gray-500 transition-colors"
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm truncate">{file.name}</div>
-                      <div className="text-xs text-gray-500">
-                        {formatFileSize(file.size)}
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
+                <Box key={file.id} className={cls.fileRow}>
+                  <Box className={cls.fileInfo}>
+                    <FileText size={16} color="var(--mantine-color-gray-5)" style={{ flexShrink: 0 }} />
+                    <Box className={cls.fileDetails}>
+                      <Text size="sm" lineClamp={1}>{file.name}</Text>
+                      <Text size="xs" c="gray.5">{formatFileSize(file.size)}</Text>
+                    </Box>
+                  </Box>
+                  <ActionIcon
+                    variant="subtle"
+                    color="gray"
                     size="sm"
                     onClick={() => handleRemoveFile(file.id)}
-                    className="h-8 w-8 p-0 text-gray-500 hover:text-red-600 hover:bg-red-50 flex-shrink-0"
                   >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
+                    <X size={16} />
+                  </ActionIcon>
+                </Box>
               ))}
-            </div>
+            </Stack>
           ) : (
-            <div className="text-sm text-gray-500 italic py-2">
+            <Text size="sm" c="gray.5" fs="italic" py="sm">
               No files uploaded yet
-            </div>
+            </Text>
           )}
-        </div>
+        </Box>
       )}
-    </div>
+    </Stack>
   );
 }

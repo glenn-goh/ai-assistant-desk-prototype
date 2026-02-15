@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { TextInput } from '@mantine/core';
+import classes from './EditableText.module.css';
 
 interface EditableTextProps {
   value: string;
@@ -16,8 +18,8 @@ interface EditableTextProps {
 export function EditableText({
   value,
   onSave,
-  className = 'text-sm font-medium text-gray-900 cursor-pointer',
-  inputClassName = 'text-sm font-medium text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400',
+  className,
+  inputClassName,
   as: Tag = 'span',
   renderDisplay,
   editing: externalEditing,
@@ -61,18 +63,19 @@ export function EditableText({
 
   if (isEditing) {
     return (
-      <input
-        type="text"
+      <TextInput
         value={editValue}
-        onChange={(e) => setEditValue(e.target.value)}
+        onChange={(e) => setEditValue(e.currentTarget.value)}
         onBlur={save}
         onKeyDown={(e) => {
           if (e.key === 'Enter') save();
           else if (e.key === 'Escape') cancel();
         }}
         onClick={(e) => e.stopPropagation()}
-        className={inputClassName}
         autoFocus
+        size="sm"
+        className={inputClassName}
+        classNames={{ input: classes.input }}
       />
     );
   }
@@ -83,7 +86,7 @@ export function EditableText({
 
   return (
     <Tag
-      className={className}
+      className={className || classes.display}
       onDoubleClick={startEditing}
       title="Double-click to rename"
     >

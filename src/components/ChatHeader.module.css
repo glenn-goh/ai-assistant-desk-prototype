@@ -1,0 +1,78 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  background-color: var(--mantine-color-gray-1);
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.titleArea {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-sm);
+  flex: 1;
+}
+
+.incognitoLabel {
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+}
+
+.titleColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.subtitleButton {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-gray-5);
+  transition: color 150ms ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.subtitleButton:hover {
+  color: var(--mantine-color-gray-7);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tempIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--mantine-font-size-xs);
+  background-color: var(--mantine-color-gray-1);
+  color: var(--mantine-color-gray-7);
+  padding: 4px var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-md);
+}
+
+.ellipsisButton {
+  padding: 6px;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease, color 150ms ease;
+  color: var(--mantine-color-gray-5);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.ellipsisButton:hover {
+  background-color: var(--mantine-color-gray-1);
+  color: var(--mantine-color-gray-7);
+}

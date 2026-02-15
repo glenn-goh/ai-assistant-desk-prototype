@@ -1,10 +1,7 @@
-import React from 'react';
-import { Plus, Folder, Cloud, Database, HardDrive, Trash2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Plus } from 'lucide-react';
+import { Button, Stack, Text } from '@mantine/core';
 import { LibraryCard } from './LibraryCard';
+import cls from './LibraryManager.module.css';
 
 export interface DataSource {
   id: string;
@@ -30,32 +27,22 @@ interface LibraryManagerProps {
   showDescription?: boolean;
 }
 
-export function LibraryManager({ 
-  dataSources, 
-  onAdd, 
-  onRemove, 
+export function LibraryManager({
+  dataSources,
+  onAdd,
+  onRemove,
   onUpdate,
-  showDescription = true 
+  showDescription = true
 }: LibraryManagerProps) {
-  const getIconForType = (type: string) => {
-    switch (type) {
-      case 'sharepoint': return <Database className="w-4 h-4" />;
-      case 'local': return <Folder className="w-4 h-4" />;
-      case 'aws': return <Cloud className="w-4 h-4" />;
-      case 'gdrive': return <HardDrive className="w-4 h-4" />;
-      default: return <Folder className="w-4 h-4" />;
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <Stack gap="xl">
       {showDescription && (
-        <p className="text-gray-500 text-sm">
+        <Text size="sm" c="gray.5">
           Create a library to organize documents by topic or project. Your AI assistant will reference these documents to provide contextual responses. You can connect cloud sources or upload files directly.
-        </p>
+        </Text>
       )}
 
-      <div className="space-y-4">
+      <Stack gap="lg">
         {dataSources.map((source) => (
           <LibraryCard
             key={source.id}
@@ -69,12 +56,12 @@ export function LibraryManager({
         <Button
           variant="outline"
           onClick={onAdd}
-          className="w-full border-dashed border-2 border-gray-300 hover:border-gray-900 hover:bg-gray-100 text-gray-500"
+          className={cls.addButton}
+          leftSection={<Plus size={16} />}
         >
-          <Plus className="w-4 h-4 mr-2" />
           Add Another Library
         </Button>
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }

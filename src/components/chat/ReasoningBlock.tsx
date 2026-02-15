@@ -9,6 +9,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
+import classes from './ReasoningBlock.module.css';
 
 // ---------- Icon map (5 curated icons) ----------
 
@@ -109,12 +110,12 @@ function resolveStatus(
 
 // ---------- Sub-components ----------
 
-function StepIcon({ iconName, className }: { iconName?: string; className?: string }) {
+function StepIcon({ iconName }: { iconName?: string }) {
   const IconComponent = iconName ? ICON_MAP[iconName] : null;
   if (IconComponent) {
-    return <IconComponent className={className || 'w-3.5 h-3.5 text-gray-400 shrink-0'} />;
+    return <IconComponent size={14} color="var(--mantine-color-gray-4)" style={{ flexShrink: 0 }} />;
   }
-  return <span className="w-1.5 h-1.5 rounded-full bg-gray-300 shrink-0 mt-1.5" />;
+  return <span className={classes.bulletDot} />;
 }
 
 function StepItem({
@@ -126,27 +127,27 @@ function StepItem({
   isLastLive?: boolean;
   showConnector?: boolean;
 }) {
-  const shimmerClass = isLastLive ? 'shimmer-text' : '';
+  const shimmerClass = isLastLive ? classes.shimmerText : '';
 
   const iconCol = (iconName?: string) => (
-    <div className="flex flex-col items-center w-5 shrink-0 pt-1">
-      <StepIcon iconName={iconName} className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-      {showConnector && <div className="flex-1 w-px bg-gray-200 mt-1" />}
+    <div className={classes.iconCol}>
+      <StepIcon iconName={iconName} />
+      {showConnector && <div className={classes.connector} />}
     </div>
   );
 
   if (step.type === 'tool_call') {
     return (
-      <div className="flex items-stretch gap-2">
+      <div className={classes.stepRow}>
         {iconCol(step.icon || 'database')}
-        <div className="text-sm text-gray-500 pt-0.5">
-          <span className="font-semibold">{step.toolName || 'Tool'}</span>
-          {step.content && <span className="ml-1">{step.content}</span>}
+        <div className={`${classes.stepContent} ${classes.stepRowText}`}>
+          <span className={classes.stepBold}>{step.toolName || 'Tool'}</span>
+          {step.content && <span style={{ marginLeft: 4 }}>{step.content}</span>}
           {step.description && (
-            <p className="text-sm text-gray-500 mt-0.5 pb-5 leading-relaxed">{step.description}</p>
+            <p className={classes.stepDescription}>{step.description}</p>
           )}
           {step.toolResult && (
-            <div className="mt-1 text-xs text-gray-400 line-clamp-2">{step.toolResult}</div>
+            <div className={classes.stepResult}>{step.toolResult}</div>
           )}
         </div>
       </div>
@@ -155,19 +156,19 @@ function StepItem({
 
   if (step.type === 'assistant_call') {
     return (
-      <div className="flex items-stretch gap-2">
+      <div className={classes.stepRow}>
         {iconCol('bot')}
-        <div className="text-sm text-gray-500 pt-0.5">
-          <span className="font-semibold">{step.assistantName || 'Assistant'}</span>
-          {step.assistantTask && <span className="ml-1">— {step.assistantTask}</span>}
+        <div className={`${classes.stepContent} ${classes.stepRowText}`}>
+          <span className={classes.stepBold}>{step.assistantName || 'Assistant'}</span>
+          {step.assistantTask && <span style={{ marginLeft: 4 }}>— {step.assistantTask}</span>}
           {step.description && (
-            <p className="text-sm text-gray-500 mt-0.5 pb-5 leading-relaxed">{step.description}</p>
+            <p className={classes.stepDescription}>{step.description}</p>
           )}
           {step.assistantResult && (
-            <div className="mt-1 text-xs text-gray-400 line-clamp-2">{step.assistantResult}</div>
+            <div className={classes.stepResult}>{step.assistantResult}</div>
           )}
           {step.childSteps && step.childSteps.length > 0 && (
-            <div className="mt-1 ml-2 border-l-2 border-gray-200 pl-3 space-y-1">
+            <div className={classes.childSteps}>
               {step.childSteps.map((child, ci) => (
                 <StepItem
                   key={child.id}
@@ -184,12 +185,12 @@ function StepItem({
 
   // reasoning step
   return (
-    <div className="flex items-stretch gap-2 text-sm text-gray-500">
+    <div className={`${classes.stepRow} ${classes.stepRowText}`}>
       {iconCol(step.icon)}
-      <div className="pt-0.5">
-        <span className={`font-semibold ${shimmerClass}`}>{step.content}</span>
+      <div className={classes.stepContent}>
+        <span className={`${classes.stepBold} ${shimmerClass}`}>{step.content}</span>
         {step.description && (
-          <p className="text-sm text-gray-500 mt-0.5 pb-5 leading-relaxed">{step.description}</p>
+          <p className={classes.stepDescription}>{step.description}</p>
         )}
       </div>
     </div>
@@ -217,35 +218,30 @@ export function ReasoningBlock({
   const isThinking = resolvedStatus === 'thinking';
 
   return (
-    <div className="flex flex-col mb-4">
+    <div className={classes.wrapper}>
       {/* Summary Bar — plain text + arrow when collapsed */}
       <button
         onClick={() => onToggle(id)}
         aria-expanded={isExpanded}
-        className="flex items-center gap-2 w-full py-1 text-left hover:opacity-80 transition-opacity"
+        className={classes.summaryButton}
       >
         {/* Tags */}
         {!isThinking && tags && tags.length > 0 && (
-          <span className="flex items-center gap-1.5 shrink-0">
+          <span className={classes.tagsGroup}>
             {tags.map((tag, i) => (
-              <span
-                key={i}
-                className="text-xs font-medium text-gray-500 bg-gray-100 border border-gray-300 rounded-full px-2.5 py-0.5 whitespace-nowrap"
-              >
-                {tag}
-              </span>
+              <span key={i} className={classes.tag}>{tag}</span>
             ))}
           </span>
         )}
 
         {/* Summary text — shimmer when thinking */}
-        <span className={`text-base font-medium italic text-gray-500 truncate min-w-0 ${isThinking ? 'shimmer-text' : ''}`}>
+        <span className={`${classes.summaryText} ${isThinking ? classes.shimmerText : ''}`}>
           {resolvedSummary}{!isThinking && resolvedSteps.length > 0 ? ` (${resolvedSteps.length} steps)` : ''}
         </span>
 
         {/* Chevron */}
-        <span className="shrink-0 text-gray-400 transition-transform duration-200" style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
-          <ChevronRight className="w-4 h-4" />
+        <span className={classes.chevron} style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}>
+          <ChevronRight size={16} />
         </span>
 
       </button>
@@ -254,11 +250,10 @@ export function ReasoningBlock({
       <div
         role="region"
         aria-hidden={!isExpanded}
-        className="grid transition-[grid-template-rows] duration-300 ease-in-out"
-        style={{ gridTemplateRows: isExpanded ? '1fr' : '0fr' }}
+        className={`${classes.detailPanel} ${isExpanded ? classes.detailPanelOpen : classes.detailPanelClosed}`}
       >
-        <div className="overflow-hidden">
-          <div className="mt-2 p-5 bg-white rounded-lg border border-gray-300">
+        <div className={classes.detailPanelInner}>
+          <div className={classes.detailContent}>
             {resolvedSteps.length > 0 && (
               <div>
                 {resolvedSteps.map((step, i) => (
@@ -273,22 +268,22 @@ export function ReasoningBlock({
             )}
 
             {/* Final status step — "Done" or "Failed" as last timeline item */}
-            <div className="flex items-center gap-2" aria-live="polite">
+            <div className={classes.statusRow} aria-live="polite">
               {isThinking ? (
-                <span className="text-sm text-gray-400 shimmer-text ml-7">Thinking...</span>
+                <span className={`${classes.statusThinking} ${classes.shimmerText}`}>Thinking...</span>
               ) : resolvedStatus === 'done' ? (
                 <>
-                  <div className="flex items-center justify-center w-5 shrink-0">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                  <div className={classes.statusIconCol}>
+                    <CheckCircle2 size={14} color="var(--mantine-color-gray-4)" />
                   </div>
-                  <span className="text-sm text-gray-500 font-medium">Done</span>
+                  <span className={classes.statusDone}>Done</span>
                 </>
               ) : (
                 <>
-                  <div className="flex items-center justify-center w-5 shrink-0">
-                    <AlertTriangle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <div className={classes.statusIconCol}>
+                    <AlertTriangle size={14} color="var(--mantine-color-red-5)" />
                   </div>
-                  <span className="text-sm text-red-500 font-medium">Failed</span>
+                  <span className={classes.statusError}>Failed</span>
                 </>
               )}
             </div>

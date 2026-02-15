@@ -1,5 +1,5 @@
 import React from 'react';
-import { Label } from '../ui/label';
+import { Stack, Input, Text } from '@mantine/core';
 
 interface FormFieldProps {
   label: string;
@@ -19,12 +19,12 @@ export function FormField({
   labelClassName,
 }: FormFieldProps) {
   return (
-    <div className={className || 'space-y-2'}>
-      <Label htmlFor={htmlFor} className={labelClassName}>{label}</Label>
+    <Stack gap="xs" className={className}>
+      <Input.Label htmlFor={htmlFor} className={labelClassName}>{label}</Input.Label>
       {helperText && (
-        <p className="text-sm text-gray-500">{helperText}</p>
+        <Text size="sm" c="gray.5">{helperText}</Text>
       )}
       {children}
-    </div>
+    </Stack>
   );
 }

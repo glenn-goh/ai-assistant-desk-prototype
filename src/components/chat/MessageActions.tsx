@@ -1,5 +1,6 @@
 import { Copy, ThumbsUp, ThumbsDown } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Tooltip, ActionIcon, Group } from '@mantine/core';
+import classes from './MessageActions.module.css';
 
 interface MessageActionsProps {
   messageId: string;
@@ -19,48 +20,37 @@ export function MessageActions({
   onFeedback,
 }: MessageActionsProps) {
   return (
-    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => onCopy(messageId, content)}
-              className="p-1.5 hover:bg-gray-100 rounded"
-            >
-              <Copy className="w-4 h-4 text-gray-400" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Copy</p>
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => onFeedback(messageId, 'up')}
-              className={`p-1.5 hover:bg-gray-100 rounded ${feedbackState[messageId] === 'up' ? 'text-green-600' : 'text-gray-400'}`}
-            >
-              <ThumbsUp className="w-4 h-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Good response</p>
-          </TooltipContent>
-        </Tooltip>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              onClick={() => onFeedback(messageId, 'down')}
-              className={`p-1.5 hover:bg-gray-100 rounded ${feedbackState[messageId] === 'down' ? 'text-red-600' : 'text-gray-400'}`}
-            >
-              <ThumbsDown className="w-4 h-4" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Bad response</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
+    <Group className={classes.actions} gap="xs">
+      <Tooltip label="Copy">
+        <ActionIcon
+          onClick={() => onCopy(messageId, content)}
+          variant="subtle"
+          color="gray"
+          size="sm"
+        >
+          <Copy size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Good response">
+        <ActionIcon
+          onClick={() => onFeedback(messageId, 'up')}
+          variant="subtle"
+          color={feedbackState[messageId] === 'up' ? 'green' : 'gray'}
+          size="sm"
+        >
+          <ThumbsUp size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Bad response">
+        <ActionIcon
+          onClick={() => onFeedback(messageId, 'down')}
+          variant="subtle"
+          color={feedbackState[messageId] === 'down' ? 'red' : 'gray'}
+          size="sm"
+        >
+          <ThumbsDown size={16} />
+        </ActionIcon>
+      </Tooltip>
+    </Group>
   );
 }

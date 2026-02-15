@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FileText, X, ArrowLeft, Copy, Download, Check, Undo2, Redo2 } from 'lucide-react';
-import { MessageInput } from './MessageInput';
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from './ui/resizable';
+import { FileText, X, ArrowLeft, Copy, Download, Check, Undo2, Redo2, GripVerticalIcon } from 'lucide-react';
+import { Button, Text, Box } from '@mantine/core';
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 import type { ImperativePanelHandle } from 'react-resizable-panels';
-import { Button } from './ui/button';
+import { MessageInput } from './MessageInput';
 import { TooltipIconButton, EditableText } from './shared';
 import type { Project } from '../types/project';
 import { ChatHeader } from './ChatHeader';
@@ -17,6 +17,7 @@ import { SkeletonLoader } from './chat/SkeletonLoader';
 import MermaidDiagram from './MermaidDiagram';
 import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
 import { getAssistantByName } from '../data/assistants';
+import cls from './ChatSimulatorView.module.css';
 
 // Type definitions
 interface ChatSimulation {
@@ -57,9 +58,9 @@ interface ThinkingResponse {
   type: "thinking";
   thoughts: string[];
   timingMs?: number;
-  reasoning?: Array<string | { text: string; icon: string; description?: string }>; // Detailed reasoning steps for expandable view
-  doneSummary?: string; // Summary shown when reasoning is done
-  tags?: string[]; // Pills shown next to done summary (e.g. ["3 tools used"])
+  reasoning?: Array<string | { text: string; icon: string; description?: string }>;
+  doneSummary?: string;
+  tags?: string[];
 }
 
 interface AssistantSwitchResponse {
@@ -94,13 +95,11 @@ interface InteractiveMessage {
 }
 
 interface ChatSimulatorProps {
-  // Simulator mode props
   data?: ChatSimulation;
   onFormSubmit?: (formData: any, artifactTitle: string) => void;
   onComplete?: () => void;
   onToggleSidebar?: () => void;
   onBack?: () => void;
-  // Interactive mode props
   mode?: 'simulator' | 'interactive';
   interactiveMessages?: InteractiveMessage[];
   onSendMessage?: (message: string, isTemporary?: boolean) => void;
@@ -119,9 +118,8 @@ interface ChatSimulatorProps {
   onRemoveFromTools?: (assistantId: string) => void;
   onReplaceToolAssistant?: (oldAssistantId: string, newAssistantId: string) => void;
   assistantType?: string;
-  assistantName?: string; // Display name of the custom assistant being used
-  onFirstUserMessage?: () => void; // Called when the first user message appears (simulator mode)
-  // Rich interactive response props
+  assistantName?: string;
+  onFirstUserMessage?: () => void;
   pendingBotResponses?: BotResponse[];
   onDecisionMade?: (value: string) => void;
   onRichResponseComplete?: () => void;
@@ -209,36 +207,22 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [awaitingDecision, setAwaitingDecision] = useState(false);
   const richResponseAbortRef = useRef(false);
 
-  // Lo-fi grayscale theme
-  const theme = {
-    primary: 'bg-gray-900 hover:bg-gray-700',
-    light: 'bg-gray-100',
-    border: 'border-gray-300',
-    text: 'text-gray-900',
-    accent: 'bg-gray-700',
-    ring: 'focus:ring-gray-500'
-  };
-
   // Animate right panel open/close
-  // Open: expand panel → wait for animation → fade in content
-  // Close: hide content instantly → collapse panel
   useEffect(() => {
     const panel = rightPanelRef.current;
     if (!panel) return;
     if (showOutputPanel) {
       panel.expand();
-      // Fade in content after panel expand animation (200ms)
       const timer = setTimeout(() => setPanelContentVisible(true), 220);
       return () => clearTimeout(timer);
     } else {
-      // Hide content instantly, then collapse
       setPanelContentVisible(false);
       const timer = setTimeout(() => panel.collapse(), 10);
       return () => clearTimeout(timer);
     }
   }, [showOutputPanel]);
 
-  // Scroll user's message to top when they send a message (not when assistant replies)
+  // Scroll user's message to top when they send a message
   useEffect(() => {
     if (shouldScrollToBottom.current) {
       setTimeout(() => {
@@ -248,21 +232,18 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     }
   }, [displayedMessages, interactiveMessages]);
 
-  // Calculate spacer height: container - lastUserMessage - assistantContent - header - gap
+  // Calculate spacer height
   useEffect(() => {
     const calculateSpacer = () => {
       if (!messagesContainerRef.current) return;
-
       const containerHeight = messagesContainerRef.current.clientHeight;
       const headerHeight = 52;
       const gap = 16;
       const lastUserHeight = lastUserMessageRef.current?.offsetHeight || 0;
       const assistantHeight = assistantContentRef.current?.offsetHeight || 0;
-
       const calculated = containerHeight - lastUserHeight - assistantHeight - headerHeight - gap;
       setSpacerHeight(Math.max(0, calculated));
     };
-
     calculateSpacer();
     const timer = setTimeout(calculateSpacer, 50);
     window.addEventListener('resize', calculateSpacer);
@@ -308,54 +289,36 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   }, [selectedArtifact]);
 
   const handleFormSubmit = (formData: any, artifactTitle: string) => {
-    // Close the artifact viewer
     setSelectedArtifact(null);
-
-    // Add a message showing form was submitted
-    setDisplayedMessages(prev => [...prev, {
-      role: 'user',
-      text: 'Form submitted ✓'
-    }]);
-
-    // Call external handler if provided
+    setDisplayedMessages(prev => [...prev, { role: 'user', text: 'Form submitted ✓' }]);
     if (onFormSubmit) {
       onFormSubmit(formData, artifactTitle);
     } else {
-      // Default behavior: show acknowledgment
       setTimeout(async () => {
         setShowThinkingDots(true);
-        await sleep(1333); // 1.5x faster: was 2000
+        await sleep(1333);
         setShowThinkingDots(false);
-
         setDisplayedMessages(prev => [...prev, {
           type: 'text',
           content: `Thank you for submitting the form! I've received your information and will process it accordingly.`
         }]);
-
-        // Move to next message if available
         setCurrentMessageIndex(prev => prev + 1);
-      }, 333); // 1.5x faster: was 500
+      }, 333);
     }
   };
 
-  // Track whether we've already fired the first user message callback
   const hasFiredFirstUserMessage = useRef(false);
 
-  // Handle message send from MessageInput (simulator only)
   const handleSendMessage = (text: string) => {
     if (!data) return;
     if (currentMessageIndex >= data.messages.length) return;
-
     const currentMsg = data.messages[currentMessageIndex];
     if (currentMsg.role !== 'user') return;
-
     const targetText = (currentMsg.content as UserMessage).text;
-
     if (!hasFiredFirstUserMessage.current) {
       hasFiredFirstUserMessage.current = true;
       onFirstUserMessage?.();
     }
-
     shouldScrollToBottom.current = true;
     setIsTyping(false);
     setDisplayedMessages(prev => [...prev, { role: 'user', text: targetText }]);
@@ -363,7 +326,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     setCurrentMessageIndex(prev => prev + 1);
   };
 
-  // Get the current target text for typing simulation (simulator only)
   const getCurrentTargetText = () => {
     if (isInteractive || !data) return undefined;
     if (currentMessageIndex >= data.messages.length) return undefined;
@@ -376,15 +338,10 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   useEffect(() => {
     if (isInteractive || !data) return;
     if (currentMessageIndex >= data.messages.length) return;
-
     const currentMsg = data.messages[currentMessageIndex];
-
     if (currentMsg.role === 'user') {
       const userContent = currentMsg.content as UserMessage;
-
-      // Check if this is an auto-send message
       if (userContent.autoSend && userContent.text) {
-        // Automatically send this message
         setTimeout(() => {
           if (!hasFiredFirstUserMessage.current) {
             hasFiredFirstUserMessage.current = true;
@@ -394,45 +351,35 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           setCurrentMessageIndex(prev => prev + 1);
         }, 500);
       } else if (userContent.formSubmission) {
-        // Handle form submission (existing behavior)
         setCurrentMessageIndex(prev => prev + 1);
       } else {
-        // Normal user typing
         setIsTyping(true);
       }
     } else {
-      // Bot message
       const responses = currentMsg.content as BotResponse[];
       processBotResponses(responses);
     }
   }, [currentMessageIndex, isInteractive, data]);
 
   const processBotResponses = async (responses: BotResponse[]) => {
-    // Show thinking dots
     setShowThinkingDots(true);
-    await sleep(1000); // 1.5x faster: was 1500
+    await sleep(1000);
     setShowThinkingDots(false);
-
     for (const response of responses) {
       if (response.type === 'thinking') {
         await processThinkingResponse(response);
       } else if (response.type === 'assistantSwitch') {
-        // Show searching state
         setSearchingAssistant(true);
-        await sleep(1333); // 1.5x faster: was 2000
+        await sleep(1333);
         setSearchingAssistant(false);
-
-        // Show final "Switched to" state
         setDisplayedMessages(prev => [...prev, { type: 'assistantSwitch', message: response.message }]);
-        await sleep(333); // 1.5x faster: was 500
+        await sleep(333);
       } else if (response.type === 'text') {
-        await sleep(response.delayMs ? response.delayMs / 1.5 : 667); // 1.5x faster: default was 1000
+        await sleep(response.delayMs ? response.delayMs / 1.5 : 667);
         setDisplayedMessages(prev => [...prev, { type: 'text', content: response.content }]);
       } else if (response.type === 'artifact') {
-        await sleep(response.delayMs ? response.delayMs / 1.5 : 667); // 1.5x faster: default was 1000
+        await sleep(response.delayMs ? response.delayMs / 1.5 : 667);
         setDisplayedMessages(prev => [...prev, { type: 'artifact', data: response }]);
-        // Only auto-open and select artifact when panel is not already open
-        // If panel is open, keep showing the user's current selection
         setShowOutputPanel(prev => {
           if (!prev) {
             setSelectedArtifact(response);
@@ -441,29 +388,20 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         });
       }
     }
-
     setCurrentMessageIndex(prev => prev + 1);
   };
 
   const processThinkingResponse = async (response: ThinkingResponse) => {
-    const timing = (response.timingMs || 1500) / 1.5; // 1.5x faster
-
-    // Get reasoning array
+    const timing = (response.timingMs || 1500) / 1.5;
     const reasoning = response.reasoning || [];
-
-    // Show reasoning progressively
     for (let i = 0; i < reasoning.length; i++) {
       setCurrentReasoning(prev => [...prev, reasoning[i]]);
       await sleep(timing / reasoning.length);
     }
-
-    // Show the thought if provided
     if (response.thought) {
       setCurrentThought(response.thought);
       await sleep(500);
     }
-
-    // Save the thought and reasoning to messages (stays visible)
     setDisplayedMessages(prev => [...prev, {
       type: 'thinking',
       thought: response.thought || '',
@@ -471,30 +409,23 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       doneSummary: response.doneSummary,
       tags: response.tags
     }]);
-
     setCurrentThought("");
     setCurrentReasoning([]);
   };
 
-  // Process rich bot responses for interactive mode
   const processInteractiveBotResponses = async (responses: BotResponse[]) => {
     setIsProcessingRichResponse(true);
     richResponseAbortRef.current = false;
-
-    // Show initial thinking dots
     setShowThinkingDots(true);
     await sleep(800);
     if (richResponseAbortRef.current) return;
     setShowThinkingDots(false);
-
     for (let i = 0; i < responses.length; i++) {
       const response = responses[i];
       if (richResponseAbortRef.current) return;
-
       if (response.type === 'thinking') {
         await processThinkingResponse(response);
         if (richResponseAbortRef.current) return;
-        // Check if next response is a decision — if so, mark thinking as pending (no "Done" yet)
         const nextIsDecision = i + 1 < responses.length && responses[i + 1].type === 'decision';
         setInteractiveDisplayedMessages(prev => [...prev, {
           type: 'thinking',
@@ -505,7 +436,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           pending: nextIsDecision,
         }]);
       } else if (response.type === 'decision') {
-        // Render decision card and pause — wait for user click
         setInteractiveDisplayedMessages(prev => [...prev, {
           type: 'decision',
           question: response.question,
@@ -513,7 +443,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         }]);
         setAwaitingDecision(true);
         setIsProcessingRichResponse(false);
-        return; // Stop processing — will resume via new pendingBotResponses
+        return;
       } else if (response.type === 'text') {
         await sleep(response.delayMs ? response.delayMs / 1.5 : 500);
         if (richResponseAbortRef.current) return;
@@ -530,39 +460,31 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         setInteractiveDisplayedMessages(prev => [...prev, { type: 'mermaid', chart: response.chart }]);
       }
     }
-
     setIsProcessingRichResponse(false);
     onRichResponseComplete?.();
   };
 
   const handleDecisionSelect = (value: string) => {
     setAwaitingDecision(false);
-
-    // Find the label before removing the card
     const option = interactiveDisplayedMessages
       .filter((m: any) => m.type === 'decision')
       .flatMap((m: any) => m.options)
       .find((o: any) => o.value === value);
     const label = option?.label || value;
-
-    // Remove decision card, mark pending thinking blocks as done, add user's selection bubble
     setInteractiveDisplayedMessages(prev => [
       ...prev
         .filter((m: any) => m.type !== 'decision')
         .map((m: any) => m.type === 'thinking' && m.pending ? { ...m, pending: false } : m),
       { type: 'userDecision', text: label },
     ]);
-
     onDecisionMade?.(value);
   };
 
-  // Process pending bot responses when they change (interactive mode)
   useEffect(() => {
     if (!isInteractive || !pendingBotResponses || pendingBotResponses.length === 0) return;
     processInteractiveBotResponses(pendingBotResponses);
   }, [pendingBotResponses]);
 
-  // Auto-select artifact when it appears in interactive displayed messages
   useEffect(() => {
     if (!isInteractive) return;
     const latestArtifact = [...interactiveDisplayedMessages].reverse().find(m => m.type === 'artifact');
@@ -572,7 +494,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     }
   }, [interactiveDisplayedMessages]);
 
-  // Clear interactive rich response state on chat switch (skip initial mount)
   const isInitialMount = useRef(true);
   useEffect(() => {
     if (isInitialMount.current) {
@@ -593,18 +514,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const toggleThinkingExpanded = (idx: number) => {
     setExpandedThinkingIds(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(idx)) {
-        newSet.delete(idx);
-      } else {
-        newSet.add(idx);
-      }
+      if (newSet.has(idx)) newSet.delete(idx);
+      else newSet.add(idx);
       return newSet;
     });
   };
 
   const handleCopyArtifact = async () => {
     if (selectedArtifact) {
-      // Strip HTML tags for plain text copy
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = selectedArtifact.content;
       const textContent = tempDiv.textContent || tempDiv.innerText || '';
@@ -633,7 +550,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
   const handleDownloadDocx = () => {
     if (selectedArtifact) {
-      // Create a simple HTML document that Word can open
       const htmlContent = `
         <!DOCTYPE html>
         <html>
@@ -675,7 +591,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
   const handleNextVersion = () => {
     if (selectedArtifact) {
-      // Simulate max 3 versions
       const current = getCurrentVersion();
       if (current < 3) {
         setArtifactVersions(prev => ({
@@ -687,17 +602,15 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   };
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-full bg-gray-50">
+    <PanelGroup direction="horizontal" className={cls.panelGroup}>
       {/* Chat Area */}
-      <ResizablePanel defaultSize={100} minSize={30}>
-        <div className="flex-1 flex flex-col h-full relative">
+      <Panel defaultSize={100} minSize={30}>
+        <Box className={cls.chatColumn}>
         {/* Copy Toast */}
         {showCopyToast && (
-          <div className="absolute left-1/2 -translate-x-1/2 z-50" style={{ top: 'calc(44px + 16px)' }}>
-            <div className="bg-gray-900 text-white text-sm px-3 py-1.5 rounded-lg shadow-lg animate-in fade-in duration-200">
-              Copied
-            </div>
-          </div>
+          <Box className={cls.copyToast}>
+            <Box className={cls.copyToastInner}>Copied</Box>
+          </Box>
         )}
         {/* Chat Header */}
         <ChatHeader
@@ -727,10 +640,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         />
 
         {/* Messages */}
-        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-6 py-4 bg-gray-50">
-          <div className="max-w-chat mx-auto space-y-8">
+        <Box ref={messagesContainerRef} className={cls.messagesArea}>
+          <Box className={cls.messagesInner}>
           {isInteractive ? (
-            /* Interactive mode - render real chat messages */
             (() => {
               const lastUserIdx = interactiveMessages.map(m => m.role).lastIndexOf('user');
               const messagesUpToLastUser = lastUserIdx >= 0 ? interactiveMessages.slice(0, lastUserIdx + 1) : interactiveMessages;
@@ -738,18 +650,17 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
               return (
                 <>
-                  {/* Messages up to and including last user message */}
                   {messagesUpToLastUser.map((msg, idx) => (
-                    <div key={msg.id} className="group">
+                    <div key={msg.id} className={cls.messageGroup}>
                       {msg.role === 'user' ? (
                         <div
                           ref={idx === lastUserIdx ? lastUserMessageRef : null}
-                          className="flex flex-col items-end ml-24"
+                          className={cls.userMessageWrapper}
                         >
-                          <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                          <div className={cls.userBubble}>
                             {msg.content}
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                          <div className={cls.userActions}>
                             <TooltipIconButton
                               icon={Copy}
                               tooltip="Copy"
@@ -760,7 +671,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                           </div>
                         </div>
                       ) : msg.richContent ? (
-                        <div className="space-y-8">
+                        <div className={cls.richContentGroup}>
                           {msg.richContent.map((rich: any, ridx: number) => (
                             <div key={`${msg.id}-rich-${ridx}`}>
                               {rich.type === 'thinking' && (
@@ -784,9 +695,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                                 />
                               )}
                               {rich.type === 'mermaid' && (
-                                <div className="my-4 bg-white rounded-xl border border-gray-200 p-4 inline-block" style={{ maxWidth: '400px' }}>
+                                <Box className={cls.mermaidWrapper}>
                                   <MermaidDiagram chart={rich.chart} maxWidth="400px" />
-                                </div>
+                                </Box>
                               )}
                               {rich.type === 'artifact' && (
                                 <ArtifactCard
@@ -811,15 +722,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                           onCopy={handleCopyMessage}
                           onFeedback={handleFeedback}
                         />
-                )}
+                      )}
                     </div>
                   ))}
 
-                  {/* Assistant content after last user message + rich responses */}
                   {(messagesAfterLastUser.length > 0 || interactiveDisplayedMessages.length > 0 || currentThought || currentReasoning.length > 0 || showThinkingDots) && (
-                    <div ref={assistantContentRef} className="space-y-8">
+                    <div ref={assistantContentRef} className={cls.richContentGroup}>
                       {messagesAfterLastUser.map((msg) => (
-                        <div key={msg.id} className="group">
+                        <div key={msg.id} className={cls.messageGroup}>
                           <TextResponseBlock
                             messageId={msg.id}
                             content={msg.content}
@@ -831,7 +741,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                         </div>
                       ))}
 
-                      {/* Rich interactive displayed messages (thinking, decisions, text) */}
                       {interactiveDisplayedMessages.map((msg, idx) => (
                         <div key={`rich-${idx}`}>
                           {msg.type === 'thinking' && (
@@ -876,21 +785,20 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                             />
                           )}
                           {msg.type === 'mermaid' && (
-                            <div className="my-4 bg-white rounded-xl border border-gray-200 p-4 inline-block" style={{ maxWidth: '400px' }}>
+                            <Box className={cls.mermaidWrapper}>
                               <MermaidDiagram chart={msg.chart} maxWidth="400px" />
-                            </div>
+                            </Box>
                           )}
                           {msg.type === 'userDecision' && (
-                            <div className="flex justify-end items-start gap-2 ml-24">
-                              <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                            <Box className={cls.decisionBubble}>
+                              <div className={cls.userBubble}>
                                 {msg.text}
                               </div>
-                            </div>
+                            </Box>
                           )}
                         </div>
                       ))}
 
-                      {/* Active thinking state with live reasoning (interactive mode) */}
                       {(currentThought || currentReasoning.length > 0) && (
                         <ReasoningBlock
                           id={-1}
@@ -907,7 +815,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                         />
                       )}
 
-                      {/* Skeleton loader */}
                       {showThinkingDots && <SkeletonLoader />}
                     </div>
                   )}
@@ -915,7 +822,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               );
             })()
           ) : (
-            /* Simulator mode - render scripted messages */
             (() => {
               const lastUserIdx = displayedMessages.map(m => m.role).lastIndexOf('user');
               const messagesUpToLastUser = lastUserIdx >= 0 ? displayedMessages.slice(0, lastUserIdx + 1) : displayedMessages;
@@ -924,16 +830,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               return (
                 <>
                   {messagesUpToLastUser.map((msg, idx) => (
-                    <div key={idx} className="group">
+                    <div key={idx} className={cls.messageGroup}>
                       {msg.role === 'user' && (
                         <div
                           ref={idx === lastUserIdx ? lastUserMessageRef : null}
-                          className="flex flex-col items-end ml-24"
+                          className={cls.userMessageWrapper}
                         >
-                          <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                          <div className={cls.userBubble}>
                             {msg.text}
                           </div>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity mt-1">
+                          <div className={cls.userActions}>
                             <TooltipIconButton
                               icon={Copy}
                               tooltip="Copy"
@@ -945,51 +851,50 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                         </div>
                       )}
 
-                {msg.type === 'thinking' && (
-                  <ReasoningBlock
-                    id={idx}
-                    reasoning={msg.reasoning || []}
-                    doneSummary={msg.doneSummary}
-                    tags={msg.tags}
-                    isExpanded={expandedThinkingIds.has(idx)}
-                    onToggle={toggleThinkingExpanded}
-                  />
-                )}
+                      {msg.type === 'thinking' && (
+                        <ReasoningBlock
+                          id={idx}
+                          reasoning={msg.reasoning || []}
+                          doneSummary={msg.doneSummary}
+                          tags={msg.tags}
+                          isExpanded={expandedThinkingIds.has(idx)}
+                          onToggle={toggleThinkingExpanded}
+                        />
+                      )}
 
-                {msg.type === 'assistantSwitch' && (
-                  <AssistantSwitchBadge message={msg.message} />
-                )}
+                      {msg.type === 'assistantSwitch' && (
+                        <AssistantSwitchBadge message={msg.message} />
+                      )}
 
-                {msg.type === 'text' && (
-                  <TextResponseBlock
-                    messageId={`sim-text-${idx}`}
-                    content={msg.content}
-                    copiedMessageId={copiedMessageId}
-                    feedbackState={feedbackMessageId}
-                    onCopy={handleCopyMessage}
-                    onFeedback={handleFeedback}
-                  />
-                )}
+                      {msg.type === 'text' && (
+                        <TextResponseBlock
+                          messageId={`sim-text-${idx}`}
+                          content={msg.content}
+                          copiedMessageId={copiedMessageId}
+                          feedbackState={feedbackMessageId}
+                          onCopy={handleCopyMessage}
+                          onFeedback={handleFeedback}
+                        />
+                      )}
 
-                {msg.type === 'artifact' && (
-                  <ArtifactCard
-                    title={msg.data.title}
-                    description={msg.data.description}
-                    fileType={msg.data.fileType}
-                    onSelect={() => {
-                      setSelectedArtifact(msg.data);
-                      setShowOutputPanel(true);
-                    }}
-                  />
-                )}
-              </div>
-            ))}
+                      {msg.type === 'artifact' && (
+                        <ArtifactCard
+                          title={msg.data.title}
+                          description={msg.data.description}
+                          fileType={msg.data.fileType}
+                          onSelect={() => {
+                            setSelectedArtifact(msg.data);
+                            setShowOutputPanel(true);
+                          }}
+                        />
+                      )}
+                    </div>
+                  ))}
 
-                  {/* Assistant content after last user message */}
                   {(messagesAfterLastUser.length > 0 || currentThought || currentReasoning.length > 0 || searchingAssistant || showThinkingDots) && (
-                    <div ref={assistantContentRef} className="space-y-8">
+                    <div ref={assistantContentRef} className={cls.richContentGroup}>
                       {messagesAfterLastUser.map((msg, idx) => (
-                        <div key={`after-${idx}`} className="group">
+                        <div key={`after-${idx}`} className={cls.messageGroup}>
                           {msg.type === 'thinking' && (
                             <ReasoningBlock
                               id={idx + 1000}
@@ -1027,7 +932,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                         </div>
                       ))}
 
-                      {/* Active thinking state with live reasoning */}
                       {(currentThought || currentReasoning.length > 0) && (
                         <ReasoningBlock
                           id={-1}
@@ -1044,10 +948,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                         />
                       )}
 
-                      {/* Searching assistant loading state */}
                       {searchingAssistant && <SearchingAssistantLoader />}
-
-                      {/* Skeleton loader */}
                       {showThinkingDots && <SkeletonLoader />}
                     </div>
                   )}
@@ -1056,21 +957,18 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
             })()
           )}
 
-            {/* Spacer - placeholder for assistant content */}
+            {/* Spacer */}
             <div style={{ height: `${spacerHeight}px` }} />
-
             <div ref={chatEndRef} />
-          </div>
-        </div>
+          </Box>
+        </Box>
 
         {/* Input Area */}
-        <div className="px-6 py-4 bg-gray-50">
-          <div className="max-w-chat mx-auto">
+        <Box className={cls.inputArea}>
+          <Box className={cls.inputInner}>
             {isInteractive ? (
-              /* Interactive mode - normal input */
               <MessageInput
                 onSend={(message) => {
-                  // Commit any completed rich content as a regular assistant message before sending
                   if (interactiveDisplayedMessages.length > 0 && !isProcessingRichResponse && !awaitingDecision) {
                     const textItems = interactiveDisplayedMessages
                       .filter((m: any) => m.type === 'text')
@@ -1093,7 +991,6 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 onNavigateToExplore={onNavigateToExplore}
               />
             ) : (
-              /* Simulator mode - auto-type input */
               <MessageInput
                 onSend={handleSendMessage}
                 value={typedText}
@@ -1104,20 +1001,23 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 onNavigateToExplore={onNavigateToExplore}
               />
             )}
-            {/* Disclaimer - only show when chat has started */}
             {((isInteractive && interactiveMessages.length > 0) || (!isInteractive && displayedMessages.length > 0)) && (
-              <p className="text-xs text-gray-400 mt-3 text-center">AI can make mistakes. Check important info.</p>
+              <Text className={cls.disclaimer}>AI can make mistakes. Check important info.</Text>
             )}
-          </div>
-        </div>
-        </div>
-      </ResizablePanel>
+          </Box>
+        </Box>
+        </Box>
+      </Panel>
 
       {/* Resizable Handle */}
-      <ResizableHandle withHandle className={`bg-gray-100 hover:bg-gray-100 transition-colors ${!showOutputPanel ? 'opacity-0 pointer-events-none' : ''}`} />
+      <PanelResizeHandle className={`${cls.resizeHandle} ${!showOutputPanel ? cls.resizeHandleHidden : ''}`}>
+        <Box className={cls.resizeHandleGrip}>
+          <GripVerticalIcon size={12} color="var(--mantine-color-gray-5)" />
+        </Box>
+      </PanelResizeHandle>
 
       {/* Output Panel */}
-      <ResizablePanel
+      <Panel
         ref={rightPanelRef}
         defaultSize={0}
         minSize={20}
@@ -1126,88 +1026,83 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
         onExpand={() => setShowOutputPanel(true)}
         onCollapse={() => setShowOutputPanel(false)}
       >
-        <div className={`flex flex-col h-full bg-white overflow-hidden transition-opacity duration-75 ${panelContentVisible ? 'opacity-100' : 'opacity-0'}`}>
+        <Box className={`${cls.outputPanel} ${!panelContentVisible ? cls.outputPanelHidden : ''}`}>
           {/* Canvas Header with Toolbar */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-300 bg-white h-[52px]">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
+          <Box className={cls.canvasHeader}>
+            <Box className={cls.canvasHeaderLeft}>
               {selectedArtifact && (
                 <button
                   onClick={() => setSelectedArtifact(null)}
-                  className="mr-2 flex items-center gap-1 text-gray-500 hover:text-gray-900 transition-colors"
+                  className={cls.canvasBackButton}
                 >
-                  <ArrowLeft className="w-4 h-4" />
+                  <ArrowLeft size={16} />
                 </button>
               )}
               {selectedArtifact ? (
                 <EditableText
                   value={selectedArtifact.title}
-                  onSave={() => {
-                    // In a real implementation, this would update the artifact title
-                  }}
+                  onSave={() => {}}
                   as="h2"
                   className="text-sm font-semibold text-gray-900 cursor-pointer truncate"
                   inputClassName="text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
                 />
               ) : (
-                <h2 className="text-sm font-semibold text-gray-900 truncate">Canvas</h2>
+                <Text size="sm" fw={600} c="gray.9" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Canvas</Text>
               )}
-            </div>
+            </Box>
 
-            <div className="flex items-center gap-1">
-              {/* Canvas Toolbar - only when viewing artifact */}
+            <Box className={cls.canvasHeaderRight}>
               {selectedArtifact && (
-                <div className="flex items-center gap-1">
-                    {/* Save as .docx button */}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleDownloadDocx}
-                      className="h-8 px-3 gap-2 border-gray-300"
-                    >
-                      <Download className="w-4 h-4" />
-                      <span className="text-xs">Save as .docx</span>
-                    </Button>
-                  </div>
+                <Box className={cls.canvasToolbar}>
+                  <Button
+                    variant="outline"
+                    color="gray"
+                    size="xs"
+                    onClick={handleDownloadDocx}
+                    leftSection={<Download size={16} />}
+                  >
+                    Save as .docx
+                  </Button>
+                </Box>
               )}
 
               <button
                 onClick={() => setShowOutputPanel(false)}
-                className="text-gray-500 hover:text-gray-900 transition-colors ml-2"
+                className={cls.canvasCloseButton}
               >
-                <X className="w-5 h-5" />
+                <X size={20} />
               </button>
-            </div>
-          </div>
+            </Box>
+          </Box>
 
           {/* Output Content */}
-          <div className="flex-1 overflow-auto" ref={outputContentRef}>
+          <Box className={cls.outputContent} ref={outputContentRef}>
             {selectedArtifact ? (
-              <div className="h-full bg-white">
-                <div className="p-8 max-w-4xl mx-auto">
+              <Box className={cls.artifactView}>
+                <Box className={cls.artifactInner}>
                   {/* Artifact Header */}
-                  <div className="mb-6 flex items-start gap-3">
-                    <div className="text-gray-700 mt-1">
+                  <Box className={cls.artifactHeader}>
+                    <Box className={cls.artifactIconWrapper}>
                       {getFileIcon(selectedArtifact.fileType)}
-                    </div>
-                    <div>
-                      <h1 className="text-2xl font-semibold text-gray-900 mb-1">{selectedArtifact.title}</h1>
-                      <p className="text-xs text-gray-500">{selectedArtifact.description}</p>
-                    </div>
-                  </div>
+                    </Box>
+                    <Box>
+                      <h1 className={cls.artifactTitle}>{selectedArtifact.title}</h1>
+                      <p className={cls.artifactDescription}>{selectedArtifact.description}</p>
+                    </Box>
+                  </Box>
 
                   {/* Artifact Content */}
                   {selectedArtifact.fileType === 'chart' ? (
                     <MermaidDiagram chart={selectedArtifact.content} />
                   ) : (
-                    <div className="prose prose-sm max-w-none prose-lofi" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
+                    <div className="prose-lofi" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
                   )}
-
-                </div>
-              </div>
+                </Box>
+              </Box>
             ) : (
-              <div className="h-full p-4">
-                <div className="mb-4">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">List of Canvas</h3>
+              <Box className={cls.canvasListPanel}>
+                <Box mb="md">
+                  <h3 className={cls.canvasListHeader}>List of Canvas</h3>
 
                   {(() => {
                     const allArtifacts = [
@@ -1215,40 +1110,40 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                       ...interactiveDisplayedMessages.filter(m => m.type === 'artifact'),
                     ];
                     return allArtifacts.length > 0 ? (
-                    <div className="space-y-2">
+                    <Box className={cls.canvasListItems}>
                       {allArtifacts.map((msg, idx) => (
                         <button
                           key={idx}
                           onClick={() => setSelectedArtifact(msg.data)}
-                          className="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-300 hover:border-gray-900 hover:shadow-sm transition-all text-left"
+                          className={cls.canvasListItem}
                         >
-                          <div className="p-2 rounded-lg bg-gray-100 text-gray-700">
+                          <Box className={cls.canvasListItemIcon}>
                             {getFileIcon(msg.data.fileType)}
-                          </div>
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900">{msg.data.title}</div>
-                            <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{msg.data.description}</div>
-                          </div>
-                          <div className="text-gray-500">
-                            <ArrowLeft className="w-4 h-4 rotate-180" />
-                          </div>
+                          </Box>
+                          <Box className={cls.canvasListItemInfo}>
+                            <Box className={cls.canvasListItemTitle}>{msg.data.title}</Box>
+                            <Box className={cls.canvasListItemDesc}>{msg.data.description}</Box>
+                          </Box>
+                          <Box style={{ color: 'var(--mantine-color-gray-5)' }}>
+                            <ArrowLeft size={16} style={{ transform: 'rotate(180deg)' }} />
+                          </Box>
                         </button>
                       ))}
-                    </div>
+                    </Box>
                   ) : (
-                    <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
-                      <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                      <p className="text-sm">No output canvas generated yet</p>
-                      <p className="text-xs mt-1">Canvases created during the chat will appear here</p>
-                    </div>
+                    <Box className={cls.canvasEmptyState}>
+                      <FileText className={cls.canvasEmptyIcon} />
+                      <Text size="sm">No output canvas generated yet</Text>
+                      <Text size="xs" mt={4}>Canvases created during the chat will appear here</Text>
+                    </Box>
                   );
                   })()}
-                </div>
-              </div>
+                </Box>
+              </Box>
             )}
-          </div>
-            </div>
-      </ResizablePanel>
-    </ResizablePanelGroup>
+          </Box>
+        </Box>
+      </Panel>
+    </PanelGroup>
   );
 };

@@ -1,5 +1,5 @@
-import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
+import { Button, Card, Stack, Title, Text } from '@mantine/core';
+import classes from './ErrorPage.module.css';
 
 interface Error404PageProps {
   onBackToLogin?: () => void;
@@ -7,26 +7,27 @@ interface Error404PageProps {
 
 export function Error404Page({ onBackToLogin }: Error404PageProps) {
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardContent className="p-8 pb-10 space-y-6 text-center">
-          <div className="space-y-2">
-            <h1 className="text-6xl font-bold text-gray-900">404</h1>
-            <h2 className="text-gray-900 text-xl font-semibold">
+    <div className={classes.page}>
+      <Card className={classes.card} withBorder shadow="md">
+        <Stack gap="xl" className={classes.cardContent}>
+          <Stack gap="xs" align="center">
+            <Title order={1} fz={60} fw={700} c="gray.9">404</Title>
+            <Title order={2} size="xl" fw={600} c="gray.9">
               Page Not Found
-            </h2>
-            <p className="text-gray-500 text-sm">
+            </Title>
+            <Text size="sm" c="gray.5">
               The page you're looking for doesn't exist or has been moved.
-            </p>
-          </div>
+            </Text>
+          </Stack>
 
           <Button
-            className="w-full h-12"
+            fullWidth
+            size="lg"
             onClick={onBackToLogin || (() => window.location.hash = '')}
           >
             Back to Home
           </Button>
-        </CardContent>
+        </Stack>
       </Card>
     </div>
   );

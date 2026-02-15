@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
+import { Box } from '@mantine/core';
 import { MessageActions } from './MessageActions';
 import { renderSimpleMarkdown } from '../../utils/simple-markdown';
+import classes from './TextResponseBlock.module.css';
 
 interface TextResponseBlockProps {
   messageId: string;
@@ -22,10 +24,9 @@ export function TextResponseBlock({
   const html = useMemo(() => renderSimpleMarkdown(content), [content]);
 
   return (
-    <div className="flex flex-col gap-1 mb-2">
+    <Box className={classes.wrapper}>
       <div
-        className="w-full prose prose-sm max-w-none prose-lofi text-gray-900"
-        style={{ fontSize: '16px', lineHeight: '1.7' }}
+        className={`prose-lofi ${classes.content}`}
         dangerouslySetInnerHTML={{ __html: html }}
       />
       <MessageActions
@@ -36,6 +37,6 @@ export function TextResponseBlock({
         onCopy={onCopy}
         onFeedback={onFeedback}
       />
-    </div>
+    </Box>
   );
 }

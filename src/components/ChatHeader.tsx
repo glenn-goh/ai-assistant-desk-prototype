@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { FileText, EyeOff, MoreHorizontal, FolderPlus, ChevronDown } from 'lucide-react';
+import { Popover, Text, Box, Menu } from '@mantine/core';
 import { TooltipIconButton, EditableText, ClassificationBadge } from './shared';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from './ui/dropdown-menu';
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
 import { AssistantCard } from './AssistantCard';
 import { ReplaceToolModal } from './ReplaceToolModal';
 import type { Assistant } from '../data/assistants';
 import { topRatedAssistants, essentialAssistants, roleBasedAssistants } from '../data/assistants';
 import type { Project } from '../types/project';
 import { IncognitoIcon } from './IncognitoIcon';
+import cls from './ChatHeader.module.css';
 
 interface ChatHeaderProps {
   // Mode
@@ -112,15 +112,15 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       : 'RSN';
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border-b border-gray-200">
-      <div className="flex items-center gap-3 flex-1">
+    <Box className={cls.header}>
+      <Box className={cls.titleArea}>
         {isIncognito ? (
-          <div className="flex items-center gap-2">
+          <Box className={cls.incognitoLabel}>
             <IncognitoIcon className="w-4 h-4 text-gray-600" />
-            <span className="text-sm font-medium text-gray-900">
+            <Text size="sm" fw={500} c="gray.9">
               Incognito chat
-            </span>
-          </div>
+            </Text>
+          </Box>
         ) : (
           <EditableText
             value={displayTitle || 'New Chat'}
@@ -128,26 +128,29 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               if (chatId && onRenameChat) onRenameChat(chatId, newTitle);
             }}
             renderDisplay={({ value: title, onDoubleClick }) => (
-              <div className="flex flex-col gap-0.5 group/title">
-                <span
-                  className="text-sm font-medium text-gray-900 cursor-pointer"
+              <Box className={cls.titleColumn}>
+                <Text
+                  size="sm"
+                  fw={500}
+                  c="gray.9"
+                  style={{ cursor: 'pointer' }}
                   onDoubleClick={() => {
                     if (isInteractive && onRenameChat) onDoubleClick();
                   }}
                   title="Double-click to rename"
                 >
                   {title}
-                </span>
+                </Text>
                 {subtitle && (
                   assistant ? (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button className="flex items-center gap-0.5 text-xs text-gray-500 hover:text-gray-700 transition-colors cursor-pointer">
+                    <Popover position="bottom-start" offset={12} withinPortal>
+                      <Popover.Target>
+                        <button className={cls.subtitleButton}>
                           {subtitle}
-                          <ChevronDown className="w-3 h-3" />
+                          <ChevronDown size={12} />
                         </button>
-                      </PopoverTrigger>
-                      <PopoverContent align="start" sideOffset={12} className="w-80 p-0 bg-white border border-gray-300 rounded-lg shadow-lg" onOpenAutoFocus={(e) => e.preventDefault()}>
+                      </Popover.Target>
+                      <Popover.Dropdown p={0} style={{ width: '20rem', border: '1px solid var(--mantine-color-gray-3)', borderRadius: 'var(--mantine-radius-md)' }}>
                         <AssistantCard
                           assistant={assistant}
                           isFavorited={isFavorited}
@@ -157,13 +160,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
                           isInTools={isInTools}
                           onToggleTools={handleToggleTools}
                         />
-                      </PopoverContent>
+                      </Popover.Dropdown>
                     </Popover>
                   ) : (
-                    <span className="text-xs text-gray-500">{subtitle}</span>
+                    <Text size="xs" c="gray.5">{subtitle}</Text>
                   )
                 )}
-              </div>
+              </Box>
             )}
           />
         )}
@@ -174,8 +177,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300"
           />
         )}
-      </div>
-      <div className="flex items-center gap-1">
+      </Box>
+      <Box className={cls.actions}>
         {/* Temporary Chat Toggle - only show when new chat and no messages */}
         {!isIncognito && isInteractive && isNewChat && !hasUserMessage && (
           <TooltipIconButton
@@ -188,47 +191,46 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
         )}
         {/* Show indicator when temporary chat is active */}
         {isTemporaryChat && hasUserMessage && (
-          <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg flex items-center gap-1">
-            <EyeOff className="w-3 h-3" />
+          <Box className={cls.tempIndicator}>
+            <EyeOff size={12} />
             Temporary
-          </span>
+          </Box>
         )}
         {/* Ellipsis Menu - only show for existing chats, non-incognito, and non-CCE */}
         {isInteractive && !isNewChat && chatId && !isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700">
-                <MoreHorizontal className="w-5 h-5" />
+          <Menu position="bottom-end" withinPortal>
+            <Menu.Target>
+              <button className={cls.ellipsisButton}>
+                <MoreHorizontal size={20} />
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
+            </Menu.Target>
+            <Menu.Dropdown>
               {!isIncognito && classificationType !== 'cce-sn' && classificationType !== 'cce-sh' && (
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="hover:bg-gray-100">
-                    <FolderPlus className="w-4 h-4 mr-2" />
-                    Move to project
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="bg-white border-2 border-gray-900 rounded-lg">
-                    {projects.length === 0 ? (
-                      <DropdownMenuItem disabled className="text-gray-400 text-sm">
-                        No projects available
-                      </DropdownMenuItem>
-                    ) : (
-                      projects.map(project => (
-                        <DropdownMenuItem
-                          key={project.id}
-                          onClick={() => onMoveToProject?.(chatId, project.id)}
-                          className="hover:bg-gray-100"
-                        >
-                          {project.name}
-                        </DropdownMenuItem>
-                      ))
-                    )}
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
+                <>
+                  <Menu.Label>
+                    <Box style={{ display: 'flex', alignItems: 'center', gap: 'var(--mantine-spacing-xs)' }}>
+                      <FolderPlus size={14} />
+                      Move to project
+                    </Box>
+                  </Menu.Label>
+                  {projects.length === 0 ? (
+                    <Menu.Item disabled>
+                      <Text size="sm" c="gray.4">No projects available</Text>
+                    </Menu.Item>
+                  ) : (
+                    projects.map(project => (
+                      <Menu.Item
+                        key={project.id}
+                        onClick={() => onMoveToProject?.(chatId, project.id)}
+                      >
+                        {project.name}
+                      </Menu.Item>
+                    ))
+                  )}
+                </>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Menu.Dropdown>
+          </Menu>
         )}
         {!showOutputPanel && (
           <TooltipIconButton
@@ -238,7 +240,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             className="text-gray-700 hover:text-gray-900 rounded-lg p-1 transition-colors"
           />
         )}
-      </div>
+      </Box>
       {assistant && (
         <ReplaceToolModal
           open={replaceModalOpen}
@@ -254,6 +256,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           }}
         />
       )}
-    </div>
+    </Box>
   );
 };

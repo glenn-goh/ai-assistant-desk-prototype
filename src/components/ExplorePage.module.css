@@ -1,0 +1,154 @@
+.page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--mantine-color-gray-1);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-gray-1);
+  border-bottom: 1px solid var(--mantine-color-gray-2);
+}
+
+.headerInner {
+  max-width: 80rem;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 var(--mantine-spacing-md);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.scrollArea {
+  flex: 1;
+  overflow: auto;
+}
+
+.content {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-md) var(--mantine-spacing-xl);
+}
+
+.flexLayout {
+  display: flex;
+  gap: var(--mantine-spacing-lg);
+}
+
+.gridArea {
+  flex: 1;
+  min-width: 0;
+}
+
+.assistantsGrid {
+  display: grid;
+  gap: var(--mantine-spacing-lg);
+  grid-template-columns: repeat(auto-fill, minmax(max(250px, calc((100% - 3rem) / 3)), 1fr));
+}
+
+.toolsPanel {
+  flex-shrink: 0;
+  transition: width 300ms ease;
+}
+
+.toolsPanelExpanded {
+  width: 20rem;
+}
+
+.toolsPanelCollapsed {
+  width: 5rem;
+}
+
+.toolsPanelSticky {
+  position: sticky;
+  top: var(--mantine-spacing-xl);
+}
+
+.collapseButton {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--mantine-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 150ms ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+}
+
+.collapseButton:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.collapseBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: var(--mantine-color-gray-9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolSlotFilled {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-xs);
+}
+
+.toolSlotInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.removeButton {
+  opacity: 0;
+  transition: opacity 150ms ease;
+  padding: 4px;
+  border-radius: var(--mantine-radius-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.toolSlotFilled:hover .removeButton {
+  opacity: 1;
+}
+
+.emptySlot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.homeLink {
+  color: var(--mantine-color-gray-9);
+  text-decoration: underline;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+}
+
+.homeLink:hover {
+  color: var(--mantine-color-gray-7);
+}

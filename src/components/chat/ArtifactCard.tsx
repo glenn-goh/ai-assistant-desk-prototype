@@ -1,4 +1,6 @@
 import { FileText, Code, BarChart3, ClipboardList } from 'lucide-react';
+import { Box, Text, UnstyledButton } from '@mantine/core';
+import classes from './ArtifactCard.module.css';
 
 interface ArtifactCardProps {
   title: string;
@@ -8,38 +10,32 @@ interface ArtifactCardProps {
 }
 
 function getFileIcon(fileType: string) {
+  const size = 20;
   switch (fileType.toLowerCase()) {
     case 'document':
-      return <FileText className="w-5 h-5" />;
+      return <FileText size={size} />;
     case 'code':
-      return <Code className="w-5 h-5" />;
+      return <Code size={size} />;
     case 'chart':
-      return <BarChart3 className="w-5 h-5" />;
+      return <BarChart3 size={size} />;
     case 'form':
-      return <ClipboardList className="w-5 h-5" />;
+      return <ClipboardList size={size} />;
     default:
-      return <FileText className="w-5 h-5" />;
+      return <FileText size={size} />;
   }
 }
 
 export function ArtifactCard({ title, description, fileType, onSelect }: ArtifactCardProps) {
   return (
-    <div>
-      <button
-        onClick={onSelect}
-        className="inline-flex bg-white border border-gray-300 rounded-lg px-4 py-3 hover:bg-gray-50 hover:border-gray-400 transition-colors text-left"
-      >
-        <div className="flex items-center gap-3">
-          <div className="text-gray-500">
-            {getFileIcon(fileType)}
-          </div>
-          <div>
-            <div className="font-medium text-gray-900 text-sm">{title}</div>
-            <div className="text-xs text-gray-500 mt-0.5">{description}</div>
-          </div>
-        </div>
-      </button>
-    </div>
+    <Box>
+      <UnstyledButton onClick={onSelect} className={classes.card}>
+        <Text c="gray.5">{getFileIcon(fileType)}</Text>
+        <Box>
+          <Text size="sm" fw={500} c="gray.9">{title}</Text>
+          <Text size="xs" c="gray.5" mt={2}>{description}</Text>
+        </Box>
+      </UnstyledButton>
+    </Box>
   );
 }
 

@@ -1,10 +1,8 @@
 import { Heart, ExternalLink, MoreHorizontal, Share2 } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
+import { Card, Button, Tooltip, Menu } from '@mantine/core';
 import { IconContainer, ClassificationBadge } from './shared';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './ui/dropdown-menu';
 import type { Assistant } from '../data/assistants';
+import classes from './AssistantCard.module.css';
 
 interface AssistantCardProps {
   assistant: Assistant;
@@ -23,83 +21,73 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
   return (
     <Card
       key={assistant.id}
-      className={`transition-all duration-300 group border border-gray-300 shadow-sm bg-white overflow-hidden relative ${hasToolsButton ? 'flex flex-col' : ''} ${viewOnly ? '' : 'hover:shadow-md'}`}
+      className={`${classes.card} ${hasToolsButton ? classes.cardWithTools : ''}`}
+      padding="xl"
     >
-      <CardContent className={`p-6 ${hasToolsButton ? 'flex flex-col flex-1' : ''}`}>
+      <div className={hasToolsButton ? classes.contentWithTools : undefined}>
         {/* Top Right: Classification Pill, Heart Icon, and Ellipsis Menu */}
-        <div className="absolute top-4 right-4 flex items-center gap-1.5">
-          {/* Classification Pill */}
+        <div className={classes.topRight}>
           <ClassificationBadge classification={assistant.classification} />
 
-          {/* Heart Icon (Favorite) with Tooltip */}
-          <TooltipProvider delayDuration={300}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleFavorite(assistant.id);
-                  }}
-                  className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                >
-                  <Heart
-                    className={`w-5 h-5 ${
-                      isFavorited
-                        ? 'fill-gray-900 text-gray-900'
-                        : 'text-gray-400'
-                    }`}
-                  />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{isFavorited ? 'Unfavourite' : 'Favourite'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Tooltip label={isFavorited ? 'Unfavourite' : 'Favourite'} openDelay={300}>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite(assistant.id);
+              }}
+              className={classes.iconButton}
+            >
+              <Heart
+                size={20}
+                fill={isFavorited ? 'var(--mantine-color-gray-9)' : 'none'}
+                color={isFavorited ? 'var(--mantine-color-gray-9)' : 'var(--mantine-color-gray-4)'}
+              />
+            </button>
+          </Tooltip>
 
-          {/* Ellipsis Menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <Menu position="bottom-end">
+            <Menu.Target>
               <button
                 onClick={(e) => e.stopPropagation()}
-                className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                className={classes.iconButton}
               >
-                <MoreHorizontal className="w-5 h-5 text-gray-400" />
+                <MoreHorizontal size={20} color="var(--mantine-color-gray-4)" />
               </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white border-2 border-gray-900 rounded-lg">
-              <DropdownMenuItem disabled onClick={(e) => e.stopPropagation()}>
-                <Share2 className="w-4 h-4 mr-1.5" />
+            </Menu.Target>
+            <Menu.Dropdown>
+              <Menu.Item
+                disabled
+                onClick={(e) => e.stopPropagation()}
+                leftSection={<Share2 size={16} />}
+                rightSection={<span style={{ fontSize: 'var(--mantine-font-size-xs)', color: 'var(--mantine-color-gray-4)' }}>Coming soon</span>}
+              >
                 Share
-                <span className="ml-auto text-xs text-gray-400">Coming soon</span>
-              </DropdownMenuItem>
+              </Menu.Item>
               {assistant.canEdit && (
-                <DropdownMenuItem onClick={(e) => {
-                  e.stopPropagation();
-                  // TODO: Navigate to studio with assistant
-                }}>
-                  <ExternalLink className="w-4 h-4 mr-1.5" />
+                <Menu.Item
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  leftSection={<ExternalLink size={16} />}
+                >
                   Edit on Studio
-                </DropdownMenuItem>
+                </Menu.Item>
               )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </Menu.Dropdown>
+          </Menu>
         </div>
 
         {/* Icon Container */}
-        <IconContainer icon={IconComponent} size="lg" className="mb-4" />
+        <IconContainer icon={IconComponent} size="lg" className={undefined} />
 
         {/* Content */}
         <div
-          className={hasToolsButton ? 'flex-1 cursor-pointer' : 'mb-4'}
+          className={hasToolsButton ? classes.bodyWithTools : classes.body}
           onClick={viewOnly ? undefined : () => onStartChat(assistant.name, assistant.assistantType)}
+          style={{ marginTop: 'var(--mantine-spacing-lg)' }}
         >
-          <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-gray-700 transition-colors">
-            {assistant.name}
-          </h3>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            {assistant.description}
-          </p>
+          <h3 className={classes.title}>{assistant.name}</h3>
+          <p className={classes.description}>{assistant.description}</p>
         </div>
 
         {/* Add to tools button */}
@@ -109,14 +97,15 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
               e.stopPropagation();
               onToggleTools(assistant.id);
             }}
-            variant={isInTools ? "default" : "outline"}
-            size="sm"
-            className={`mt-4 self-start ${isInTools ? 'bg-gray-900 text-white hover:bg-gray-700' : 'border-gray-300'}`}
+            variant={isInTools ? 'filled' : 'outline'}
+            color={isInTools ? 'gray.9' : 'gray'}
+            size="xs"
+            mt="lg"
           >
             {isInTools ? 'Remove from tools' : 'Add to tools'}
           </Button>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 }

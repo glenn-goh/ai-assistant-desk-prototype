@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { MessageInput } from './MessageInput';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Label } from './ui/label';
-import { Shield, ShieldCheck, ChevronDown } from 'lucide-react';
+import { Shield, ShieldCheck } from 'lucide-react';
+import { Select, Text, Title, Box } from '@mantine/core';
 import { TooltipIconButton } from './shared';
-import { Separator } from './ui/separator';
 import { IncognitoIcon } from './IncognitoIcon';
+import cls from './HomePage.module.css';
 
 interface HomePageProps {
   colorTheme: ColorTheme;
@@ -56,6 +55,11 @@ const getPromptSuggestions = (role: string) => {
   }
 };
 
+const classificationData = [
+  { value: 'rsn', label: 'Up to R/SN' },
+  { value: 'cce-sn', label: 'Up to C(CE)/SN' },
+];
+
 export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSidebarOpen, userProfile, onSelectSimulation, onStartChat, toolAssistants = [], onIncognitoChange, onNavigateToExplore }: HomePageProps) {
   const [inputValue, setInputValue] = useState('');
   const [classificationType, setClassificationType] = useState<'rsn' | 'cce-sn'>('rsn');
@@ -69,94 +73,77 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
   };
 
   // Reset incognito when switching to CCE/SN
-  const handleClassificationChange = (value: 'rsn' | 'cce-sn') => {
-    setClassificationType(value);
-    if (value === 'cce-sn') {
+  const handleClassificationChange = (value: string | null) => {
+    if (!value) return;
+    const typedValue = value as 'rsn' | 'cce-sn';
+    setClassificationType(typedValue);
+    if (typedValue === 'cce-sn') {
       setIsIncognito(false);
       onIncognitoChange?.(false);
     }
   };
 
   return (
-    <div className="flex-1 h-full flex flex-col bg-gray-100">
+    <Box className={cls.page}>
       {/* Main Content */}
-      <div className="flex-1 overflow-auto flex items-center">
-        <div className="flex flex-col w-full max-w-chat mx-auto px-6">
+      <Box className={cls.mainContent}>
+        <Box className={cls.innerContent}>
           {/* Welcome Header */}
-          <div className="pb-8">
+          <Box className={cls.welcomeHeader}>
             {isIncognito ? (
-              <div>
-                <h1 className="text-2xl mb-1 tracking-tight font-semibold text-gray-900" style={{ fontSize: '2rem' }}>
+              <Box>
+                <Title order={1} size="2rem" fw={600} c="gray.9">
                   Incognito chat
-                </h1>
-                <div className="flex items-center gap-2 mt-2">
+                </Title>
+                <Box className={cls.incognitoHint}>
                   <IncognitoIcon className="w-4 h-4 text-gray-500" />
-                  <p className="text-sm text-gray-500">
+                  <Text size="sm" c="gray.5">
                     Incognito chat does not reference memories or save to chat history
-                  </p>
-                </div>
-              </div>
+                  </Text>
+                </Box>
+              </Box>
             ) : (
-              <h1 className="text-2xl mb-1 tracking-tight font-semibold text-gray-900" style={{ fontSize: '2rem' }}>
+              <Title order={1} size="2rem" fw={600} c="gray.9">
                 Good {today.getHours() < 12 ? 'Morning' : today.getHours() < 18 ? 'Afternoon' : 'Evening'}, {userProfile.name.split(' ')[0]}
-              </h1>
+              </Title>
             )}
-          </div>
+          </Box>
 
           {/* Data Classification Selector */}
-          <div className="mb-2 flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-900">
+          <Box className={cls.classificationRow}>
+            <Box className={cls.classificationSelector}>
+              <Text size="sm" fw={500} c="gray.9">
                 Data classification
-              </span>
-              <Select value={classificationType} onValueChange={(value) => handleClassificationChange(value as 'rsn' | 'cce-sn')}>
-                <SelectTrigger
-                  className="w-auto h-9 bg-white border-gray-300 px-3"
-                >
-                  <div className="flex items-center gap-2">
-                    {classificationType === 'rsn' ? (
-                      <Shield className="w-4 h-4" />
-                    ) : (
-                      <ShieldCheck className="w-4 h-4" />
-                    )}
-                    <span className="whitespace-nowrap">Up to {classificationType === 'rsn' ? 'R/SN' : 'C(CE)/SN'}</span>
-                  </div>
-                </SelectTrigger>
-                  <SelectContent className="w-[400px]">
-                    {/* Header */}
-                    <div className="p-3">
-                      <h3 className="font-semibold text-gray-900">Data Classification</h3>
-                      <p className="text-sm text-gray-500 mt-1">Select the highest classification level allowed</p>
-                    </div>
-                    <Separator />
-                    {/* Options */}
-                    <div className="p-2">
-                      <SelectItem value="rsn" className="cursor-pointer">
-                        <div className="flex items-start gap-3 py-2">
-                          <Shield className="w-5 h-5 mt-0.5 text-gray-700 flex-shrink-0" />
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900">R/SN</div>
-                            <div className="text-sm text-gray-500">Restricted / Sensitive Normal</div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="cce-sn" className="cursor-pointer">
-                        <div className="flex items-start gap-3 py-2">
-                          <ShieldCheck className="w-5 h-5 mt-0.5 text-gray-700 flex-shrink-0" />
-                          <div className="flex-1">
-                            <div className="font-semibold text-gray-900">C(CE)/SN</div>
-                            <div className="text-sm text-gray-500">Confidential (Cloud-Eligible) / Sensitive Normal</div>
-                            <div className="text-sm font-bold text-gray-900 mt-1">CCE/SN chats will not be saved.</div>
-                          </div>
-                        </div>
-                      </SelectItem>
-                    </div>
-                  </SelectContent>
-                </Select>
-            </div>
-            <p className="text-xs text-gray-500 flex-1">
+              </Text>
+              <Select
+                value={classificationType}
+                onChange={handleClassificationChange}
+                data={classificationData}
+                leftSection={classificationType === 'rsn' ? <Shield size={16} /> : <ShieldCheck size={16} />}
+                size="xs"
+                className={cls.classificationSelect}
+                comboboxProps={{ withinPortal: true }}
+                renderOption={({ option }) => (
+                  <Box className={cls.selectOptionContent}>
+                    <Box className={cls.selectOptionIcon}>
+                      {option.value === 'rsn' ? <Shield size={20} /> : <ShieldCheck size={20} />}
+                    </Box>
+                    <Box style={{ flex: 1 }}>
+                      <Text fw={600} c="gray.9" size="sm">{option.value === 'rsn' ? 'R/SN' : 'C(CE)/SN'}</Text>
+                      <Text size="sm" c="gray.5">
+                        {option.value === 'rsn' ? 'Restricted / Sensitive Normal' : 'Confidential (Cloud-Eligible) / Sensitive Normal'}
+                      </Text>
+                      {option.value === 'cce-sn' && (
+                        <Text size="sm" fw={700} c="gray.9" mt={4}>CCE/SN chats will not be saved.</Text>
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              />
+            </Box>
+            <Text size="xs" c="gray.5" style={{ flex: 1 }}>
               This setting cannot be changed once the chat begins.
-            </p>
+            </Text>
 
             {/* Incognito Toggle - Only for R/SN */}
             {classificationType === 'rsn' && (
@@ -171,11 +158,11 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                 className="p-2 rounded-lg transition-colors ml-auto text-gray-500 hover:text-gray-700 hover:bg-gray-200"
               />
             )}
-          </div>
+          </Box>
 
           {/* Chat Input Section */}
-          <div data-tour="chat-interface">
-            <div className="rounded-2xl border bg-white border-gray-300">
+          <Box data-tour="chat-interface">
+            <Box className={cls.chatInputWrapper}>
               <MessageInput
                 onSend={(message) => {
                   if (onStartChat) {
@@ -192,23 +179,23 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                 toolAssistants={toolAssistants}
                 onNavigateToExplore={onNavigateToExplore}
               />
-            </div>
+            </Box>
 
             {/* PromptSuggestions - hide without shifting layout when input has text */}
-            <div className={`mt-8 flex flex-wrap gap-2 transition-opacity ${inputValue ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <Box className={`${cls.promptSuggestions} ${inputValue ? cls.promptSuggestionsHidden : ''}`}>
               {promptSuggestions.map((prompt, index) => (
                 <button
                   key={index}
                   onClick={() => handlePromptClick(prompt)}
-                  className="px-3 py-2 text-sm rounded-full transition-colors bg-white border border-gray-900 text-gray-900 hover:bg-gray-100"
+                  className={cls.promptChip}
                 >
                   {prompt}
                 </button>
               ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }

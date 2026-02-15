@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { Target, Sparkles, Star, Users, Database, ShieldCheck, Code, Bookmark, Plus, X, ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
-import { Button } from './ui/button';
+import { Plus, X, SlidersHorizontal } from 'lucide-react';
+import { Button, Card, Text, Title, Box } from '@mantine/core';
 import { IconContainer, SearchInput, FilterTabs, EmptyState } from './shared';
 import { AssistantCard } from './AssistantCard';
 import { ReplaceToolModal } from './ReplaceToolModal';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
-import { getThemeClasses, getFontClasses } from '../lib/theme-utils';
+import { getFontClasses } from '../lib/theme-utils';
 import {
   type Assistant,
   essentialAssistants,
@@ -16,22 +15,9 @@ import {
   getTypeBadgeStyles,
   roleBasedAssistants
 } from '../data/assistants';
+import cls from './ExplorePage.module.css';
 
 const allFilterTabs = ['All', 'Favourites', 'My Assistants', 'Shared with Me', 'Community'];
-
-// Helper to get type icon
-const getTypeIcon = (type: string) => {
-  switch (type) {
-    case 'Official':
-      return <ShieldCheck className="w-3 h-3 mr-1" />;
-    case 'Community':
-      return <Users className="w-3 h-3 mr-1" />;
-    case 'Developer':
-      return <Code className="w-3 h-3 mr-1" />;
-    default:
-      return null;
-  }
-};
 
 interface ExplorePageProps {
   colorTheme: ColorTheme;
@@ -50,7 +36,6 @@ interface ExplorePageProps {
 }
 
 export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userRole, favoritedAssistants = [], pinnedAssistants = [], toolAssistants = [], onToggleFavorite, onTogglePin, onAddToTools, onRemoveFromTools, onReplaceToolAssistant, onNavigateToHome }: ExplorePageProps) {
-  const theme = getThemeClasses(colorTheme);
   const font = getFontClasses(fontStyle);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -58,25 +43,19 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   const [pendingAssistantToAdd, setPendingAssistantToAdd] = useState<Assistant | null>(null);
   const [isToolsPanelCollapsed, setIsToolsPanelCollapsed] = useState(false);
 
-  // Always show all filter tabs including Favourites
   const filterTabs = allFilterTabs;
 
-  // Handle toggle favorite
   const handleToggleFavorite = (assistantId: string) => {
     onToggleFavorite?.(assistantId);
   };
 
-  // Handle add to tools with replace modal if at limit
   const handleAddToTools = (assistant: Assistant) => {
     if (toolAssistants.includes(assistant.id)) {
-      // Already in tools, remove it
       onRemoveFromTools?.(assistant.id);
     } else if (toolAssistants.length >= 3) {
-      // At limit, show replace modal
       setPendingAssistantToAdd(assistant);
       setReplaceModalOpen(true);
     } else {
-      // Add to tools
       onAddToTools?.(assistant.id);
     }
   };
@@ -96,10 +75,8 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
       favoritedAssistants.includes(a.id)
     );
   } else if (activeFilter === 'My Assistants') {
-    // Filter for assistants owned by the user
     filteredAssistants = filteredAssistants.filter(a => a.isOwned === true);
   } else if (activeFilter === 'Shared with Me') {
-    // Filter for shared assistants (not owned by user)
     filteredAssistants = filteredAssistants.filter(a => a.isOwned === false || (a.isOwned === undefined && a.type !== 'Community'));
   } else if (activeFilter === 'Community') {
     filteredAssistants = filteredAssistants.filter(a => a.type === 'Community');
@@ -115,7 +92,6 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
     );
   }
 
-  // Render assistant card using shared component
   const renderAssistantCard = (assistant: Assistant) => (
     <AssistantCard
       key={assistant.id}
@@ -129,54 +105,48 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
   );
 
   return (
-    <div className={`flex-1 flex flex-col bg-gray-100 ${font.base}`}>
+    <Box className={cls.page} style={font.base}>
       {/* Header */}
-      <div className="flex flex-col gap-4 p-4 bg-gray-100 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto w-full px-4">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="font-semibold text-gray-900" style={{ fontSize: '18px' }}>Explore Assistants</h1>
-            <Button
-              className="gap-2"
-              size="sm"
-            >
-              <Plus className="w-4 h-4" />
+      <Box className={cls.header}>
+        <Box className={cls.headerInner}>
+          <Box className={cls.headerRow}>
+            <Title order={3} size="h4">Explore Assistants</Title>
+            <Button size="sm" leftSection={<Plus size={16} />}>
               Create new assistant
             </Button>
-          </div>
+          </Box>
 
-          {/* Search Bar */}
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
             placeholder="Search assistants..."
-            className="mb-4"
           />
 
-          {/* Filter Tabs */}
-          <FilterTabs
-            tabs={filterTabs}
-            activeTab={activeFilter}
-            onTabChange={setActiveFilter}
-          />
-        </div>
-      </div>
+          <Box mt="md">
+            <FilterTabs
+              tabs={filterTabs}
+              activeTab={activeFilter}
+              onTabChange={setActiveFilter}
+            />
+          </Box>
+        </Box>
+      </Box>
 
       {/* Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="flex gap-6">
-            {/* Assistants Grid - Responsive columns, max 3, min 250px */}
-            <div className="flex-1 space-y-12 min-w-0">
+      <Box className={cls.scrollArea}>
+        <Box className={cls.content}>
+          <Box className={cls.flexLayout}>
+            {/* Assistants Grid */}
+            <Box className={cls.gridArea}>
               {filteredAssistants.length > 0 ? (
-                <div
-                  className="grid gap-6"
+                <Box
+                  className={cls.assistantsGrid}
                   style={{
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(max(250px, calc((100% - 3rem) / 3)), 1fr))',
                     maxWidth: `${filteredAssistants.length * 280 + (filteredAssistants.length - 1) * 24}px`
                   }}
                 >
                   {filteredAssistants.map(renderAssistantCard)}
-                </div>
+                </Box>
               ) : (
                 <EmptyState
                   compact
@@ -184,113 +154,107 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
                   description={activeFilter === 'Favourites' && favoritedAssistants.length === 0 ? 'Favorite an assistant to see it listed on this page.' : 'Try adjusting your search or filters'}
                 />
               )}
-            </div>
+            </Box>
 
-            {/* My Tools Section - Sticky and Collapsible */}
-            <div className={`flex-shrink-0 transition-all duration-300 ${isToolsPanelCollapsed ? 'w-20' : 'w-80'}`}>
-              <div className="sticky top-8">
-                <Card className="border-2 border-gray-900 bg-white">
-                  <CardContent className="p-6">
-                    {isToolsPanelCollapsed ? (
-                      <div className="flex flex-col items-center">
+            {/* My Tools Section */}
+            <Box className={`${cls.toolsPanel} ${isToolsPanelCollapsed ? cls.toolsPanelCollapsed : cls.toolsPanelExpanded}`}>
+              <Box className={cls.toolsPanelSticky}>
+                <Card withBorder p="lg" style={{ borderWidth: 2, borderColor: 'var(--mantine-color-gray-9)' }}>
+                  {isToolsPanelCollapsed ? (
+                    <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <button
+                        onClick={() => setIsToolsPanelCollapsed(false)}
+                        className={cls.collapseButton}
+                        title="Expand My Tools"
+                      >
+                        <SlidersHorizontal size={16} color="var(--mantine-color-gray-7)" />
+                        {toolAssistants.length > 0 && (
+                          <Box className={cls.collapseBadge}>
+                            <Text size="xs" c="white" fw={600}>{toolAssistants.length}</Text>
+                          </Box>
+                        )}
+                      </button>
+                    </Box>
+                  ) : (
+                    <>
+                      <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--mantine-spacing-xs)' }}>
+                        <Title order={4}>My Tools</Title>
                         <button
-                          onClick={() => setIsToolsPanelCollapsed(false)}
-                          className="relative w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
-                          title="Expand My Tools"
+                          onClick={() => setIsToolsPanelCollapsed(true)}
+                          className={cls.collapseButton}
+                          title="Collapse My Tools"
                         >
-                          <SlidersHorizontal className="w-4 h-4 text-gray-700" />
-                          {toolAssistants.length > 0 && (
-                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
-                              <span className="text-xs text-white font-semibold">{toolAssistants.length}</span>
-                            </div>
-                          )}
+                          <SlidersHorizontal size={16} color="var(--mantine-color-gray-7)" />
                         </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="flex items-center justify-between mb-2">
-                          <h2 className="text-lg font-bold text-gray-900">My Tools</h2>
-                          <button
-                            onClick={() => setIsToolsPanelCollapsed(true)}
-                            className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
-                            title="Collapse My Tools"
-                          >
-                            <SlidersHorizontal className="w-4 h-4 text-gray-700" />
-                          </button>
-                        </div>
-                        <p className="text-sm text-gray-500 mb-4">
-                          Select up to 3 assistants to be callable as tools by your{' '}
-                          <button
-                            onClick={onNavigateToHome}
-                            className="text-gray-900 underline hover:text-gray-700"
-                          >
-                            Personal AI Assistant
-                          </button>
-                          .
-                        </p>
+                      </Box>
+                      <Text size="sm" c="gray.5" mb="md">
+                        Select up to 3 assistants to be callable as tools by your{' '}
+                        <button
+                          onClick={onNavigateToHome}
+                          className={cls.homeLink}
+                        >
+                          Personal AI Assistant
+                        </button>
+                        .
+                      </Text>
 
-                        {/* Tool Slots */}
-                        <div className="space-y-3">
-                          {[0, 1, 2].map((index) => {
-                            const toolAssistantId = toolAssistants[index];
-                            const toolAssistant = toolAssistantId
-                              ? [...topRatedAssistants, ...essentialAssistants, ...Object.values(roleBasedAssistants).flat()]
-                                  .find(a => a.id === toolAssistantId)
-                              : null;
+                      {/* Tool Slots */}
+                      <Box style={{ display: 'flex', flexDirection: 'column', gap: 'var(--mantine-spacing-sm)' }}>
+                        {[0, 1, 2].map((index) => {
+                          const toolAssistantId = toolAssistants[index];
+                          const toolAssistant = toolAssistantId
+                            ? [...topRatedAssistants, ...essentialAssistants, ...Object.values(roleBasedAssistants).flat()]
+                                .find(a => a.id === toolAssistantId)
+                            : null;
 
-                            if (toolAssistant) {
-                              const IconComponent = toolAssistant.icon;
-                              return (
-                                <Card
-                                  key={index}
-                                  className="border-2 border-gray-300 bg-white relative group"
-                                >
-                                  <CardContent className="!p-3">
-                                    <div className="flex items-start gap-2">
-                                      <IconContainer icon={IconComponent} size="sm" />
-                                      <div className="flex-1 min-w-0">
-                                        <h3 className="text-xs font-semibold text-gray-900 truncate mb-0.5">
-                                          {toolAssistant.name}
-                                        </h3>
-                                        <p className="text-xs text-gray-500 line-clamp-2 leading-tight">
-                                          {toolAssistant.description}
-                                        </p>
-                                      </div>
-                                      <button
-                                        onClick={() => onRemoveFromTools?.(toolAssistantId)}
-                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-100 rounded"
-                                      >
-                                        <X className="w-4 h-4 text-gray-500" />
-                                      </button>
-                                    </div>
-                                  </CardContent>
-                                </Card>
-                              );
-                            }
-
+                          if (toolAssistant) {
+                            const IconComponent = toolAssistant.icon;
                             return (
-                              <Card
-                                key={index}
-                                className="border-2 border-dashed border-gray-300 bg-gray-50"
-                              >
-                                <CardContent className="!p-3 flex items-center justify-center">
-                                  <p className="text-xs text-gray-400 text-center py-2">
-                                    Added assistant will appear here
-                                  </p>
-                                </CardContent>
+                              <Card key={index} withBorder p="sm" style={{ borderWidth: 2 }}>
+                                <Box className={cls.toolSlotFilled}>
+                                  <IconContainer icon={IconComponent} size="sm" />
+                                  <Box className={cls.toolSlotInfo}>
+                                    <Text size="xs" fw={600} c="gray.9" lineClamp={1} mb={2}>
+                                      {toolAssistant.name}
+                                    </Text>
+                                    <Text size="xs" c="gray.5" lineClamp={2} lh={1.3}>
+                                      {toolAssistant.description}
+                                    </Text>
+                                  </Box>
+                                  <button
+                                    onClick={() => onRemoveFromTools?.(toolAssistantId)}
+                                    className={cls.removeButton}
+                                  >
+                                    <X size={16} color="var(--mantine-color-gray-5)" />
+                                  </button>
+                                </Box>
                               </Card>
                             );
-                          })}
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
+                          }
+
+                          return (
+                            <Card
+                              key={index}
+                              p="sm"
+                              style={{ borderWidth: 2, borderStyle: 'dashed', borderColor: 'var(--mantine-color-gray-3)', backgroundColor: 'var(--mantine-color-gray-0)' }}
+                            >
+                              <Box className={cls.emptySlot}>
+                                <Text size="xs" c="gray.4" ta="center" py="xs">
+                                  Added assistant will appear here
+                                </Text>
+                              </Box>
+                            </Card>
+                          );
+                        })}
+                      </Box>
+                    </>
+                  )}
                 </Card>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
 
       {/* Replace Tool Modal */}
       {pendingAssistantToAdd && (
@@ -309,6 +273,6 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
           }}
         />
       )}
-    </div>
+    </Box>
   );
 }

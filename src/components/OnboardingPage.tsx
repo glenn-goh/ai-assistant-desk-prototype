@@ -1,14 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
+import { Button, TextInput, Select, Checkbox, Card, Stack, Title, Text, Divider, Box, Input } from '@mantine/core';
 import { FormField } from './shared';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Checkbox } from './ui/checkbox';
-import { Card, CardContent } from './ui/card';
-import { Separator } from './ui/separator';
-import { cn } from './ui/utils';
+import cls from './OnboardingPage.module.css';
 
 interface OnboardingPageProps {
   userProfile: import('../App').UserProfile;
@@ -24,6 +18,28 @@ const AI_STYLES = [
   { id: 'Others', label: 'Others', description: 'Describe your own style' },
 ];
 
+const JOB_ROLE_OPTIONS = [
+  { value: 'policy-strategy', label: 'Policy / Strategy' },
+  { value: 'operations', label: 'Operations' },
+  { value: 'hr-people', label: 'HR / People' },
+  { value: 'finance-procurement', label: 'Finance / Procurement' },
+  { value: 'legal-compliance', label: 'Legal / Compliance' },
+  { value: 'communications', label: 'Communications' },
+  { value: 'data-tech', label: 'Data / Tech' },
+  { value: 'other', label: 'Other' },
+];
+
+const WORK_ACTIVITIES = [
+  { id: 'drafting', label: 'Drafting documents' },
+  { id: 'reviewing', label: 'Reviewing / editing' },
+  { id: 'researching', label: 'Researching / summarising' },
+  { id: 'briefings', label: 'Preparing briefings / slides' },
+  { id: 'cases', label: 'Handling cases' },
+  { id: 'queries', label: 'Responding to queries' },
+  { id: 'analysis', label: 'Data analysis' },
+  { id: 'planning', label: 'Planning / coordination' },
+];
+
 export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: OnboardingPageProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [aiStyle, setAiStyle] = useState('Concise');
@@ -34,7 +50,6 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
   const [workActivities, setWorkActivities] = useState<string[]>([]);
 
   const handleComplete = () => {
-    // Save the personalization data
     onUpdateProfile({
       ...userProfile,
       name: name.trim() || userProfile.name,
@@ -76,39 +91,34 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gray-100 p-4">
-      <Card className="w-full max-w-2xl shadow-lg border-gray-300 bg-white">
-        <CardContent className="p-8">
+    <Box className={cls.page}>
+      <Card className={cls.card} shadow="lg" withBorder>
+        <Box className={cls.stepContent}>
           {/* Step 1: Personal Information */}
           {currentStep === 1 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <div>
-                <p className="text-xs text-gray-500 mb-2">Step 1 of 2</p>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Tell Us About Yourself
-                </h2>
-                <p className="text-gray-500">
-                  Help us personalize your experience
-                </p>
-              </div>
+            <Stack gap="lg">
+              <Box>
+                <Text size="xs" c="gray.5" mb="xs">Step 1 of 2</Text>
+                <Title order={2} mb="xs">Tell Us About Yourself</Title>
+                <Text c="gray.5">Help us personalize your experience</Text>
+              </Box>
 
-              <div className="space-y-6">
+              <Stack gap="lg">
                 {/* Name */}
                 <FormField
                   label="What would you like us to call you?"
                   htmlFor="name"
                   helperText="Choose something you're comfortable with—your first name, nickname, or preferred title."
                 >
-                  <Input
+                  <TextInput
                     id="name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => setName(e.currentTarget.value)}
                     placeholder="e.g., Jayden, Jay, Mr. Tan"
-                    className="bg-white border-gray-300"
                   />
                 </FormField>
 
-                <Separator className="bg-gray-300" />
+                <Divider color="gray.3" />
 
                 {/* Job Role */}
                 <FormField
@@ -116,143 +126,117 @@ export function OnboardingPage({ userProfile, onUpdateProfile, onComplete }: Onb
                   htmlFor="job-role"
                   helperText="This helps the AI understand your professional context."
                 >
-                  <Select value={jobRole} onValueChange={setJobRole}>
-                    <SelectTrigger id="job-role" className="bg-white border-gray-300">
-                      <SelectValue placeholder="Select your job role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="policy-strategy">Policy / Strategy</SelectItem>
-                      <SelectItem value="operations">Operations</SelectItem>
-                      <SelectItem value="hr-people">HR / People</SelectItem>
-                      <SelectItem value="finance-procurement">Finance / Procurement</SelectItem>
-                      <SelectItem value="legal-compliance">Legal / Compliance</SelectItem>
-                      <SelectItem value="communications">Communications</SelectItem>
-                      <SelectItem value="data-tech">Data / Tech</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Select
+                    id="job-role"
+                    value={jobRole}
+                    onChange={(value) => setJobRole(value || '')}
+                    data={JOB_ROLE_OPTIONS}
+                    placeholder="Select your job role"
+                  />
                   {jobRole === 'other' && (
-                    <Input
+                    <TextInput
                       placeholder="Describe your job role..."
                       value={otherJobRole}
-                      onChange={(e) => setOtherJobRole(e.target.value)}
-                      className="mt-2 bg-white border-gray-300"
+                      onChange={(e) => setOtherJobRole(e.currentTarget.value)}
+                      mt="xs"
                     />
                   )}
                 </FormField>
 
-                <Separator className="bg-gray-300" />
+                <Divider color="gray.3" />
 
                 {/* Work Activities */}
-                <div>
-                  <Label>What do you spend most of your time doing?</Label>
-                  <p className="text-xs text-gray-500 mt-1 mb-3">
+                <Box>
+                  <Input.Label>What do you spend most of your time doing?</Input.Label>
+                  <Text size="xs" c="gray.5" mt={4} mb="sm">
                     Select all that apply
-                  </p>
-                  <div className="space-y-3">
-                    {[
-                      { id: 'drafting', label: 'Drafting documents' },
-                      { id: 'reviewing', label: 'Reviewing / editing' },
-                      { id: 'researching', label: 'Researching / summarising' },
-                      { id: 'briefings', label: 'Preparing briefings / slides' },
-                      { id: 'cases', label: 'Handling cases' },
-                      { id: 'queries', label: 'Responding to queries' },
-                      { id: 'analysis', label: 'Data analysis' },
-                      { id: 'planning', label: 'Planning / coordination' },
-                    ].map((activity) => (
-                      <div key={activity.id} className="flex items-center space-x-2">
+                  </Text>
+                  <Stack gap="sm">
+                    {WORK_ACTIVITIES.map((activity) => (
+                      <Box key={activity.id} className={cls.activityItem}>
                         <Checkbox
                           id={activity.id}
                           checked={workActivities.includes(activity.id)}
-                          onCheckedChange={() => toggleActivity(activity.id)}
+                          onChange={() => toggleActivity(activity.id)}
+                          label={activity.label}
+                          size="sm"
                         />
-                        <Label htmlFor={activity.id} className="text-sm font-normal cursor-pointer">
-                          {activity.label}
-                        </Label>
-                      </div>
+                      </Box>
                     ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+                  </Stack>
+                </Box>
+              </Stack>
+            </Stack>
           )}
 
           {/* Step 2: AI Style and Tone */}
           {currentStep === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-300">
-              <div>
-                <p className="text-xs text-gray-500 mb-2">Step 2 of 2</p>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-                  Choose Your AI Style
-                </h2>
-                <p className="text-gray-500">
+            <Stack gap="lg">
+              <Box>
+                <Text size="xs" c="gray.5" mb="xs">Step 2 of 2</Text>
+                <Title order={2} mb="xs">Choose Your AI Style</Title>
+                <Text c="gray.5">
                   Select how you'd like your AI Assistant to communicate with you
-                </p>
-              </div>
+                </Text>
+              </Box>
 
-              <div className="grid grid-cols-2 gap-3">
+              <Box className={cls.styleGrid}>
                 {AI_STYLES.map((style) => (
                   <button
                     key={style.id}
                     onClick={() => setAiStyle(style.id)}
-                    className={cn(
-                      "relative p-4 rounded-lg border-2 text-left transition-all",
-                      aiStyle === style.id
-                        ? "border-gray-900 bg-gray-50"
-                        : "border-gray-300 hover:border-gray-400"
-                    )}
+                    className={`${cls.styleOption} ${aiStyle === style.id ? cls.styleOptionSelected : ''}`}
                   >
                     {aiStyle === style.id && (
-                      <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
-                        <Check className="w-3 h-3 text-white" />
-                      </div>
+                      <Box className={cls.checkIcon}>
+                        <Check size={12} color="white" />
+                      </Box>
                     )}
-                    <div className="font-semibold text-gray-900 mb-1">{style.label}</div>
-                    <div className="text-xs text-gray-500">{style.description}</div>
+                    <Text fw={600} c="gray.9" mb={4}>{style.label}</Text>
+                    <Text size="xs" c="gray.5">{style.description}</Text>
                   </button>
                 ))}
-              </div>
+              </Box>
 
               {aiStyle === 'Others' && (
-                <div className="mt-4">
-                  <Input
-                    placeholder="Describe your preferred style..."
-                    value={otherAiStyle}
-                    onChange={(e) => setOtherAiStyle(e.target.value)}
-                    className="bg-white border-gray-300"
-                  />
-                </div>
+                <TextInput
+                  placeholder="Describe your preferred style..."
+                  value={otherAiStyle}
+                  onChange={(e) => setOtherAiStyle(e.currentTarget.value)}
+                  mt="md"
+                />
               )}
-            </div>
+            </Stack>
           )}
-        </CardContent>
+        </Box>
 
         {/* Navigation */}
-        <div className="p-6 border-t border-gray-300 bg-gray-100">
-          <div className="flex justify-end items-center gap-4">
-            <div className="flex items-center gap-3">
+        <Box className={cls.footer}>
+          <Box className={cls.footerActions}>
+            <Box className={cls.footerButtons}>
               {currentStep === 2 && (
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="gap-2 h-12 text-base border-gray-300 hover:bg-gray-100"
+                  leftSection={<ArrowLeft size={16} />}
+                  size="md"
                 >
-                  <ArrowLeft className="w-4 h-4" />
                   Back
                 </Button>
               )}
 
               <Button
                 onClick={handleNext}
-                className="bg-gray-900 hover:bg-gray-800 text-white gap-2 h-12 text-base px-8"
+                rightSection={<ArrowRight size={16} />}
+                size="md"
+                px="xl"
               >
                 {currentStep === 1 ? 'Next' : 'Complete Setup'}
-                <ArrowRight className="w-4 h-4" />
               </Button>
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
       </Card>
-    </div>
+    </Box>
   );
 }

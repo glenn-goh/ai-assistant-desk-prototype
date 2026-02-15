@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--mantine-radius-lg);
+  background-color: var(--mantine-color-gray-1);
+}
+
+.sm {
+  width: 2rem;
+  height: 2rem;
+}
+
+.md {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.lg {
+  width: 3rem;
+  height: 3rem;
+}

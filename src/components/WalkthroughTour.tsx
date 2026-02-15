@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, ChevronRight, ChevronLeft } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '@mantine/core';
+import classes from './WalkthroughTour.module.css';
 
 interface TourStep {
   target: string; // CSS selector for the element to highlight
@@ -90,7 +91,7 @@ export function WalkthroughTour({ isOpen, onClose }: WalkthroughTourProps) {
           left = rect.left - 320 - 20;
           break;
         case 'top':
-          top = rect.top - 250; // Increased offset to ensure tooltip is above
+          top = rect.top - 250;
           left = rect.left + rect.width / 2 - 160;
           break;
         case 'bottom':
@@ -132,19 +133,16 @@ export function WalkthroughTour({ isOpen, onClose }: WalkthroughTourProps) {
       {targetElement && (
         <>
           {/* Click handler overlay */}
-          <div className="fixed inset-0 z-[9998]" onClick={handleClose} />
+          <div className={classes.clickOverlay} onClick={handleClose} />
 
           {/* Spotlight effect - creates overlay with cutout */}
           <div
-            className="fixed z-[9999] pointer-events-none"
+            className={classes.spotlight}
             style={{
               top: targetElement.getBoundingClientRect().top - 4,
               left: targetElement.getBoundingClientRect().left - 4,
               width: targetElement.getBoundingClientRect().width + 8,
               height: targetElement.getBoundingClientRect().height + 8,
-              border: '3px solid white',
-              borderRadius: '8px',
-              boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)',
             }}
           />
         </>
@@ -152,49 +150,45 @@ export function WalkthroughTour({ isOpen, onClose }: WalkthroughTourProps) {
 
       {/* Tooltip */}
       <div
-        className="fixed z-[10000] bg-white border-2 border-gray-900 rounded-lg shadow-xl p-6 w-80"
+        className={classes.tooltip}
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,
         }}
       >
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex-1">
-            <div className="text-xs text-gray-500 mb-1">
+        <div className={classes.tooltipHeader}>
+          <div className={classes.tooltipHeaderContent}>
+            <div className={classes.stepIndicator}>
               Step {currentStep + 1} of {tourSteps.length}
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">{step.title}</h3>
+            <h3 className={classes.tooltipTitle}>{step.title}</h3>
           </div>
-          <button
-            onClick={handleClose}
-            className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-          >
-            <X className="w-4 h-4 text-gray-500" />
+          <button onClick={handleClose} className={classes.closeButton}>
+            <X size={16} color="var(--mantine-color-gray-5)" />
           </button>
         </div>
 
-        <p className="text-sm text-gray-700 mb-6">{step.content}</p>
+        <p className={classes.tooltipBody}>{step.content}</p>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className={classes.tooltipActions}>
           {!isFirstStep && (
             <Button
-              variant="ghost"
-              size="sm"
+              variant="subtle"
+              color="gray"
+              size="xs"
               onClick={handlePrev}
-              className="gap-1"
+              leftSection={<ChevronLeft size={16} />}
             >
-              <ChevronLeft className="w-4 h-4" />
               Previous
             </Button>
           )}
 
           <Button
-            size="sm"
+            size="xs"
             onClick={handleNext}
-            className="bg-gray-900 hover:bg-gray-800 text-white gap-1"
+            rightSection={!isLastStep ? <ChevronRight size={16} /> : undefined}
           >
             {isLastStep ? 'Finish' : 'Next'}
-            {!isLastStep && <ChevronRight className="w-4 h-4" />}
           </Button>
         </div>
       </div>

@@ -1,0 +1,76 @@
+.clickOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+}
+
+.spotlight {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  border: 3px solid white;
+  border-radius: var(--mantine-radius-lg);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 10000;
+  background-color: var(--mantine-color-white);
+  border: 2px solid var(--mantine-color-gray-9);
+  border-radius: var(--mantine-radius-lg);
+  box-shadow: var(--mantine-shadow-xl);
+  padding: var(--mantine-spacing-xl);
+  width: 320px;
+}
+
+.tooltipHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.tooltipHeaderContent {
+  flex: 1;
+}
+
+.stepIndicator {
+  font-size: var(--mantine-font-size-xs);
+  color: var(--mantine-color-gray-5);
+  margin-bottom: var(--mantine-spacing-xs);
+}
+
+.tooltipTitle {
+  font-size: var(--mantine-font-size-lg);
+  font-weight: 600;
+  color: var(--mantine-color-gray-9);
+}
+
+.closeButton {
+  padding: var(--mantine-spacing-xs);
+  border-radius: var(--mantine-radius-lg);
+  transition: background-color 150ms ease;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.closeButton:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.tooltipBody {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-7);
+  margin-bottom: var(--mantine-spacing-xl);
+}
+
+.tooltipActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--mantine-spacing-sm);
+}

@@ -1,0 +1,9 @@
+.infoBox {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-md);
+  background-color: var(--mantine-color-gray-1);
+  border-radius: var(--mantine-radius-lg);
+  border: 1px solid var(--mantine-color-gray-3);
+}

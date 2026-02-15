@@ -1,5 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
+import { Box, Text, Title } from '@mantine/core';
 import { IconContainer } from './IconContainer';
+import classes from './ListItemRow.module.css';
 
 interface ListItemRowProps {
   icon: LucideIcon;
@@ -10,18 +12,18 @@ interface ListItemRowProps {
   className?: string;
 }
 
-export function ListItemRow({ icon, title, subtitle, onClick, rightContent, className = '' }: ListItemRowProps) {
+export function ListItemRow({ icon, title, subtitle, onClick, rightContent, className }: ListItemRowProps) {
   return (
-    <div
+    <Box
       onClick={onClick}
-      className={`flex items-center gap-4 p-4 bg-white rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-gray-200 ${className}`}
+      className={`${classes.row}${className ? ` ${className}` : ''}`}
     >
       <IconContainer icon={icon} size="md" />
-      <div className="flex-1 min-w-0">
-        <h3 className="text-base font-medium text-gray-900 truncate">{title}</h3>
-        <p className="text-sm text-gray-500 truncate">{subtitle}</p>
-      </div>
+      <Box className={classes.content}>
+        <Title order={3} size="md" fw={500} c="gray.9" lineClamp={1}>{title}</Title>
+        <Text size="sm" c="gray.5" lineClamp={1}>{subtitle}</Text>
+      </Box>
       {rightContent}
-    </div>
+    </Box>
   );
 }

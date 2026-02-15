@@ -1,0 +1,45 @@
+.appShell {
+  display: flex;
+  height: 100vh;
+}
+
+.incognitoShell {
+  background-color: var(--mantine-color-gray-9);
+  padding: 40px 8px 8px;
+  position: relative;
+}
+
+.normalShell {
+  background: linear-gradient(to bottom right, #ede9fe, #fce7f3, #dbeafe);
+}
+
+.incognitoCloseButton {
+  position: absolute;
+  top: 8px;
+  right: 16px;
+  padding: 6px;
+  border-radius: var(--mantine-radius-md);
+  transition: background-color 150ms ease;
+  color: white;
+  z-index: 10;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.incognitoCloseButton:hover {
+  background-color: var(--mantine-color-gray-8);
+}
+
+.contentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.incognitoContent {
+  border-radius: var(--mantine-radius-xl);
+  overflow: hidden;
+}

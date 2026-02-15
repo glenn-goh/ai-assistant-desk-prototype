@@ -1,0 +1,75 @@
+.card {
+  transition: all 300ms ease;
+  border: 1px solid var(--mantine-color-gray-3);
+  box-shadow: var(--mantine-shadow-xs);
+  background-color: var(--mantine-color-white);
+  overflow: hidden;
+  position: relative;
+}
+
+.card:hover {
+  box-shadow: var(--mantine-shadow-md);
+}
+
+.cardWithTools {
+  display: flex;
+  flex-direction: column;
+}
+
+.contentWithTools {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.topRight {
+  position: absolute;
+  top: var(--mantine-spacing-lg);
+  right: var(--mantine-spacing-lg);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconButton {
+  padding: 6px;
+  border-radius: var(--mantine-radius-lg);
+  transition: background-color 150ms ease;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.iconButton:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.body {
+  cursor: pointer;
+  margin-bottom: var(--mantine-spacing-lg);
+}
+
+.bodyWithTools {
+  flex: 1;
+  cursor: pointer;
+}
+
+.title {
+  font-size: var(--mantine-font-size-md);
+  font-weight: 700;
+  color: var(--mantine-color-gray-9);
+  margin-bottom: var(--mantine-spacing-sm);
+  transition: color 150ms ease;
+}
+
+.card:hover .title {
+  color: var(--mantine-color-gray-7);
+}
+
+.description {
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-5);
+  line-height: 1.6;
+}

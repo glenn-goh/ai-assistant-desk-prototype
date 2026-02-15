@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import { Input } from '../ui/input';
+import { TextInput } from '@mantine/core';
 
 interface SearchInputProps {
   value: string;
@@ -14,20 +14,19 @@ export function SearchInput({
   value,
   onChange,
   placeholder = 'Search...',
-  className = '',
-  inputClassName = '',
+  className,
+  inputClassName,
   autoFocus,
 }: SearchInputProps) {
   return (
-    <div className={`relative ${className}`}>
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-      <Input
-        placeholder={placeholder}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`pl-10 bg-white ${inputClassName}`}
-        autoFocus={autoFocus}
-      />
-    </div>
+    <TextInput
+      placeholder={placeholder}
+      value={value}
+      onChange={(e) => onChange(e.currentTarget.value)}
+      leftSection={<Search size={16} />}
+      autoFocus={autoFocus}
+      className={className}
+      classNames={inputClassName ? { input: inputClassName } : undefined}
+    />
   );
 }

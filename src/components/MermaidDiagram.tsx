@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import mermaid from 'mermaid';
+import classes from './MermaidDiagram.module.css';
 
 mermaid.initialize({
   startOnLoad: false,
@@ -36,8 +37,8 @@ export default function MermaidDiagram({ chart, maxWidth }: { chart: string; max
   return (
     <div
       ref={containerRef}
-      className="mermaid-diagram [&_svg]:!max-w-full [&_svg]:!w-full [&_svg]:h-auto"
-      style={{ padding: '16px 0', maxWidth: maxWidth || undefined }}
+      className={classes.diagram}
+      style={maxWidth ? { maxWidth } : undefined}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
