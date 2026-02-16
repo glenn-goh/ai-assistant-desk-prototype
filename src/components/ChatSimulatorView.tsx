@@ -985,8 +985,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   onSendMessage?.(message);
                 }}
                 autoFocus={true}
-                bookmarkedAssistants={favoritedAssistants}
-                assistantType={assistantType}
+                toolAssistants={toolAssistants}
                 disabled={isProcessingRichResponse || awaitingDecision}
                 onNavigateToExplore={onNavigateToExplore}
               />
@@ -997,7 +996,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 onChange={setTypedText}
                 autoTypeText={getCurrentTargetText()}
                 disabled={!isTyping}
-                assistantType={assistantType}
+                toolAssistants={toolAssistants}
                 onNavigateToExplore={onNavigateToExplore}
               />
             )}
@@ -1094,7 +1093,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   {selectedArtifact.fileType === 'chart' ? (
                     <MermaidDiagram chart={selectedArtifact.content} />
                   ) : (
-                    <div className={`prose-lofi ${cls.artifactContent}`} dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
+                    <div className={`prose-lofi artifact-content ${cls.artifactContent}`} dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
                   )}
                 </Box>
               </Box>

@@ -13,7 +13,7 @@ No test or lint commands are configured. Requires Node.js v18+.
 
 ## Architecture Overview
 
-React + TypeScript prototype for an AI Assistant Desk application using Vite, Tailwind CSS 4, and Radix UI primitives. Lo-fi wireframe aesthetic with grayscale colors.
+React + TypeScript prototype for an AI Assistant Desk application using Vite, Mantine v8, and CSS Modules. Lo-fi wireframe aesthetic with grayscale colors.
 
 **Path alias:** `@` maps to `./src` (configured in vite.config.ts and tsconfig).
 **Base path:** `/ai-assistant-desk-prototype/mvp/` (for GitHub Pages deployment).
@@ -90,15 +90,30 @@ interface UserProfile { name, email, role, agency, profileDescription?, workFocu
 
 ### Styling
 
-Lo-fi grayscale aesthetic with CSS variables defined in `src/styles/globals.css`:
+**Stack:** Mantine v8 + CSS Modules + Mantine CSS variables. Tailwind CSS has been fully removed.
+
+**Theme:** Defined in `src/theme/theme.ts` — Mantine `createTheme()` with lo-fi grayscale palette, Source Sans 3 font, custom spacing/radius/shadows. Use Mantine props (`size`, `c`, `fw`, etc.) for component styling; they take precedence over CSS module classes.
+
+**Global styles** in `src/styles/globals.css`:
 - 5-color grayscale palette: Gray-100 (lightest) through Gray-900 (darkest), plus red for errors
-- User messages: `bg-gray-100` bubbles, right-aligned. Assistant messages: plain text, left-aligned
+- User messages: gray-1 background bubbles, right-aligned. Assistant messages: plain text, left-aligned
 - 16px font size with 1.7 line-height for messages
-- `max-w-chat` custom utility for chat content width constraint
-- `.prose-lofi` class for artifact content with grayscale color overrides
-- Dark mode support via `.dark` class selector
+- `max-w-chat` custom variable for chat content width constraint (700px)
+- `.prose-lofi` class for rendered HTML content with grayscale filter + typography overrides
 - Custom animations: `@dotBounce` (thinking indicator), `@shimmer` (thinking text effect)
-- Radix UI primitives in `src/components/ui/` for accessible components
+
+**Artifact content styling** (`src/styles/artifact-tailwind.css`):
+- Artifact HTML content (in `src/data/` simulation files) contains Tailwind CSS class names baked into the HTML strings
+- Since Tailwind is removed, a scoped CSS file provides all needed Tailwind utility classes under `.artifact-content` parent selector
+- This means Tailwind classes like `flex`, `p-6`, `bg-blue-50`, etc. **only work inside** elements with the `artifact-content` class
+- The canvas artifact render in `ChatSimulatorView.tsx` applies `className="prose-lofi artifact-content"` to activate both the lo-fi filter and scoped Tailwind utilities
+- If new Tailwind classes are added to artifact HTML, they must be added to `artifact-tailwind.css`
+
+**CSS conventions:**
+- Use CSS Modules (`.module.css`) for component-specific styles
+- Use Mantine component props for size/color/spacing where possible (they override CSS module classes)
+- Use `var(--mantine-color-gray-*)` and `var(--mantine-font-size-*)` for CSS variable references
+- Do NOT use Tailwind classes in component JSX — only in artifact HTML content strings
 
 ### Project System
 
@@ -135,6 +150,230 @@ Multi-branch GitHub Pages via `.github/workflows/deploy-multi-branch.yml`:
 Original Figma design: https://www.figma.com/design/gOkwlIFZzJLoRd3JF1zp8y/AI-Assistant-Desk--UXD-s-edit
 
 
-### Mantine migration 
-Refer to the documentation for moving to use mantine lib instead of tailwind in .claude/mantine-migration. 
-Read MIGRATION-INSTRUCTIONS.md first
+### Mantine Migration (Complete)
+
+Fully migrated from Tailwind CSS 4 + Radix UI to Mantine v8 + CSS Modules. Run `npm run ladle` to view the theme documentation at localhost:61000.
+
+Detailed reference guides are in `.claude/mantine-migration/`:
+- `MIGRATION-INSTRUCTIONS.md` — Rules, conventions, and v8-specific notes
+- `tailwind-to-mantine-map.md` — Full class-by-class mapping table
+- `migration-checklist.md` — Phase-by-phase checklist
+- `theme-template.md` — Theme file template with Tailwind config mapping rules
+
+---
+
+## Tailwind to Mantine Migration Guide
+
+This section documents the complete process used to migrate this project. Use it as a reference for similar migrations.
+
+### Phase 1: Setup & Baseline
+
+**1. Install Mantine v8 alongside Tailwind (coexistence during migration)**
+```bash
+npm install @mantine/core @mantine/hooks
+```
+
+**2. Create the Mantine theme file** (`src/theme/theme.ts`)
+Map your existing Tailwind config values into Mantine's `createTheme()`:
+
+| Tailwind source | Mantine theme key |
+|----------------|-------------------|
+| Color palette (gray-100 to gray-900) | `colors.gray` — expand to 10-shade `MantineColorsTuple` |
+| `fontFamily` | `fontFamily`, `fontFamilyMonospace` |
+| `fontSize` | `fontSizes` — use `rem()` helper: `xs: rem(12), sm: rem(14), md: rem(16)` |
+| `spacing` | `spacing` — map Tailwind's 4px multiples: `xs: rem(4), sm: rem(8), md: rem(12)` |
+| `borderRadius` | `radius` + `defaultRadius` |
+| `boxShadow` | `shadows` |
+| `screens` | `breakpoints` |
+| `lineHeight` | `lineHeights` |
+
+Also configure component defaults in `components` key to match your existing Radix UI/Tailwind styling (Button radius, Card padding, Modal centering, etc.).
+
+**3. Wrap app in MantineProvider** (`src/main.tsx`)
+```tsx
+import '@mantine/core/styles.css';
+import './styles/globals.css';
+import { MantineProvider } from '@mantine/core';
+import { theme } from './theme/theme';
+
+createRoot(document.getElementById('root')!).render(
+  <MantineProvider theme={theme}>
+    <App />
+  </MantineProvider>
+);
+```
+
+**4. Capture baseline screenshots** for visual regression comparison (optional but recommended)
+
+### Phase 2: File-by-File Component Migration
+
+Migrate one file completely before moving to the next. A migrated file must have **zero Tailwind classes** remaining.
+
+**Migration order:** shared components → feature components → page components → layout/shell
+
+#### For each component file:
+
+**Step 1: Replace Tailwind layout classes with Mantine components or CSS Modules**
+
+| Tailwind pattern | Mantine replacement |
+|-----------------|---------------------|
+| `<div className="flex items-center gap-2">` | `<Group gap="sm">` |
+| `<div className="flex flex-col gap-4">` | `<Stack gap="md">` |
+| `<div className="grid grid-cols-2 gap-4">` | `<SimpleGrid cols={2} spacing="md">` |
+| `<div className="flex flex-1">` | `<Box style={{ flex: 1 }}>` or CSS module |
+| `<div className="relative">` | `<Box pos="relative">` |
+| `<div className="container mx-auto">` | `<Container>` |
+
+**Step 2: Replace Tailwind utility classes with Mantine props on `<Box>`, `<Text>`, etc.**
+
+| Tailwind | Mantine prop |
+|----------|-------------|
+| `className="p-4 mt-2 mb-4"` | `p="md" mt="sm" mb="md"` |
+| `className="text-sm text-gray-500"` | `<Text size="sm" c="gray.5">` |
+| `className="font-semibold"` | `fw={600}` |
+| `className="text-center"` | `ta="center"` |
+| `className="truncate"` | `<Text truncate>` |
+| `className="rounded-lg shadow-md"` | `<Paper radius="lg" shadow="md">` |
+| `className="bg-gray-100"` | `bg="gray.1"` |
+
+**Step 3: Move complex/custom styling to CSS Modules**
+
+Create `ComponentName.module.css` next to the component. All values must reference Mantine CSS variables:
+
+```css
+/* ✅ Correct — uses Mantine CSS variables */
+.wrapper {
+  padding: var(--mantine-spacing-md);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-lg);
+  font-size: var(--mantine-font-size-sm);
+  color: var(--mantine-color-gray-7);
+  background-color: var(--mantine-color-gray-0);
+  transition: background-color 150ms ease;
+}
+
+.wrapper:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+/* ❌ Wrong — hardcoded values */
+.wrapper {
+  padding: 16px;
+  border: 1px solid #d4d4d4;
+  font-size: 14px;
+}
+```
+
+Import in the component:
+```tsx
+import cls from './ComponentName.module.css';
+// ...
+<div className={cls.wrapper}>
+```
+
+**Step 4: Replace Radix UI primitives with Mantine equivalents**
+
+| Radix UI | Mantine |
+|----------|---------|
+| `<Dialog>` | `<Modal>` |
+| `<Popover>` | `<Popover>` |
+| `<DropdownMenu>` | `<Menu>` |
+| `<Tooltip>` | `<Tooltip>` |
+| `<Select>` | `<Select>` |
+| `<Switch>` | `<Switch>` |
+| `<Tabs>` | `<Tabs>` |
+| `<Separator>` | `<Divider>` |
+
+**Step 5: Verify** — run `npm run dev`, check browser, confirm no visual regressions
+
+### Phase 3: Tailwind Removal
+
+After all components are migrated:
+
+```bash
+npm uninstall tailwindcss @tailwindcss/vite  # or whatever TW packages were installed
+```
+
+- Delete `tailwind.config.js` / `tailwind.config.ts`
+- Remove `@tailwind` / `@import "tailwindcss"` directives from CSS files
+- Remove Tailwind PostCSS plugins from `postcss.config.js`
+- Grep the entire codebase for any remaining Tailwind classes: `grep -r "className.*bg-\|className.*text-\|className.*flex\|className.*p-\|className.*m-" src/`
+
+### Phase 4: Handling Embedded HTML with Tailwind Classes
+
+If your app renders raw HTML strings (e.g., artifact/canvas content from data files) that contain Tailwind classes, you have two options:
+
+**Option A: Scoped CSS file (recommended — no HTML changes needed)**
+
+Create a CSS file with all needed Tailwind utility classes scoped under a parent selector:
+
+```css
+/* src/styles/artifact-tailwind.css */
+.artifact-content {
+  .flex { display: flex; }
+  .p-6 { padding: 1.5rem; }
+  .bg-blue-50 { background-color: #eff6ff; }
+  .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  /* ... all classes used in the HTML content ... */
+}
+```
+
+Then wrap the HTML render in the scoped class:
+```tsx
+<div className="artifact-content" dangerouslySetInnerHTML={{ __html: content }} />
+```
+
+To extract all classes: search data files for `class="..."` patterns and deduplicate.
+
+**Option B: Convert HTML to inline styles** — more work, but eliminates all Tailwind dependency.
+
+### Key Gotchas & Lessons Learned
+
+**1. Mantine props override CSS module classes.** The `<Text size="xs" c="gray.4">` props generate inline styles that beat CSS module specificity. When a Mantine component ignores your CSS class for `font-size` or `color`, use the component's props instead.
+
+**2. Tailwind gray shades ≠ Mantine gray shades.** Tailwind uses 50–900, Mantine uses 0–9. Approximate mapping: Tailwind 50→Mantine 0, 100→1, 200→2, ..., 900→9.
+
+**3. Icons: keep Lucide React.** Do NOT swap to Tabler icons. Lucide works fine inside Mantine components:
+```tsx
+<Button leftSection={<Search size={16} />}>Search</Button>
+<ActionIcon variant="subtle" color="gray" size="lg">
+  <Paperclip size={18} />
+</ActionIcon>
+```
+
+**4. Custom SVG icons need explicit props.** If you have custom icon components (like `IncognitoIcon`), add `size` and `style` props to match the lucide icon API so they work consistently in `ActionIcon`/`TooltipIconButton` wrappers.
+
+**5. CSS nesting works in CSS Modules.** Vite + PostCSS supports nested selectors:
+```css
+.messageGroup:hover .userActions { opacity: 1; }
+```
+
+**6. Mantine v8 specifics:**
+- `Switch` shows a check indicator inside the thumb by default — set `withThumbIndicator: false` to match v7
+- `Popover` `hideDetached` defaults to `true` — popovers auto-close when target leaves DOM
+- `Menu.Item` no longer uses `data-hovered` — use `:hover` and `:focus` pseudo-classes
+- Import `@mantine/core/styles.css` in entry file (bundles all needed global styles)
+
+**7. Spacing mapping from this project:**
+| Tailwind | Pixels | Mantine |
+|----------|--------|---------|
+| `p-1` / `gap-1` | 4px | `xs` |
+| `p-2` / `gap-2` | 8px | `sm` |
+| `p-3` / `gap-3` | 12px | `md` |
+| `p-4` / `gap-4` | 16px | `lg` |
+| `p-6` / `gap-6` | 24px | `xl` |
+| `p-8` | 32px | `{32}` (numeric) |
+
+**8. Responsive breakpoints:**
+```tsx
+// Mantine component props
+<SimpleGrid cols={{ base: 1, sm: 2, md: 3 }}>
+
+// CSS Module
+@media (min-width: 48em) { /* sm */ }
+@media (min-width: 62em) { /* md */ }
+
+// Visibility
+<Box visibleFrom="md">  // hidden on mobile, visible from md up
+<Box hiddenFrom="md">   // visible on mobile, hidden from md up
+```

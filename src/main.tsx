@@ -5,6 +5,7 @@
   import App from "./App.tsx";
   import "@mantine/core/styles.css";
   import "./styles/globals.css";
+  import "./styles/artifact-tailwind.css";
 
   createRoot(document.getElementById("root")!).render(
     <MantineProvider theme={theme}>

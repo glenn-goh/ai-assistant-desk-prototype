@@ -91,7 +91,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                   Incognito chat
                 </Title>
                 <Box className={cls.incognitoHint}>
-                  <IncognitoIcon className="w-4 h-4 text-gray-500" />
+                  <IncognitoIcon size={16} style={{ color: 'var(--mantine-color-gray-5)' }} />
                   <Text size="sm" c="gray.5">
                     Incognito chat does not reference memories or save to chat history
                   </Text>
@@ -174,7 +174,8 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                   setIsIncognito(newValue);
                   onIncognitoChange?.(newValue);
                 }}
-                size="sm"
+                size="lg"
+                iconSize={18}
                 color="gray.5"
               />
             )}

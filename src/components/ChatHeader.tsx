@@ -116,7 +116,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
       <Box className={cls.titleArea}>
         {isIncognito ? (
           <Box className={cls.incognitoLabel}>
-            <IncognitoIcon className="w-4 h-4 text-gray-600" />
+            <IncognitoIcon size={16} style={{ color: 'var(--mantine-color-gray-6)' }} />
             <Text size="sm" fw={500} c="gray.9">
               Incognito chat
             </Text>
@@ -174,7 +174,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
           <ClassificationBadge
             classification={classificationType}
             label={classificationLabel}
-            className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-lg border border-gray-300"
           />
         )}
       </Box>
