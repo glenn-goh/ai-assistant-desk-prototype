@@ -31,8 +31,23 @@
   --red-500: #ef4444;
   --red-600: #dc2626;
 
+  /* Layout */
+  --max-w-chat: 700px;
+
   /* Border radius */
   --radius: 8px;
+}
+
+/* ---------- Minimal reset (replaces Tailwind Preflight) ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+  margin: 0;
 }
 
 /* ---------- Base typography ---------- */
@@ -53,9 +68,30 @@ body {
 .prose-lofi {
   filter: grayscale(100%);
   max-width: none;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.7;
   color: var(--gray-700);
+}
+
+/* Tighter paragraph/heading margins matching Tailwind prose-sm */
+.prose-lofi p {
+  margin-top: 0.15em;
+  margin-bottom: 0.15em;
+}
+
+.prose-lofi p:first-child {
+  margin-top: 0;
+}
+
+.prose-lofi h1, .prose-lofi h2, .prose-lofi h3,
+.prose-lofi h4, .prose-lofi h5, .prose-lofi h6 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+.prose-lofi ol, .prose-lofi ul {
+  margin-top: 0.15em;
+  margin-bottom: 0.15em;
 }
 
 .prose-lofi table {

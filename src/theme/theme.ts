@@ -193,15 +193,30 @@ export const theme = createTheme({
       defaultProps: {
         radius: 'lg',
       },
+      styles: {
+        input: {
+          borderColor: 'var(--mantine-color-gray-3)',
+        },
+      },
     },
     Textarea: {
       defaultProps: {
         radius: 'lg',
       },
+      styles: {
+        input: {
+          borderColor: 'var(--mantine-color-gray-3)',
+        },
+      },
     },
     Select: {
       defaultProps: {
         radius: 'lg',
+      },
+      styles: {
+        input: {
+          borderColor: 'var(--mantine-color-gray-3)',
+        },
       },
     },
     Badge: {
@@ -212,18 +227,53 @@ export const theme = createTheme({
     },
     Modal: {
       defaultProps: {
-        radius: 'lg',
+        radius: 'xl',
         centered: true,
+        padding: 'lg',
+      },
+      styles: {
+        content: {
+          border: '1px solid var(--mantine-color-gray-3)',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+        },
+        header: {
+          paddingBottom: '2px',
+        },
+        title: {
+          fontSize: 'var(--mantine-font-size-lg)',
+          fontWeight: 700,
+        },
       },
     },
     Popover: {
       defaultProps: {
         radius: 'lg',
       },
+      styles: {
+        dropdown: {
+          border: '2px solid var(--mantine-color-gray-9)',
+        },
+      },
+    },
+    Menu: {
+      defaultProps: {
+        radius: 'lg',
+      },
+      styles: {
+        dropdown: {
+          border: '2px solid var(--mantine-color-gray-9)',
+        },
+      },
     },
     Tooltip: {
       defaultProps: {
         withArrow: true,
+      },
+      styles: {
+        tooltip: {
+          fontSize: 'var(--mantine-font-size-sm)',
+          padding: '6px 12px',
+        },
       },
     },
     ActionIcon: {

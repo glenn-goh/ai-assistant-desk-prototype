@@ -1,4 +1,5 @@
-import { SegmentedControl } from '@mantine/core';
+import { Chip, Group } from '@mantine/core';
+import classes from './FilterTabs.module.css';
 
 interface FilterTabsProps {
   tabs: string[];
@@ -10,12 +11,24 @@ interface FilterTabsProps {
 
 export function FilterTabs({ tabs, activeTab, onTabChange, size = 'md', className }: FilterTabsProps) {
   return (
-    <SegmentedControl
-      value={activeTab}
-      onChange={onTabChange}
-      data={tabs}
-      size={size === 'sm' ? 'xs' : 'sm'}
-      className={className}
-    />
+    <Chip.Group value={activeTab} onChange={(value) => value && onTabChange(value as string)}>
+      <Group gap="sm" className={className}>
+        {tabs.map((tab) => (
+          <Chip
+            key={tab}
+            value={tab}
+            variant="outline"
+            size={size === 'sm' ? 'sm' : 'md'}
+            icon={<></>}
+            classNames={{
+              label: classes.chip,
+              iconWrapper: classes.iconWrapper,
+            }}
+          >
+            {tab}
+          </Chip>
+        ))}
+      </Group>
+    </Chip.Group>
   );
 }

@@ -196,7 +196,7 @@ export function ChatSidebar({
 
         {/* Collapsed icons */}
         <Box className={cls.collapsedIcons}>
-          <TooltipIconButton icon={SquarePen} tooltip="New Chat (⇧⌘O)" onClick={onNewChat} side="right" className="p-2 rounded-lg hover:bg-gray-200 transition-colors text-gray-700" />
+          <TooltipIconButton icon={SquarePen} tooltip="New Chat (⇧⌘O)" onClick={onNewChat} side="right" />
         </Box>
 
         {/* Settings at bottom */}
@@ -230,7 +230,7 @@ export function ChatSidebar({
           <Text size="lg" fw={700} c="gray.9">
             AI Assistant Desk (MVP)
           </Text>
-          <TooltipIconButton icon={PanelLeft} tooltip="Collapse sidebar" onClick={onClose} side="bottom" className="p-1 rounded-lg hover:bg-gray-200 transition-colors text-gray-500 hover:text-gray-700" />
+          <TooltipIconButton icon={PanelLeft} tooltip="Collapse sidebar" onClick={onClose} side="bottom" />
         </Box>
 
         {/* Scrollable Content Area */}
@@ -588,6 +588,7 @@ export function ChatSidebar({
                                   <button
                                     onClick={onNewChat}
                                     className={cls.emptyLink}
+                                    style={{ fontWeight: 600 }}
                                   >
                                     new chat
                                   </button>

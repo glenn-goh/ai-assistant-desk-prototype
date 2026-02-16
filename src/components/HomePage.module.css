@@ -19,7 +19,7 @@
   width: 100%;
   max-width: var(--max-w-chat, 48rem);
   margin: 0 auto;
-  padding: 0 var(--mantine-spacing-lg);
+  padding: 0 var(--mantine-spacing-xl);
 }
 
 .welcomeHeader {
@@ -36,7 +36,7 @@
 .classificationRow {
   display: flex;
   align-items: center;
-  gap: var(--mantine-spacing-md);
+  gap: var(--mantine-spacing-lg);
   margin-bottom: var(--mantine-spacing-xs);
 }
 
@@ -46,32 +46,53 @@
   gap: var(--mantine-spacing-xs);
 }
 
-.classificationSelect {
-  width: auto;
+.classificationTrigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  font-size: var(--mantine-font-size-sm);
+  background: white;
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: var(--mantine-radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
 }
 
-.selectOptionContent {
+.classificationTrigger:hover {
+  background-color: var(--mantine-color-gray-0);
+}
+
+.classDropdownHeader {
+  padding: var(--mantine-spacing-md);
+}
+
+.classDropdownItem {
   display: flex;
   align-items: flex-start;
-  gap: var(--mantine-spacing-sm);
-  padding: var(--mantine-spacing-xs) 0;
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  border-radius: var(--mantine-radius-md);
+  cursor: pointer;
+  width: 100%;
+  background: none;
+  border: none;
+  text-align: left;
 }
 
-.selectOptionIcon {
-  flex-shrink: 0;
-  margin-top: 2px;
+.classDropdownItem:hover {
+  background-color: var(--mantine-color-gray-1);
 }
 
 .chatInputWrapper {
-  border-radius: var(--mantine-radius-lg);
-  border: 1px solid var(--mantine-color-gray-3);
-  background-color: white;
+  /* border/bg handled by MessageInput wrapper */
 }
 
 .promptSuggestions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--mantine-spacing-xs);
+  gap: var(--mantine-spacing-sm);
   margin-top: var(--mantine-spacing-xl);
   transition: opacity 150ms ease;
 }
@@ -82,8 +103,9 @@
 }
 
 .promptChip {
-  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  padding: 8px 12px;
   font-size: var(--mantine-font-size-sm);
+  font-weight: 500;
   border-radius: 9999px;
   transition: background-color 150ms ease;
   background-color: white;

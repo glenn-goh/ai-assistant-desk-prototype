@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tooltip, ActionIcon } from '@mantine/core';
+import { Tooltip, ActionIcon, type MantineSize } from '@mantine/core';
 
 interface TooltipIconButtonProps {
   icon: React.ComponentType<{ className?: string; size?: number }>;
@@ -8,8 +8,11 @@ interface TooltipIconButtonProps {
   side?: 'top' | 'right' | 'bottom' | 'left';
   delayDuration?: number;
   className?: string;
-  iconClassName?: string;
   disabled?: boolean;
+  size?: MantineSize;
+  iconSize?: number;
+  active?: boolean;
+  color?: string;
 }
 
 export function TooltipIconButton({
@@ -19,20 +22,23 @@ export function TooltipIconButton({
   side = 'top',
   delayDuration,
   className,
-  iconClassName,
   disabled,
+  size = 'md',
+  iconSize = 18,
+  active,
+  color = 'gray',
 }: TooltipIconButtonProps) {
   return (
     <Tooltip label={tooltip} position={side} openDelay={delayDuration}>
       <ActionIcon
         onClick={onClick}
-        variant="subtle"
-        color="gray"
-        size="lg"
+        variant={active ? 'light' : 'subtle'}
+        color={color}
+        size={size}
         disabled={disabled}
         className={className}
       >
-        <Icon size={20} className={iconClassName} />
+        <Icon size={iconSize} />
       </ActionIcon>
     </Tooltip>
   );

@@ -1,5 +1,5 @@
 // Custom Incognito Icon (Fedora Hat + Binoculars)
-export function IncognitoIcon({ className }: { className?: string }) {
+export function IncognitoIcon({ className, size }: { className?: string; size?: number }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -9,6 +9,8 @@ export function IncognitoIcon({ className }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      width={size}
+      height={size}
     >
       {/* Fedora Hat */}
       <path d="M4 10c0-1.5 1.5-3 4-3h8c2.5 0 4 1.5 4 3" />

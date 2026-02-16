@@ -22,7 +22,8 @@ async function shot(page: import('@playwright/test').Page, name: string, fullPag
 
 /** Dismiss the walkthrough tour overlay if it appears. */
 async function dismissWalkthrough(page: import('@playwright/test').Page) {
-  const closeBtn = page.locator('.fixed.inset-0 ~ div button:has(svg.lucide-x), [role="dialog"] button:has(svg.lucide-x)').first();
+  // Walkthrough overlay uses CSS Modules (z-index 10000 tooltip with close button containing X icon)
+  const closeBtn = page.locator('button:has(svg.lucide-x)').first();
   await page.waitForTimeout(800);
   try {
     if (await closeBtn.isVisible({ timeout: 2000 })) {
@@ -61,6 +62,14 @@ test('capture baseline screenshots', async ({ page }) => {
   await page.waitForTimeout(500);
   await shot(page, '02-tools-popover');
   // Close the popover
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(300);
+
+  // ── 2b. Home page — classification dropdown ──────────────────
+  const classificationBtn = page.locator('button:has-text("Up to R/SN")');
+  await classificationBtn.click();
+  await page.waitForTimeout(500);
+  await shot(page, '02b-classification-dropdown');
   await page.keyboard.press('Escape');
   await page.waitForTimeout(300);
 

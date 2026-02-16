@@ -13,6 +13,7 @@
 .card {
   width: 100%;
   max-width: 28rem;
+  border: 2px solid var(--mantine-color-gray-9) !important;
 }
 
 .cardContent {

@@ -122,7 +122,7 @@ export function ExplorePage({ colorTheme, fontStyle, onStartAssistantChat, userR
             placeholder="Search assistants..."
           />
 
-          <Box mt="md">
+          <Box mt="lg">
             <FilterTabs
               tabs={filterTabs}
               activeTab={activeFilter}

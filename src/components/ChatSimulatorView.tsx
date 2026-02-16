@@ -665,8 +665,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                               icon={Copy}
                               tooltip="Copy"
                               onClick={() => handleCopyMessage(msg.id, msg.content)}
-                              className="p-1.5 hover:bg-gray-100 rounded"
-                              iconClassName="w-4 h-4 text-gray-400"
+                              size="sm"
+                              iconSize={16}
                             />
                           </div>
                         </div>
@@ -844,8 +844,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                               icon={Copy}
                               tooltip="Copy"
                               onClick={() => handleCopyMessage(`sim-${idx}`, msg.text)}
-                              className="p-1.5 hover:bg-gray-100 rounded"
-                              iconClassName="w-4 h-4 text-gray-400"
+                              size="sm"
+                              iconSize={16}
                             />
                           </div>
                         </div>
@@ -1002,7 +1002,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
               />
             )}
             {((isInteractive && interactiveMessages.length > 0) || (!isInteractive && displayedMessages.length > 0)) && (
-              <Text className={cls.disclaimer}>AI can make mistakes. Check important info.</Text>
+              <Text size="xs" c="gray.4" mt="sm" className={cls.disclaimer}>AI can make mistakes. Check important info.</Text>
             )}
           </Box>
         </Box>
@@ -1043,8 +1043,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   value={selectedArtifact.title}
                   onSave={() => {}}
                   as="h2"
-                  className="text-sm font-semibold text-gray-900 cursor-pointer truncate"
-                  inputClassName="text-sm font-semibold text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                  className={cls.canvasTitle}
                 />
               ) : (
                 <Text size="sm" fw={600} c="gray.9" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Canvas</Text>
@@ -1095,7 +1094,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                   {selectedArtifact.fileType === 'chart' ? (
                     <MermaidDiagram chart={selectedArtifact.content} />
                   ) : (
-                    <div className="prose-lofi" dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
+                    <div className={`prose-lofi ${cls.artifactContent}`} dangerouslySetInnerHTML={{ __html: selectedArtifact.content }} />
                   )}
                 </Box>
               </Box>

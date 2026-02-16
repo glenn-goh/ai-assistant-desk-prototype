@@ -101,6 +101,8 @@ export function AssistantCard({ assistant, isFavorited, onToggleFavorite, onStar
             color={isInTools ? 'gray.9' : 'gray'}
             size="xs"
             mt="lg"
+            w="fit-content"
+            className={isInTools ? undefined : classes.toolsButton}
           >
             {isInTools ? 'Remove from tools' : 'Add to tools'}
           </Button>

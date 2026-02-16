@@ -1,8 +1,8 @@
 .header {
   display: flex;
   align-items: center;
-  gap: var(--mantine-spacing-sm);
-  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  gap: var(--mantine-spacing-md);
+  padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
   background-color: var(--mantine-color-gray-1);
   border-bottom: 1px solid var(--mantine-color-gray-2);
 }
@@ -10,7 +10,7 @@
 .titleArea {
   display: flex;
   align-items: center;
-  gap: var(--mantine-spacing-sm);
+  gap: var(--mantine-spacing-md);
   flex: 1;
 }
 
@@ -56,7 +56,7 @@
   font-size: var(--mantine-font-size-xs);
   background-color: var(--mantine-color-gray-1);
   color: var(--mantine-color-gray-7);
-  padding: 4px var(--mantine-spacing-xs);
+  padding: 4px var(--mantine-spacing-sm);
   border-radius: var(--mantine-radius-md);
 }
 

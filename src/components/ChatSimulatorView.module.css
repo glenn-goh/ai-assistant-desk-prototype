@@ -112,7 +112,7 @@
 .disclaimer {
   font-size: var(--mantine-font-size-xs);
   color: var(--mantine-color-gray-4);
-  margin-top: 12px;
+  margin-top: var(--mantine-spacing-sm);
   text-align: center;
 }
 
@@ -218,6 +218,16 @@
   gap: 4px;
 }
 
+.canvasTitle {
+  font-size: var(--mantine-font-size-sm);
+  font-weight: 600;
+  color: var(--mantine-color-gray-9);
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .canvasCloseButton {
   color: var(--mantine-color-gray-5);
   transition: color 150ms ease;
@@ -271,6 +281,11 @@
 .artifactDescription {
   font-size: var(--mantine-font-size-xs);
   color: var(--mantine-color-gray-5);
+}
+
+.artifactContent {
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .canvasListPanel {

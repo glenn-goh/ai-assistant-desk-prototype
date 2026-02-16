@@ -1,0 +1,41 @@
+/* Hide the checkmark icon and remove from layout */
+.iconWrapper.iconWrapper {
+  display: none;
+  width: 0;
+  max-width: 0;
+  overflow: hidden;
+}
+
+/*
+ * Specificity note: Mantine's outline variant uses
+ *   :where([data-mantine-color-scheme]) .hash:not([data-disabled])  → (0,2,0)
+ * Our single .chip class is (0,1,0) and loses. Doubling to .chip.chip
+ * gives (0,2,0), winning by load order (CSS modules load after styles.css).
+ */
+.chip.chip {
+  color: var(--mantine-color-gray-7);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  padding-block: 8px;
+  padding-inline: 16px;
+  border-radius: var(--mantine-radius-lg);
+  border: 1px solid var(--mantine-color-gray-3);
+  background-color: white;
+  cursor: pointer;
+}
+
+.chip.chip[data-checked] {
+  color: var(--mantine-color-white);
+  background-color: var(--mantine-color-gray-9);
+  border-color: var(--mantine-color-gray-9);
+  padding-inline: 16px;
+}
+
+.chip.chip:hover {
+  background-color: white;
+}
+
+.chip.chip[data-checked]:hover {
+  background-color: var(--mantine-color-gray-9);
+}

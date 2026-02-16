@@ -3,7 +3,38 @@
   align-items: flex-start;
   gap: var(--mantine-spacing-sm);
   padding: var(--mantine-spacing-md);
-  background-color: var(--mantine-color-gray-1);
+  background-color: var(--mantine-color-gray-0);
   border-radius: var(--mantine-radius-lg);
-  border: 1px solid var(--mantine-color-gray-3);
+  border: 1px solid var(--mantine-color-gray-2);
+}
+
+.label {
+  font-weight: 500;
+  font-size: var(--mantine-font-size-sm);
+}
+
+.input input {
+  border: 2px solid var(--mantine-color-gray-9);
+  height: 42px;
+  font-size: var(--mantine-font-size-md);
+}
+
+.input input:focus {
+  border-color: var(--mantine-color-gray-9);
+}
+
+.cancelBtn {
+  border: 1px solid var(--mantine-color-gray-9);
+  color: var(--mantine-color-gray-9);
+  font-weight: 600;
+}
+
+.createBtn {
+  font-weight: 600;
+}
+
+.createBtn[data-disabled] {
+  background-color: var(--mantine-color-gray-9) !important;
+  color: white !important;
+  opacity: 0.6;
 }

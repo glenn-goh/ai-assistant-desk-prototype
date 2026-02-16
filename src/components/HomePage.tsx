@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { MessageInput } from './MessageInput';
 import type { ColorTheme, FontStyle } from './PersonalizationDialog';
-import { Shield, ShieldCheck } from 'lucide-react';
-import { Select, Text, Title, Box } from '@mantine/core';
+import { Shield, ShieldCheck, ChevronDown, Check } from 'lucide-react';
+import { Text, Title, Box, Menu } from '@mantine/core';
 import { TooltipIconButton } from './shared';
 import { IncognitoIcon } from './IncognitoIcon';
 import cls from './HomePage.module.css';
@@ -55,14 +55,11 @@ const getPromptSuggestions = (role: string) => {
   }
 };
 
-const classificationData = [
-  { value: 'rsn', label: 'Up to R/SN' },
-  { value: 'cce-sn', label: 'Up to C(CE)/SN' },
-];
 
 export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSidebarOpen, userProfile, onSelectSimulation, onStartChat, toolAssistants = [], onIncognitoChange, onNavigateToExplore }: HomePageProps) {
   const [inputValue, setInputValue] = useState('');
   const [classificationType, setClassificationType] = useState<'rsn' | 'cce-sn'>('rsn');
+  const [isClassificationOpen, setIsClassificationOpen] = useState(false);
   const [isIncognito, setIsIncognito] = useState(false);
 
   const today = new Date();
@@ -73,11 +70,9 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
   };
 
   // Reset incognito when switching to CCE/SN
-  const handleClassificationChange = (value: string | null) => {
-    if (!value) return;
-    const typedValue = value as 'rsn' | 'cce-sn';
-    setClassificationType(typedValue);
-    if (typedValue === 'cce-sn') {
+  const handleClassificationChange = (value: 'rsn' | 'cce-sn') => {
+    setClassificationType(value);
+    if (value === 'cce-sn') {
       setIsIncognito(false);
       onIncognitoChange?.(false);
     }
@@ -115,31 +110,55 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
               <Text size="sm" fw={500} c="gray.9">
                 Data classification
               </Text>
-              <Select
-                value={classificationType}
-                onChange={handleClassificationChange}
-                data={classificationData}
-                leftSection={classificationType === 'rsn' ? <Shield size={16} /> : <ShieldCheck size={16} />}
-                size="xs"
-                className={cls.classificationSelect}
-                comboboxProps={{ withinPortal: true }}
-                renderOption={({ option }) => (
-                  <Box className={cls.selectOptionContent}>
-                    <Box className={cls.selectOptionIcon}>
-                      {option.value === 'rsn' ? <Shield size={20} /> : <ShieldCheck size={20} />}
-                    </Box>
-                    <Box style={{ flex: 1 }}>
-                      <Text fw={600} c="gray.9" size="sm">{option.value === 'rsn' ? 'R/SN' : 'C(CE)/SN'}</Text>
-                      <Text size="sm" c="gray.5">
-                        {option.value === 'rsn' ? 'Restricted / Sensitive Normal' : 'Confidential (Cloud-Eligible) / Sensitive Normal'}
-                      </Text>
-                      {option.value === 'cce-sn' && (
-                        <Text size="sm" fw={700} c="gray.9" mt={4}>CCE/SN chats will not be saved.</Text>
-                      )}
-                    </Box>
+              <Menu
+                opened={isClassificationOpen}
+                onChange={setIsClassificationOpen}
+                position="bottom-start"
+                offset={4}
+                withinPortal
+              >
+                <Menu.Target>
+                  <button type="button" className={cls.classificationTrigger}>
+                    {classificationType === 'rsn' ? <Shield size={16} /> : <ShieldCheck size={16} />}
+                    <span>Up to {classificationType === 'rsn' ? 'R/SN' : 'C(CE)/SN'}</span>
+                    <ChevronDown size={14} style={{ opacity: 0.5 }} />
+                  </button>
+                </Menu.Target>
+                <Menu.Dropdown style={{ width: 400, padding: 0 }}>
+                  <Box className={cls.classDropdownHeader}>
+                    <Text fw={600} c="gray.9">Data Classification</Text>
+                    <Text size="sm" c="gray.5" mt={4}>Select the highest classification level allowed</Text>
                   </Box>
-                )}
-              />
+                  <Menu.Divider />
+                  <Box p="xs">
+                    <button
+                      type="button"
+                      className={cls.classDropdownItem}
+                      onClick={() => { handleClassificationChange('rsn'); setIsClassificationOpen(false); }}
+                    >
+                      <Shield size={20} color="var(--mantine-color-gray-7)" style={{ flexShrink: 0, marginTop: 2 }} />
+                      <Box style={{ flex: 1 }}>
+                        <Text fw={600} c="gray.9" size="sm">R/SN</Text>
+                        <Text size="sm" c="gray.5">Restricted / Sensitive Normal</Text>
+                      </Box>
+                      {classificationType === 'rsn' && <Check size={16} color="var(--mantine-color-gray-9)" />}
+                    </button>
+                    <button
+                      type="button"
+                      className={cls.classDropdownItem}
+                      onClick={() => { handleClassificationChange('cce-sn'); setIsClassificationOpen(false); }}
+                    >
+                      <ShieldCheck size={20} color="var(--mantine-color-gray-7)" style={{ flexShrink: 0, marginTop: 2 }} />
+                      <Box style={{ flex: 1 }}>
+                        <Text fw={600} c="gray.9" size="sm">C(CE)/SN</Text>
+                        <Text size="sm" c="gray.5">Confidential (Cloud-Eligible) / Sensitive Normal</Text>
+                        <Text size="sm" fw={700} c="gray.9" mt={4}>CCE/SN chats will not be saved.</Text>
+                      </Box>
+                      {classificationType === 'cce-sn' && <Check size={16} color="var(--mantine-color-gray-9)" />}
+                    </button>
+                  </Box>
+                </Menu.Dropdown>
+              </Menu>
             </Box>
             <Text size="xs" c="gray.5" style={{ flex: 1 }}>
               This setting cannot be changed once the chat begins.
@@ -155,7 +174,8 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                   setIsIncognito(newValue);
                   onIncognitoChange?.(newValue);
                 }}
-                className="p-2 rounded-lg transition-colors ml-auto text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+                size="sm"
+                color="gray.5"
               />
             )}
           </Box>

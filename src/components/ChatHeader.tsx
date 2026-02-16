@@ -185,8 +185,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             icon={EyeOff}
             tooltip={isTemporaryChat ? 'Temporary chat enabled - no memory, not saved' : 'Enable temporary chat'}
             onClick={handleTemporaryToggle}
-            className={`p-1.5 rounded-lg transition-colors ${isTemporaryChat ? 'bg-gray-100 text-gray-900' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
-            iconClassName="w-4 h-4"
+            active={isTemporaryChat}
           />
         )}
         {/* Show indicator when temporary chat is active */}
@@ -237,7 +236,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             icon={FileText}
             tooltip="Expand canvas"
             onClick={onShowOutputPanel}
-            className="text-gray-700 hover:text-gray-900 rounded-lg p-1 transition-colors"
           />
         )}
       </Box>

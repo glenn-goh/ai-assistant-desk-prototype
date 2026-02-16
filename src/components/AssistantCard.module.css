@@ -71,5 +71,10 @@
 .description {
   font-size: var(--mantine-font-size-sm);
   color: var(--mantine-color-gray-5);
-  line-height: 1.6;
+  line-height: 1.625;
+}
+
+.toolsButton {
+  border-width: 1px;
+  border-color: var(--mantine-color-gray-3);
 }

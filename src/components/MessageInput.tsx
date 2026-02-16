@@ -204,12 +204,12 @@ export function MessageInput({
             <ActionIcon
               variant="subtle"
               color="gray"
-              size="sm"
+              size="lg"
               className={`${cls.iconButton} ${isInputDisabled ? cls.iconButtonDisabled : ''}`}
               onClick={() => fileInputRef.current?.click()}
               disabled={isInputDisabled}
             >
-              <Paperclip size={16} />
+              <Paperclip size={18} />
             </ActionIcon>
           </Tooltip>
 
@@ -228,12 +228,12 @@ export function MessageInput({
                   <ActionIcon
                     variant="subtle"
                     color="gray"
-                    size="sm"
+                    size="lg"
                     className={`${cls.iconButton} ${isInputDisabled ? cls.iconButtonDisabled : ''}`}
                     disabled={isInputDisabled}
                     style={{ position: 'relative' }}
                   >
-                    <SlidersHorizontal size={14} />
+                    <SlidersHorizontal size={18} />
                     {(selectedTools.length + selectedAssistants.length) > 0 && (
                       <Box className={cls.toolsBadge}>
                         {selectedTools.length + selectedAssistants.length}
@@ -399,10 +399,12 @@ export function MessageInput({
           <ActionIcon
             onClick={handleSend}
             disabled={!input.trim() || isInputDisabled}
-            size="sm"
-            className={`${cls.sendButton} ${(!input.trim() || isInputDisabled) ? cls.sendButtonDisabled : ''}`}
+            variant="filled"
+            color="dark"
+            size="lg"
+            className={`${cls.sendButton} ${isInputDisabled ? cls.sendButtonDisabled : ''}`}
           >
-            <ArrowUp size={14} />
+            <ArrowUp size={18} />
           </ActionIcon>
         </Box>
       </Box>

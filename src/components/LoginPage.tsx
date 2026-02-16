@@ -19,7 +19,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
     return (
         <div className={classes.page}>
-            <Card className={classes.card} withBorder shadow="md">
+            <Card className={classes.card} withBorder shadow="md" padding={0}>
                 <Stack gap="xl" className={classes.cardContent}>
                     <Stack gap="xs" align="center">
                         <Text size="sm" c="gray.5">
@@ -33,6 +33,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     <Button
                         fullWidth
                         size="lg"
+                        h={48}
                         onClick={handleWOGLogin}
                     >
                         Log In with TechPass
