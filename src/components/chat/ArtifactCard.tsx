@@ -28,8 +28,10 @@ function getFileIcon(fileType: string) {
 export function ArtifactCard({ title, description, fileType, onSelect }: ArtifactCardProps) {
   return (
     <Box>
-      <UnstyledButton onClick={onSelect} className={classes.card}>
-        <Text c="gray.5">{getFileIcon(fileType)}</Text>
+      <UnstyledButton onClick={onSelect} className={classes.artifactCard}>
+        <Box className={classes.iconBox}>
+          <Text c="gray.5" lh={1}>{getFileIcon(fileType)}</Text>
+        </Box>
         <Box>
           <Text size="sm" fw={500} c="gray.9">{title}</Text>
           <Text size="xs" c="gray.5" mt={2}>{description}</Text>

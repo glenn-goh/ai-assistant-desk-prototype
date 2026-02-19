@@ -43,7 +43,7 @@ export const hrCandidateShortlistingData = {
             { text: "Using the Candidate Scoring Agent assistant (Tool)...", icon: "wrench", description: "Custom agent is pre-screening candidate profiles for data completeness and flagging any missing required fields." },
             { text: "Preparing shortlisting workflow...", icon: "search", description: "Setting up the evaluation pipeline with weighted scoring based on the role's must-have and nice-to-have criteria." }
           ],
-          timingMs: 8000,
+          timingMs: 7000,
           doneSummary: "Analyzed requisition and retrieved 127 candidates",
           tags: ["3 tools used"]
         },

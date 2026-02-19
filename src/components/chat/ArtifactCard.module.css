@@ -1,17 +1,27 @@
-.card {
+.artifactCard {
   display: inline-flex;
   align-items: center;
   gap: var(--mantine-spacing-md);
-  padding: var(--mantine-spacing-md) var(--mantine-spacing-lg);
-  background-color: var(--mantine-color-white);
-  border: 1px solid var(--mantine-color-gray-3);
+  padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+  background-color: white;
+  border: 1px solid var(--mantine-color-gray-2);
   border-radius: var(--mantine-radius-lg);
   cursor: pointer;
   text-align: left;
-  transition: background-color 150ms ease, border-color 150ms ease;
+  transition: background-color 150ms ease;
 }
 
-.card:hover {
+.artifactCard:hover {
+  background-color: var(--mantine-color-gray-1);
+}
+
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   background-color: var(--mantine-color-gray-0);
-  border-color: var(--mantine-color-gray-4);
+  border-radius: var(--mantine-radius-md);
+  flex-shrink: 0;
 }

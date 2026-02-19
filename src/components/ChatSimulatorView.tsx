@@ -295,8 +295,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       onFormSubmit(formData, artifactTitle);
     } else {
       setTimeout(async () => {
-        setShowThinkingDots(true);
-        await sleep(1333);
+        setShowThinkingDots(false);
+        await sleep(0);
         setShowThinkingDots(false);
         setDisplayedMessages(prev => [...prev, {
           type: 'text',
@@ -362,8 +362,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   }, [currentMessageIndex, isInteractive, data]);
 
   const processBotResponses = async (responses: BotResponse[]) => {
-    setShowThinkingDots(true);
-    await sleep(1000);
+    setShowThinkingDots(false);
+    await sleep(0);
     setShowThinkingDots(false);
     for (const response of responses) {
       if (response.type === 'thinking') {
@@ -416,8 +416,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const processInteractiveBotResponses = async (responses: BotResponse[]) => {
     setIsProcessingRichResponse(true);
     richResponseAbortRef.current = false;
-    setShowThinkingDots(true);
-    await sleep(800);
+    setShowThinkingDots(false);
+    await sleep(0);
     if (richResponseAbortRef.current) return;
     setShowThinkingDots(false);
     for (let i = 0; i < responses.length; i++) {

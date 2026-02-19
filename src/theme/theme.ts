@@ -302,9 +302,7 @@ export const theme = createTheme({
 //
 // Global styles in src/styles/globals.css:
 //   .prose-lofi   — grayscale filter + typography overrides for artifact content
-//   .shimmer-text — shimmer animation for thinking state
 //   @keyframes dotBounce — thinking indicator dots
-//   @keyframes shimmer   — gradient sweep for shimmer-text
 //
 // Personalization themes (src/lib/theme-utils.ts):
 //   8 ColorTheme variants returning CSSProperties objects
