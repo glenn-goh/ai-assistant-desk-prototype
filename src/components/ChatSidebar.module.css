@@ -265,12 +265,27 @@
   text-decoration: underline;
 }
 
-.profileSection {
-  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+.profileSectionWrapper {
   border-top: 1px solid var(--mantine-color-gray-3);
+  padding: var(--mantine-spacing-xs);
+}
+
+.profileSection {
+  padding: var(--mantine-spacing-sm);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: var(--mantine-radius-md);
+  font: inherit;
+  transition: background-color 150ms ease;
+}
+
+.profileSection:hover {
+  background-color: var(--mantine-color-gray-2);
 }
 
 .profileInfo {

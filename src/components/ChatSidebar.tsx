@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Trash2, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Heart, Pencil, Bookmark } from 'lucide-react';
+import { Trash2, Compass, SquarePen, MoreHorizontal, Users, Info, PanelLeft, ChevronDown, ChevronRight, Search, FolderPlus, Folder, Heart, Pencil, Bookmark, ChevronsUpDown } from 'lucide-react';
 import { ScrollArea, Tooltip, Menu, Modal, Text, Box, Button, Collapse } from '@mantine/core';
 import { TooltipIconButton, EditableText } from './shared';
 import { SearchChatsModal } from './SearchChatsModal';
@@ -629,20 +629,20 @@ export function ChatSidebar({
         </Box>
 
         {/* User Profile Section at Bottom */}
-        <Box className={cls.profileSection}>
-          <Box className={cls.profileInfo}>
-            {/* Dark grey solid color avatar */}
-            <Box className={cls.avatar} />
-            <Box style={{ textAlign: 'left', overflow: 'hidden' }}>
-              <Text size="sm" fw={500} c="gray.9">{userProfile.name}</Text>
-            </Box>
-          </Box>
-          <Menu position="top-end" withinPortal>
-            <Menu.Target>
-              <button data-tour="settings" className={cls.settingsButton}>
-                <Settings size={16} />
-              </button>
-            </Menu.Target>
+        <Box className={cls.profileSectionWrapper}>
+        <Menu position="top-end" withinPortal>
+          <Menu.Target>
+            <button data-tour="settings" className={cls.profileSection}>
+              <Box className={cls.profileInfo}>
+                {/* Dark grey solid color avatar */}
+                <Box className={cls.avatar} />
+                <Box style={{ textAlign: 'left', overflow: 'hidden' }}>
+                  <Text size="sm" fw={500} c="gray.9">{userProfile.name}</Text>
+                </Box>
+              </Box>
+              <ChevronsUpDown size={16} color="var(--mantine-color-gray-5)" />
+            </button>
+          </Menu.Target>
             <Menu.Dropdown style={{ width: 192 }}>
               <Menu.Item onClick={(e) => {
                 e.stopPropagation();
