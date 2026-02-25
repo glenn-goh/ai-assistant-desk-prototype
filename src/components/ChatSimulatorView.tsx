@@ -13,6 +13,7 @@ import { TextResponseBlock } from './chat/TextResponseBlock';
 import { AssistantSwitchBadge } from './chat/AssistantSwitchBadge';
 import { ArtifactCard, getFileIcon } from './chat/ArtifactCard';
 import { DecisionCard } from './chat/DecisionCard';
+import { MultiDecisionCard } from './chat/MultiDecisionCard';
 import { SkeletonLoader } from './chat/SkeletonLoader';
 import MermaidDiagram from './MermaidDiagram';
 import { SearchingAssistantLoader } from './chat/SearchingAssistantLoader';
@@ -210,6 +211,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const [isProcessingRichResponse, setIsProcessingRichResponse] = useState(false);
   const [awaitingDecision, setAwaitingDecision] = useState(false);
   const richResponseAbortRef = useRef(false);
+  const simulatorPendingResponsesRef = useRef<any[]>([]); // Remaining bot responses after a decision pause in simulator mode
 
   // Lo-fi grayscale theme
   const theme = {
@@ -415,9 +417,33 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
     await sleep(1000); // 1.5x faster: was 1500
     setShowThinkingDots(false);
 
-    for (const response of responses) {
+    for (let i = 0; i < responses.length; i++) {
+      const response = responses[i];
       if (response.type === 'thinking') {
         await processThinkingResponse(response);
+        // Check if next response is a decision/multiDecision — mark the just-added thinking as pending
+        const nextIsDecision = i + 1 < responses.length && (responses[i + 1].type === 'decision' || responses[i + 1].type === 'multiDecision');
+        if (nextIsDecision) {
+          setDisplayedMessages(prev => {
+            const updated = [...prev];
+            const lastIdx = updated.length - 1;
+            if (lastIdx >= 0 && updated[lastIdx].type === 'thinking') {
+              updated[lastIdx] = { ...updated[lastIdx], pending: true };
+            }
+            return updated;
+          });
+        }
+      } else if (response.type === 'multiDecision' || response.type === 'decision') {
+        // Show decision card and pause — wait for user click
+        setDisplayedMessages(prev => [...prev, {
+          type: response.type,
+          question: response.question,
+          options: response.options,
+        }]);
+        setAwaitingDecision(true);
+        // Store remaining responses to continue after decision
+        simulatorPendingResponsesRef.current = responses.slice(i + 1);
+        return; // Stop — do NOT advance currentMessageIndex yet
       } else if (response.type === 'assistantSwitch') {
         // Show searching state
         setSearchingAssistant(true);
@@ -496,8 +522,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
       if (response.type === 'thinking') {
         await processThinkingResponse(response);
         if (richResponseAbortRef.current) return;
-        // Check if next response is a decision — if so, mark thinking as pending (no "Done" yet)
-        const nextIsDecision = i + 1 < responses.length && responses[i + 1].type === 'decision';
+        // Check if next response is a decision or multiDecision — if so, mark thinking as pending (no "Done" yet)
+        const nextIsDecision = i + 1 < responses.length && (responses[i + 1].type === 'decision' || responses[i + 1].type === 'multiDecision');
         setInteractiveDisplayedMessages(prev => [...prev, {
           type: 'thinking',
           thought: response.thought || '',
@@ -506,6 +532,16 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           tags: response.tags,
           pending: nextIsDecision,
         }]);
+      } else if (response.type === 'multiDecision') {
+        // Render multi-decision card and pause — wait for user selection
+        setInteractiveDisplayedMessages(prev => [...prev, {
+          type: 'multiDecision',
+          question: response.question,
+          options: response.options,
+        }]);
+        setAwaitingDecision(true);
+        setIsProcessingRichResponse(false);
+        return; // Stop processing — will resume via new pendingBotResponses
       } else if (response.type === 'decision') {
         // Render decision card and pause — wait for user click
         setInteractiveDisplayedMessages(prev => [...prev, {
@@ -540,22 +576,74 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   const handleDecisionSelect = (value: string) => {
     setAwaitingDecision(false);
 
-    // Find the label before removing the card
+    // Find the label before removing the card (check both decision and multiDecision)
     const option = interactiveDisplayedMessages
-      .filter((m: any) => m.type === 'decision')
+      .filter((m: any) => m.type === 'decision' || m.type === 'multiDecision')
       .flatMap((m: any) => m.options)
       .find((o: any) => o.value === value);
-    const label = option?.label || value;
+    const label = value === 'cancel' ? 'Cancel' : (option?.label || value);
 
-    // Remove decision card, mark pending thinking blocks as done, add user's selection bubble
+    // Remove decision/multiDecision cards, mark pending thinking blocks as done, add user's selection bubble
     setInteractiveDisplayedMessages(prev => [
       ...prev
-        .filter((m: any) => m.type !== 'decision')
+        .filter((m: any) => m.type !== 'decision' && m.type !== 'multiDecision')
         .map((m: any) => m.type === 'thinking' && m.pending ? { ...m, pending: false } : m),
       { type: 'userDecision', text: label },
     ]);
 
     onDecisionMade?.(value);
+  };
+
+  // Handle decision selection in simulator mode (scripted demos with clickable decisions)
+  const handleSimulatorDecisionSelect = (value: string) => {
+    setAwaitingDecision(false);
+
+    // Find the label before removing the card
+    const isMultiDecision = displayedMessages.some((m: any) => m.type === 'multiDecision');
+    let label: string;
+    if (value === 'cancel') {
+      label = 'Cancel';
+    } else if (isMultiDecision) {
+      // In simulator mode, always resolve to the first option (Vacation Leave) for scripted flow
+      const firstOption = displayedMessages
+        .filter((m: any) => m.type === 'multiDecision')
+        .flatMap((m: any) => m.options)[0];
+      label = firstOption?.label || value;
+    } else {
+      const option = displayedMessages
+        .filter((m: any) => m.type === 'decision')
+        .flatMap((m: any) => m.options)
+        .find((o: any) => o.value === value);
+      label = option?.label || value;
+    }
+
+    // Remove decision/multiDecision cards, mark pending thinking as done, add user selection bubble
+    setDisplayedMessages(prev => [
+      ...prev
+        .filter((m: any) => m.type !== 'decision' && m.type !== 'multiDecision')
+        .map((m: any) => m.type === 'thinking' && m.pending ? { ...m, pending: false } : m),
+      { type: 'userDecision', text: label },
+    ]);
+
+    if (value === 'cancel') {
+      // Show cancel message and stop the simulation
+      setDisplayedMessages(prev => [...prev, {
+        type: 'text',
+        content: "Leave application cancelled. Let me know if you'd like to apply for leave on different dates or if there's anything else I can help with.",
+      }]);
+      simulatorPendingResponsesRef.current = [];
+      return;
+    }
+
+    // Continue with any remaining responses from the current bot message
+    const remaining = simulatorPendingResponsesRef.current;
+    simulatorPendingResponsesRef.current = [];
+    if (remaining.length > 0) {
+      processBotResponses(remaining);
+    } else {
+      // No remaining responses in this bot message — advance to next message
+      setCurrentMessageIndex(prev => prev + 1);
+    }
   };
 
   // Process pending bot responses when they change (interactive mode)
@@ -843,7 +931,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
                       {/* Rich interactive displayed messages (thinking, decisions, text) */}
                       {interactiveDisplayedMessages.map((msg, idx) => (
-                        <div key={`rich-${idx}`}>
+                        <div key={`rich-${idx}`} className="group">
                           {msg.type === 'thinking' && (
                             <ReasoningBlock
                               id={idx + 2000}
@@ -854,6 +942,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                               onToggle={toggleThinkingExpanded}
                               isLive={msg.pending}
                               liveLabel="Awaiting confirmation..."
+                            />
+                          )}
+                          {msg.type === 'multiDecision' && (
+                            <MultiDecisionCard
+                              question={msg.question}
+                              options={msg.options}
+                              onSelect={handleDecisionSelect}
+                              disabled={msg.disabled}
                             />
                           )}
                           {msg.type === 'decision' && (
@@ -1000,6 +1096,14 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     }}
                   />
                 )}
+
+                {msg.type === 'userDecision' && (
+                  <div className="flex flex-col items-end ml-24">
+                    <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                      {msg.text}
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
 
@@ -1016,6 +1120,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                               tags={msg.tags}
                               isExpanded={expandedThinkingIds.has(idx + 1000)}
                               onToggle={toggleThinkingExpanded}
+                              isLive={msg.pending}
+                              liveLabel="Awaiting confirmation..."
                             />
                           )}
                           {msg.type === 'assistantSwitch' && (
@@ -1041,6 +1147,27 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                                 setShowOutputPanel(true);
                               }}
                             />
+                          )}
+                          {msg.type === 'multiDecision' && (
+                            <MultiDecisionCard
+                              question={msg.question}
+                              options={msg.options}
+                              onSelect={handleSimulatorDecisionSelect}
+                            />
+                          )}
+                          {msg.type === 'decision' && (
+                            <DecisionCard
+                              question={msg.question}
+                              options={msg.options}
+                              onSelect={handleSimulatorDecisionSelect}
+                            />
+                          )}
+                          {msg.type === 'userDecision' && (
+                            <div className="flex flex-col items-end ml-24">
+                              <div className="bg-gray-100 text-black rounded-lg px-4 py-3 max-w-2xl mt-4" style={{ fontSize: '16px', lineHeight: '1.7' }}>
+                                {msg.text}
+                              </div>
+                            </div>
                           )}
                         </div>
                       ))}

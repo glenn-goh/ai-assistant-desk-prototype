@@ -30,7 +30,9 @@ import { marketingSoftwareAorData } from './data/marketing-software-aor';
 import { pqResponseDataV2 } from './data/pq-response-mnd-v2';
 import { canvasDemoData } from './data/canvas-demo';
 import { getWebSearchResponses } from './data/interactive-web-search';
+import { getLeaveApplyResponses, getDefaultLeaveDateRange } from './data/interactive-leave-apply';
 import { getDiagramInChatResponses, getDiagramInCanvasResponses } from './data/interactive-diagram';
+import { getLeaveApplySimulationData } from './data/leave-apply-simulation';
 
 export interface Message {
   id: string;
@@ -106,6 +108,20 @@ function detectDiagramKeyword(message: string): 'chat' | 'canvas' | null {
   return null;
 }
 
+function detectLeaveKeyword(message: string): { dateRange?: string } | null {
+  const lower = message.toLowerCase();
+  if (!lower.includes('apply leave') && !lower.includes('apply for leave')) {
+    return null;
+  }
+  // Try to extract date range in DD MMM YYYY to DD MMM YYYY format
+  const datePattern = /(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4})\s+to\s+(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4})/i;
+  const match = message.match(datePattern);
+  if (match) {
+    return { dateRange: `${match[1]} to ${match[2]}` };
+  }
+  return { dateRange: undefined };
+}
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -159,6 +175,7 @@ export default function App() {
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [pendingBotResponses, setPendingBotResponses] = useState<any[]>([]);
   const [pendingSearchTerm, setPendingSearchTerm] = useState<string>('');
+  const [pendingLeaveContext, setPendingLeaveContext] = useState<{ dateRange: string; leaveType?: string } | null>(null);
   const [showExitIncognitoDialog, setShowExitIncognitoDialog] = useState(false);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem('hasSeenWalkthrough') === 'true';
@@ -321,6 +338,16 @@ export default function App() {
       return;
     }
 
+    // Check for leave application keywords — trigger leave response pipeline
+    const leaveMatch = detectLeaveKeyword(content);
+    if (leaveMatch) {
+      const resolvedDateRange = leaveMatch.dateRange || getDefaultLeaveDateRange();
+      const responses = getLeaveApplyResponses(resolvedDateRange);
+      setPendingLeaveContext({ dateRange: resolvedDateRange });
+      setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
     // Check for diagram/flowchart keywords — trigger diagram response pipeline
     const diagramMode = detectDiagramKeyword(content);
     if (diagramMode) {
@@ -390,6 +417,7 @@ export default function App() {
     setIncognitoChat(null); // Clear any incognito chat
     setPendingBotResponses([]);
     setPendingSearchTerm('');
+    setPendingLeaveContext(null);
     setActiveChatId('new-rsn');
     setActiveView('home');
     setHomeResetKey(prev => prev + 1);
@@ -437,6 +465,16 @@ export default function App() {
     if (searchTerm) {
       const responses = getWebSearchResponses(searchTerm);
       setPendingSearchTerm(searchTerm);
+      setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
+    // Check for leave application keywords — trigger leave response pipeline
+    const leaveMatch2 = detectLeaveKeyword(message);
+    if (leaveMatch2) {
+      const resolvedDateRange = leaveMatch2.dateRange || getDefaultLeaveDateRange();
+      const responses = getLeaveApplyResponses(resolvedDateRange);
+      setPendingLeaveContext({ dateRange: resolvedDateRange });
       setPendingBotResponses(responses.preDecision);
       return;
     }
@@ -556,6 +594,7 @@ export default function App() {
   const assistantSimulationMap: Record<string, string> = {
     'workday-shortlister': 'hr-candidate-shortlisting',
     'parliamentary-question': 'pq-response-mnd-v2',
+    'leave-assistant': 'leave-apply-simulation',
   };
 
   const handleStartAssistantChat = (assistantName: string, assistantType: string) => {
@@ -622,19 +661,51 @@ export default function App() {
     setIncognitoChat(null); // Clear any incognito chat
     setPendingBotResponses([]);
     setPendingSearchTerm('');
+    setPendingLeaveContext(null);
     setActiveChatId(chatId);
     setActiveView('chat');
   };
 
   const handleDecisionMade = (value: string) => {
-    if (!pendingSearchTerm) return;
-    const responses = getWebSearchResponses(pendingSearchTerm);
-    if (value === 'proceed') {
-      setPendingBotResponses(responses.onProceed);
-    } else {
-      setPendingBotResponses(responses.onCancel);
+    // Web search decision flow
+    if (pendingSearchTerm) {
+      const responses = getWebSearchResponses(pendingSearchTerm);
+      if (value === 'proceed') {
+        setPendingBotResponses(responses.onProceed);
+      } else {
+        setPendingBotResponses(responses.onCancel);
+      }
+      setPendingSearchTerm('');
+      return;
     }
-    setPendingSearchTerm('');
+
+    // Leave application decision flow
+    if (pendingLeaveContext) {
+      const responses = getLeaveApplyResponses(pendingLeaveContext.dateRange);
+
+      if (value === 'cancel') {
+        // Cancel at any phase
+        setPendingBotResponses(responses.onCancel);
+        setPendingLeaveContext(null);
+        return;
+      }
+
+      if (!pendingLeaveContext.leaveType) {
+        // Phase 1 → Phase 2: user selected a leave type from multiDecision
+        const leaveType = value;
+        setPendingLeaveContext({ ...pendingLeaveContext, leaveType });
+        setPendingBotResponses(responses.onLeaveTypeSelected(leaveType, pendingLeaveContext.dateRange));
+      } else {
+        // Phase 2 → Phase 3: user confirmed the application
+        if (value === 'proceed') {
+          setPendingBotResponses(responses.onConfirm(pendingLeaveContext.leaveType, pendingLeaveContext.dateRange));
+        } else {
+          setPendingBotResponses(responses.onCancel);
+        }
+        setPendingLeaveContext(null);
+      }
+      return;
+    }
   };
 
   const handleRichResponseComplete = () => {
@@ -870,6 +941,7 @@ export default function App() {
     'marketing-software-aor': marketingSoftwareAorData,
     'pq-response-mnd-v2': pqResponseDataV2,
     'canvas-demo': canvasDemoData,
+    'leave-apply-simulation': getLeaveApplySimulationData(),
   };
   // Resolve simulation data: check instance-based IDs first, then legacy exact IDs
   const resolveSimulationData = () => {
