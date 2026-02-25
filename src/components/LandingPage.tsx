@@ -203,7 +203,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
       <footer className="bg-gray-900 py-8 md:py-10 mt-auto">
         <div className="max-w-7xl mx-auto px-6 md:px-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <p className="text-sm text-gray-400">
-            &copy; 2025 Government of Singapore
+            &copy; {new Date().getFullYear()} Government of Singapore
           </p>
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
             {footerLinks.map((link) => (
