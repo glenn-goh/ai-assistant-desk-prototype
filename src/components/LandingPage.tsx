@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Brain, PanelRight, Globe, FileText, GitFork, Users, Shield } from 'lucide-react';
+import heroImage from '../assets/landing/hero.png';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -127,8 +128,8 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Get Started
             </button>
           </div>
-          <div className="mt-12 md:mt-16 aspect-video max-w-4xl mx-auto rounded-xl bg-gray-100 border border-gray-200 flex items-center justify-center shadow-lg">
-            <span className="text-sm text-gray-400">Product screenshot / illustration placeholder</span>
+          <div className="mt-12 md:mt-16 max-w-4xl mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+            <img src={heroImage} alt="AIBots V2 workspace screenshot" className="w-full h-auto" />
           </div>
         </div>
       </section>
