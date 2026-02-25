@@ -158,7 +158,7 @@ export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [favoritedAssistants, setFavoritedAssistants] = useState<string[]>(() => {
     const stored = localStorage.getItem('favoritedAssistants');
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : ['leave-assistant'];
   });
   const [pinnedAssistants, setPinnedAssistants] = useState<string[]>(() => {
     const stored = localStorage.getItem('pinnedAssistants');
@@ -166,7 +166,7 @@ export default function App() {
   });
   const [toolAssistants, setToolAssistants] = useState<string[]>(() => {
     const stored = localStorage.getItem('toolAssistants');
-    return stored ? JSON.parse(stored) : [];
+    return stored ? JSON.parse(stored) : ['leave-assistant'];
   });
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations (base IDs, for non-assistant simulation launches)
   const [simulationInstances, setSimulationInstances] = useState<Array<{ instanceId: string; simulationId: string }>>([]);  // Each simulation chat instance
