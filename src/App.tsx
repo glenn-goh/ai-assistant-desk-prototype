@@ -5,6 +5,7 @@ import { StudioPage } from './components/StudioPage';
 import { LibraryPage } from './components/LibraryPage';
 import { ChatsPage } from './components/ChatsPage';
 import { HomePage } from './components/HomePage';
+import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
 import { OnboardingPage } from './components/OnboardingPage';
 import { PersonalizationDialog } from './components/PersonalizationDialog';
@@ -124,6 +125,7 @@ function detectLeaveKeyword(message: string): { dateRange?: string } | null {
 
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
+  const [hasSeenLanding, setHasSeenLanding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [hasOnboarded, setHasOnboarded] = useState(false);
 
@@ -135,6 +137,26 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Browser back button support for landing → login transition
+  useEffect(() => {
+    // Seed initial history entry so back button has something to return to
+    if (!hasSeenLanding) {
+      window.history.replaceState({ page: 'landing' }, '');
+    }
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state?.page === 'landing') {
+        setHasSeenLanding(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleLeaveLanding = () => {
+    window.history.pushState({ page: 'login' }, '');
+    setHasSeenLanding(true);
+  };
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: 'John Doe',
     email: 'john.doe@tech.gov.sg',
@@ -753,6 +775,7 @@ export default function App() {
 
   const handleSignOut = () => {
     // Reset authentication state
+    setHasSeenLanding(false);
     setIsAuthenticated(false);
     setHasOnboarded(false);
     // Reset to default profile
@@ -954,6 +977,11 @@ export default function App() {
     return simulationDataMap[legacyId] || null;
   };
   const simulationData = resolveSimulationData();
+
+  // Early return for landing page
+  if (!hasSeenLanding) {
+    return <LandingPage onGetStarted={handleLeaveLanding} />;
+  }
 
   // Early return for login page
   if (!isAuthenticated) {
