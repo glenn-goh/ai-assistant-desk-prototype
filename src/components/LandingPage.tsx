@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Search, Brain, PanelRight, Globe, FileText, GitFork, Users, Shield } from 'lucide-react';
+import { HeroGrid } from './HeroGrid';
 import heroImage from '../assets/landing/hero.png';
 
 interface LandingPageProps {
@@ -95,20 +96,14 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
       {/* Hero */}
       <section className="relative pt-24 pb-20 md:pt-32 md:pb-24 overflow-hidden">
-        {/* Subtle grid background */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: 'linear-gradient(to right, #f5f5f5 1px, transparent 1px), linear-gradient(to bottom, #f5f5f5 1px, transparent 1px)',
-            backgroundSize: '24px 24px',
-          }}
-        />
+        {/* Interactive grid background */}
+        <HeroGrid />
         {/* Bottom fade into next section */}
         <div
           className="absolute bottom-0 left-0 right-0 h-40 pointer-events-none"
           style={{ background: 'linear-gradient(to bottom, transparent, white)' }}
         />
-        <div className="relative max-w-3xl mx-auto px-6 md:px-8 text-center">
+        <div className="relative max-w-3xl mx-auto px-6 md:px-8 text-center pointer-events-none">
           <span className="inline-block text-xs font-medium px-3 py-1 rounded-full bg-gray-100 text-gray-700 mb-6">
             V2 Beta
           </span>
@@ -123,7 +118,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <div className="mt-8">
             <button
               onClick={onGetStarted}
-              className="w-full sm:w-auto px-8 py-3 bg-gray-900 text-white text-base font-semibold rounded-lg hover:bg-gray-700 transition-colors"
+              className="pointer-events-auto w-full sm:w-auto px-8 py-3 bg-gray-900 text-white text-base font-semibold rounded-lg hover:bg-gray-700 transition-colors"
             >
               Get Started
             </button>
