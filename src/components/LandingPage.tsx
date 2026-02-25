@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Brain, PanelRight, Globe, FileText, GitFork, Users, Shield } from 'lucide-react';
+import { Search, Brain, PanelRight, ShieldCheck, Globe, FileText, GitFork, Users, Shield } from 'lucide-react';
 import { HeroGrid } from './HeroGrid';
 import heroImage from '../assets/landing/hero.png';
 
@@ -22,6 +22,11 @@ const featureCards = [
     icon: PanelRight,
     title: 'Canvas',
     body: 'Edit, preview, and download documents side-by-side with your AI. Draft a report, refine it in Canvas, and export, all in one flow.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'CCE/SN Approved',
+    body: 'Built for government classification standards. Handle sensitive and restricted work directly in your workspace.',
   },
 ];
 
@@ -123,7 +128,9 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Get Started
             </button>
           </div>
-          <div className="mt-12 md:mt-16 max-w-4xl mx-auto rounded-xl overflow-hidden border border-gray-200 shadow-lg">
+        </div>
+        <div className="relative mt-12 md:mt-16 max-w-7xl mx-auto px-6 md:px-8 pointer-events-none">
+          <div className="rounded-xl overflow-hidden border border-gray-200 shadow-lg">
             <img src={heroImage} alt="AIBots V2 workspace screenshot" className="w-full h-auto" />
           </div>
         </div>
@@ -140,7 +147,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Everything you need in one place. No more juggling tabs, tools, or copy-pasting between apps.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-12 md:mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-12 md:mt-16">
             {featureCards.map((card) => (
               <div
                 key={card.title}
