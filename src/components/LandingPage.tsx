@@ -70,7 +70,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolledPastHero(window.scrollY > 400);
+      setScrolledPastHero(window.scrollY > 100);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -147,7 +147,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Everything you need in one place. No more juggling tabs, tools, or copy-pasting between apps.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mt-12 md:mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mt-12 md:mt-16">
             {featureCards.map((card) => (
               <div
                 key={card.title}
