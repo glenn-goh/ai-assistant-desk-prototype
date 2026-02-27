@@ -123,11 +123,14 @@ function detectLeaveKeyword(message: string): { dateRange?: string } | null {
   return { dateRange: undefined };
 }
 
+// Check once at module load — stable across re-renders
+const isDirectChat = window.location.hash.slice(1) === '/chat';
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
-  const [hasSeenLanding, setHasSeenLanding] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [hasSeenLanding, setHasSeenLanding] = useState(isDirectChat);
+  const [isAuthenticated, setIsAuthenticated] = useState(isDirectChat);
+  const [hasOnboarded, setHasOnboarded] = useState(isDirectChat);
 
   // Simple hash-based routing
   useEffect(() => {
@@ -140,6 +143,7 @@ export default function App() {
 
   // Browser back button support for landing → login transition
   useEffect(() => {
+    if (isDirectChat) return;
     // Seed initial history entry so back button has something to return to
     if (!hasSeenLanding) {
       window.history.replaceState({ page: 'landing' }, '');
@@ -179,16 +183,16 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [favoritedAssistants, setFavoritedAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('favoritedAssistants');
-    return stored ? JSON.parse(stored) : ['leave-assistant'];
+    localStorage.removeItem('favoritedAssistants');
+    return [];
   });
   const [pinnedAssistants, setPinnedAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('pinnedAssistants');
-    return stored ? JSON.parse(stored) : [];
+    localStorage.removeItem('pinnedAssistants');
+    return [];
   });
   const [toolAssistants, setToolAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('toolAssistants');
-    return stored ? JSON.parse(stored) : ['leave-assistant'];
+    localStorage.removeItem('toolAssistants');
+    return [];
   });
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations (base IDs, for non-assistant simulation launches)
   const [simulationInstances, setSimulationInstances] = useState<Array<{ instanceId: string; simulationId: string }>>([]);  // Each simulation chat instance
@@ -224,12 +228,13 @@ export default function App() {
 
   // Handle browser back button to return to login
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isDirectChat) {
       // Push a new history state when authenticated
       window.history.pushState({ authenticated: true }, '');
     }
 
     const handlePopState = () => {
+      if (isDirectChat) return;
       // When browser back is pressed, sign out
       setIsAuthenticated(false);
       setHasOnboarded(false);
@@ -765,6 +770,7 @@ export default function App() {
 
   // Auto-start walkthrough when user logs in directly (skips onboarding)
   useEffect(() => {
+    if (isDirectChat) return;
     if (isAuthenticated && hasOnboarded && !isWalkthroughOpen) {
       // Only start if we haven't already started it from onboarding
       setTimeout(() => {

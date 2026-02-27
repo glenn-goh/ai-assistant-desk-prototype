@@ -434,13 +434,13 @@ export const roleBasedAssistants: Record<string, Assistant[]> = {
     allAssistants.marketResearch,
   ],
   'hr': [
-    allAssistants.workdayShortlister,
+    // allAssistants.workdayShortlister,
     allAssistants.interviewQuestions,
     allAssistants.onboardingGuide,
     allAssistants.performanceReview,
   ],
   'human resources': [
-    allAssistants.workdayShortlister,
+    // allAssistants.workdayShortlister,
     allAssistants.interviewQuestions,
     allAssistants.onboardingGuide,
     allAssistants.performanceReview,
