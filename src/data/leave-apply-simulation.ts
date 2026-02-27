@@ -35,7 +35,7 @@ export function getLeaveApplySimulationData() {
   return {
     id: "leave-apply-simulation",
     title: "Apply for leave",
-    assistantName: "Leave Assistant",
+    assistantName: "HR Assistant",
     description: "Apply for leave through Workday",
     colorScheme: "indigo" as const,
     messages: [
@@ -45,7 +45,7 @@ export function getLeaveApplySimulationData() {
         content: [
           {
             type: "text" as const,
-            content: "Hello! I'm the Leave Assistant. I can help you apply for leave through Workday. Just let me know the dates you'd like to take off and I'll handle the rest.",
+            content: "Hello! I'm the HR Assistant. I can help you apply for leave through Workday. Just let me know the dates you'd like to take off and I'll handle the rest.",
           },
         ],
       },

@@ -384,7 +384,7 @@ const allAssistants = {
   },
   leaveAssistant: {
     id: 'leave-assistant',
-    name: 'Leave Assistant',
+    name: 'HR Assistant',
     description: 'Apply for leave through Workday. Checks your leave balances and submits applications on your behalf.',
     owner: 'AI Assistant Team',
     tags: ['HR', 'Leave'],

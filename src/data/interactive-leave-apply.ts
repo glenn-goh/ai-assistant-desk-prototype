@@ -44,11 +44,7 @@ const LEAVE_POOLS: Record<string, { label: string; total: number; used: number }
 };
 
 export function getDefaultLeaveDateRange(): string {
-  const start = new Date();
-  start.setDate(start.getDate() + 2);
-  const end = new Date();
-  end.setDate(end.getDate() + 4);
-  return `${formatDate(start)} to ${formatDate(end)}`;
+  return '09 Mar 2026 to 12 Mar 2026';
 }
 
 function formatDate(date: Date): string {
