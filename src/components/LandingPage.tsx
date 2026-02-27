@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Search, Brain, PanelRight, ShieldCheck, Globe, FileText, GitFork, Users, Shield } from 'lucide-react';
 import { HeroGrid } from './HeroGrid';
 import heroImage from '../assets/landing/hero.png';
+import { ChatSimulatorView } from './ChatSimulatorView';
+import { getLandingDemoStarterMessage } from '../data/landing-demo';
+import type { Message } from '../App';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -67,6 +70,17 @@ const footerLinks = [
 
 export function LandingPage({ onGetStarted }: LandingPageProps) {
   const [scrolledPastHero, setScrolledPastHero] = useState(false);
+  const [showDemo, setShowDemo] = useState(true); // Show demo by default
+  const [demoMessages, setDemoMessages] = useState<Message[]>([
+    {
+      id: '1',
+      role: 'assistant',
+      content: getLandingDemoStarterMessage(),
+      timestamp: new Date(),
+    }
+  ]);
+  const [messageCount, setMessageCount] = useState(0);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,6 +89,61 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleDemoSendMessage = (content: string) => {
+    // Check message limit
+    if (messageCount >= 10) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
+    // Add user message
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content,
+      timestamp: new Date(),
+    };
+
+    setDemoMessages(prev => [...prev, userMessage]);
+    setMessageCount(prev => prev + 1);
+
+    // Generate AI response with assistant mentions
+    setTimeout(() => {
+      const responseContent = generateLandingDemoResponse(content, messageCount + 1);
+
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date(),
+      };
+
+      setDemoMessages(prev => [...prev, aiMessage]);
+    }, 800);
+  };
+
+  const generateLandingDemoResponse = (userInput: string, messageNum: number): string => {
+    return "This is a demo response. In the full version, I would provide detailed assistance with your request, including access to specialized tools, web search, document editing in Canvas, and more. Please login to experience the complete AIBots V2 capabilities.";
+  };
+
+  const handleDemoClose = () => {
+    setShowDemo(false);
+    setDemoMessages([
+      {
+        id: '1',
+        role: 'assistant',
+        content: getLandingDemoStarterMessage(),
+        timestamp: new Date(),
+      }
+    ]);
+    setMessageCount(0);
+    setShowLoginPrompt(false);
+  };
+
+  const handleLoginFromDemo = () => {
+    onGetStarted();
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white" style={{ fontFamily: "'Source Sans 3', 'Source Sans Pro', system-ui, sans-serif" }}>
@@ -129,10 +198,42 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </button>
           </div>
         </div>
-        <div className="relative mt-12 md:mt-16 max-w-7xl mx-auto px-6 md:px-8 pointer-events-none">
-          <div className="rounded-xl overflow-hidden border border-gray-200 shadow-lg">
-            <img src={heroImage} alt="AIBots V2 workspace screenshot" className="w-full h-auto" />
+        {/* Interactive Demo */}
+        <div className="relative mt-12 md:mt-16 max-w-7xl mx-auto px-6 md:px-8 pointer-events-auto">
+          {/* Chat Interface */}
+          <div className="rounded-xl overflow-hidden border-2 border-gray-900 shadow-xl bg-white" style={{ height: '600px' }}>
+            <ChatSimulatorView
+              mode="interactive"
+              title="AIBots V2 Demo"
+              interactiveMessages={demoMessages}
+              onSendMessage={handleDemoSendMessage}
+              isNewChat={false}
+              toolAssistants={['email-drafter', 'workday-shortlister', 'deep-research', 'report-writer']}
+              demoMessageCount={messageCount}
+              demoMessageLimit={10}
+              disableAutoScroll={true}
+            />
           </div>
+
+          {/* Login Prompt Overlay */}
+          {showLoginPrompt && (
+            <div className="absolute inset-0 bg-white/95 rounded-xl flex items-center justify-center z-10">
+              <div className="text-center max-w-md p-8">
+                <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                  Ready to explore more?
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  You've reached the demo limit. Login to continue the conversation and access all features including Canvas, web search, and 50+ specialized assistants.
+                </p>
+                <button
+                  onClick={handleLoginFromDemo}
+                  className="px-6 py-3 bg-gray-900 text-white text-base font-semibold rounded-lg hover:bg-gray-700 transition-colors"
+                >
+                  Login to Continue
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

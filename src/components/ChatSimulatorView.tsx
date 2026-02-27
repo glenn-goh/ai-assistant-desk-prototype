@@ -128,6 +128,10 @@ interface ChatSimulatorProps {
   onRichResponseComplete?: () => void;
   onCommitRichContent?: (textContent: string, richContent?: any[]) => void;
   onNavigateToExplore?: () => void;
+  // Demo message count (for landing page demo)
+  demoMessageCount?: number;
+  demoMessageLimit?: number;
+  disableAutoScroll?: boolean; // Disable auto-scroll on new messages
 }
 
 // Simulated reasoning content for thinking states
@@ -173,6 +177,9 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
   onRichResponseComplete,
   onCommitRichContent,
   onNavigateToExplore,
+  demoMessageCount,
+  demoMessageLimit,
+  disableAutoScroll = false,
 }) => {
   const isInteractive = mode === 'interactive';
   const currentAssistantName = isInteractive ? assistantName : data?.assistantName;
@@ -244,13 +251,13 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
 
   // Scroll user's message to top when they send a message (not when assistant replies)
   useEffect(() => {
-    if (shouldScrollToBottom.current) {
+    if (shouldScrollToBottom.current && !disableAutoScroll) {
       setTimeout(() => {
         lastUserMessageRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 50);
       shouldScrollToBottom.current = false;
     }
-  }, [displayedMessages, interactiveMessages]);
+  }, [displayedMessages, interactiveMessages, disableAutoScroll]);
 
   // Calculate spacer height: container - lastUserMessage - assistantContent - header - gap
   useEffect(() => {
@@ -814,6 +821,8 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
           onReplaceToolAssistant={onReplaceToolAssistant}
           showOutputPanel={showOutputPanel}
           onShowOutputPanel={() => setShowOutputPanel(true)}
+          demoMessageCount={demoMessageCount}
+          demoMessageLimit={demoMessageLimit}
         />
 
         {/* Messages */}

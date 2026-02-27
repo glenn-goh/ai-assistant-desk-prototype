@@ -8,13 +8,8 @@ interface LoginPageProps {
 
 export function LoginPage({ onLogin }: LoginPageProps) {
     const handleWOGLogin = () => {
-        const defaultProfile: UserProfile = {
-            name: 'John Doe',
-            email: 'john.doe@tech.gov.sg',
-            role: 'Product Manager',
-            agency: 'GovTech'
-        };
-        onLogin(defaultProfile, true);
+        // Don't set profile here - will be set on AccountSelectionPage
+        onLogin({} as UserProfile, true);
     };
 
     return (

@@ -7,6 +7,7 @@ import { ChatsPage } from './components/ChatsPage';
 import { HomePage } from './components/HomePage';
 import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
+import { AccountSelectionPage } from './components/AccountSelectionPage';
 import { OnboardingPage } from './components/OnboardingPage';
 import { PersonalizationDialog } from './components/PersonalizationDialog';
 import { ChatSimulatorView } from './components/ChatSimulatorView';
@@ -130,6 +131,7 @@ export default function App() {
   const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
   const [hasSeenLanding, setHasSeenLanding] = useState(isDirectChat);
   const [isAuthenticated, setIsAuthenticated] = useState(isDirectChat);
+  const [hasSelectedAccount, setHasSelectedAccount] = useState(isDirectChat);
   const [hasOnboarded, setHasOnboarded] = useState(isDirectChat);
 
   // Simple hash-based routing
@@ -237,6 +239,7 @@ export default function App() {
       if (isDirectChat) return;
       // When browser back is pressed, sign out
       setIsAuthenticated(false);
+      setHasSelectedAccount(false);
       setHasOnboarded(false);
     };
 
@@ -794,6 +797,7 @@ export default function App() {
     // Reset authentication state
     setHasSeenLanding(false);
     setIsAuthenticated(false);
+    setHasSelectedAccount(false);
     setHasOnboarded(false);
     // Reset to default profile
     setUserProfile({
@@ -810,13 +814,18 @@ export default function App() {
   };
 
   const handleLogin = (profile: UserProfile, skipOnboarding: boolean) => {
-    setUserProfile(profile);
+    // Don't set userProfile here - will be set in handleAccountSelected
     setIsAuthenticated(true);
     if (skipOnboarding) {
       setHasOnboarded(true);
       // Start with empty chats for all users
       setChats([]);
     }
+  };
+
+  const handleAccountSelected = (profile: UserProfile) => {
+    setUserProfile(profile);
+    setHasSelectedAccount(true);
   };
 
   const handleSelectSimulation = (simulationId: string) => {
@@ -1005,10 +1014,15 @@ export default function App() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  // Early return for account selection page
+  if (!hasSelectedAccount) {
+    return <AccountSelectionPage onAccountSelected={handleAccountSelected} />;
+  }
+
   // Early return for onboarding page
   if (!hasOnboarded) {
     return (
-      <OnboardingPage 
+      <OnboardingPage
         userProfile={userProfile}
         onUpdateProfile={setUserProfile}
         onComplete={handleCompleteOnboarding}
