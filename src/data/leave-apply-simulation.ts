@@ -76,7 +76,7 @@ export function getLeaveApplySimulationData() {
               { text: "Checking whether there are available leave...", icon: "database", description: "Querying your leave balances and verifying eligibility for the requested dates." },
               { text: "Awaiting user response", icon: "search", description: "Leave balances retrieved successfully. Waiting for user to select the leave type." },
             ],
-            doneSummary: "Leave balances retrieved — awaiting selection",
+            doneSummary: "Reasoning",
           },
           {
             type: "multiDecision" as const,

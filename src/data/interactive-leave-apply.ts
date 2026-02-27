@@ -95,7 +95,7 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
           { text: "Checking whether there are available leave...", icon: "database", description: "Querying your leave balances and verifying eligibility for the requested dates." },
           { text: "Awaiting user response", icon: "search", description: "Leave balances retrieved successfully. Waiting for user to select the leave type." },
         ],
-        doneSummary: "Leave balances retrieved — awaiting selection",
+        doneSummary: "Reasoning",
         tags: ["1 tool"],
       },
       {
@@ -167,7 +167,7 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
             { text: "Extracting leave details...", icon: "search", description: `Gathering leave type, dates (${dateRange}), and duration for the email.` },
             { text: "Generating 3 draft versions...", icon: "search", description: "Creating formal, neutral, and casual tone variations for the RO email." },
           ],
-          doneSummary: "3 email drafts generated",
+          doneSummary: "Reasoning",
           tags: ["1 tool"],
         },
         {

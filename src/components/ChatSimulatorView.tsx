@@ -1245,7 +1245,7 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                 onChange={setTypedText}
                 autoTypeText={getCurrentTargetText()}
                 disabled={!isTyping}
-                assistantType={assistantType}
+                assistantType={assistantType || (data?.assistantName ? 'custom' : undefined)}
                 onNavigateToExplore={onNavigateToExplore}
               />
             )}

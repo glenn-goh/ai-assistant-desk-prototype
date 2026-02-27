@@ -312,8 +312,8 @@ export function MessageInput({
                         );
                       })}
 
-                      {/* Custom Assistants Submenu */}
-                      <div className="relative group/assistants mt-1 border-t border-gray-200 pt-1">
+                      {/* Custom Assistants Submenu - hidden for assistant chats */}
+                      {!assistantType && <div className="relative group/assistants mt-1 border-t border-gray-200 pt-1">
                         <button
                           type="button"
                           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -377,7 +377,7 @@ export function MessageInput({
                             )}
                           </div>
                         </div>
-                      </div>
+                      </div>}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>

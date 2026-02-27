@@ -89,9 +89,8 @@ export function PersonalizationDialog({
             <div className="space-y-3 mt-4">
               {/* Sample memories */}
               {[
-                { id: '1', text: 'Works at GovTech as a Marketing Officer', date: 'Jan 15, 2026' },
-                { id: '2', text: 'Prefers concise, bullet-point responses', date: 'Jan 18, 2026' },
-                { id: '3', text: 'Often works on marketing campaigns and content', date: 'Jan 20, 2026' },
+                { id: '1', text: 'Prefers concise, bullet-point responses', date: 'Jan 18, 2026' },
+                { id: '2', text: 'Worked as a HR officer in Agency A', date: 'Jan 20, 2026' },
               ].map((memory) => (
                 <div key={memory.id} className="flex items-start justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors group">
                   <div className="flex-1">
