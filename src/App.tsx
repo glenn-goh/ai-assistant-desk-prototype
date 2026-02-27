@@ -201,7 +201,7 @@ export default function App() {
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [pendingBotResponses, setPendingBotResponses] = useState<any[]>([]);
   const [pendingSearchTerm, setPendingSearchTerm] = useState<string>('');
-  const [pendingLeaveContext, setPendingLeaveContext] = useState<{ dateRange: string; leaveType?: string } | null>(null);
+  const [pendingLeaveContext, setPendingLeaveContext] = useState<{ dateRange: string; leaveType?: string; phase?: 'leave-type' | 'confirm' | 'email-prompt' | 'email-style' } | null>(null);
   const [showExitIncognitoDialog, setShowExitIncognitoDialog] = useState(false);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem('hasSeenWalkthrough') === 'true';
@@ -717,17 +717,28 @@ export default function App() {
         return;
       }
 
-      if (!pendingLeaveContext.leaveType) {
-        // Phase 1 → Phase 2: user selected a leave type from multiDecision
+      const phase = pendingLeaveContext.phase || 'leave-type';
+
+      if (phase === 'leave-type') {
+        // Phase 1: user selected a leave type from multiDecision
         const leaveType = value;
-        setPendingLeaveContext({ ...pendingLeaveContext, leaveType });
+        setPendingLeaveContext({ ...pendingLeaveContext, leaveType, phase: 'confirm' });
         setPendingBotResponses(responses.onLeaveTypeSelected(leaveType, pendingLeaveContext.dateRange));
-      } else {
-        // Phase 2 → Phase 3: user confirmed the application
+      } else if (phase === 'confirm') {
+        // Phase 2: user confirmed or cancelled the application
         if (value === 'proceed') {
-          setPendingBotResponses(responses.onConfirm(pendingLeaveContext.leaveType, pendingLeaveContext.dateRange));
+          setPendingBotResponses(responses.onConfirm(pendingLeaveContext.leaveType!, pendingLeaveContext.dateRange));
+          setPendingLeaveContext({ ...pendingLeaveContext, phase: 'email-prompt' });
         } else {
           setPendingBotResponses(responses.onCancel);
+          setPendingLeaveContext(null);
+        }
+      } else if (phase === 'email-prompt') {
+        // Phase 3: user chose to draft email or skip
+        if (value === 'draft-email') {
+          setPendingBotResponses(responses.onDraftEmail(pendingLeaveContext.leaveType!, pendingLeaveContext.dateRange));
+        } else {
+          setPendingBotResponses(responses.onSkipEmail);
         }
         setPendingLeaveContext(null);
       }

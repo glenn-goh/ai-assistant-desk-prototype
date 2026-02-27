@@ -77,7 +77,6 @@ export function getLeaveApplySimulationData() {
               { text: "Awaiting user response", icon: "search", description: "Leave balances retrieved successfully. Waiting for user to select the leave type." },
             ],
             doneSummary: "Leave balances retrieved — awaiting selection",
-            tags: ["1 tool"],
           },
           {
             type: "multiDecision" as const,

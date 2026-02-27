@@ -34,6 +34,9 @@ interface LeaveApplyResponses {
   preDecision: BotResponse[];
   onLeaveTypeSelected: (leaveType: string, dateRange: string) => BotResponse[];
   onConfirm: (leaveType: string, dateRange: string) => BotResponse[];
+  onDraftEmail: (leaveType: string, dateRange: string) => BotResponse[];
+  onEmailStyleSelected: (style: string, leaveType: string, dateRange: string) => BotResponse[];
+  onSkipEmail: BotResponse[];
   onCancel: BotResponse[];
 }
 
@@ -85,6 +88,7 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
         thoughts: [],
         timingMs: 11250,
         reasoning: [
+          { text: "Using the Leave Assistant (Tool)...", icon: "wrench", description: "Invoking the Leave Assistant tool to process the leave application request." },
           { text: "Analyzing leave request...", icon: "search", description: `Parsing the user's message to extract leave details and date preferences.` },
           { text: "Identifying leave system for your organisation", icon: "search", description: "Determining the appropriate leave management system configured for your agency." },
           { text: "Connecting to Workday", icon: "database", description: "Establishing a secure connection to Workday HR system to retrieve your leave entitlements." },
@@ -135,7 +139,74 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
       return [
         {
           type: "text",
-          content: `Your **${pool.label}** has been successfully applied for **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nYou now have **${remaining} day${remaining !== 1 ? 's' : ''}** remaining in your ${pool.label} pool. A confirmation has been sent to your email and your supervisor has been notified.`,
+          content: `Your **${pool.label}** has been successfully applied for **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nYou now have **${remaining} day${remaining !== 1 ? 's' : ''}** remaining in your ${pool.label} pool.\n\n---\n\nI can also draft an email to notify your reporting officer (RO) about your upcoming leave. Would you like me to prepare one?`,
+          delayMs: 400,
+        },
+        {
+          type: "decision",
+          question: "Draft an email to your RO?",
+          options: [
+            { label: "Yes, draft email", value: "draft-email", variant: "primary" as const },
+            { label: "No thanks", value: "skip-email", variant: "secondary" as const },
+          ],
+        },
+      ];
+    },
+
+    onDraftEmail: (leaveType: string, dateRange: string) => {
+      const pool = LEAVE_POOLS[leaveType] || LEAVE_POOLS.vacation;
+      const days = countBusinessDays(dateRange);
+
+      return [
+        {
+          type: "thinking",
+          thoughts: [],
+          timingMs: 8000,
+          reasoning: [
+            { text: "Using the Email Drafting Tool...", icon: "wrench", description: "Invoking the Email Drafting tool to compose an RO notification email." },
+            { text: "Extracting leave details...", icon: "search", description: `Gathering leave type, dates (${dateRange}), and duration for the email.` },
+            { text: "Generating 3 draft versions...", icon: "search", description: "Creating formal, neutral, and casual tone variations for the RO email." },
+          ],
+          doneSummary: "3 email drafts generated",
+          tags: ["1 tool"],
+        },
+        {
+          type: "text",
+          content: `Here are 3 draft versions:\n\n**1. Formal**\n\nDear Sir/Ma'am,\n\nI am writing to inform you that I have applied for ${pool.label} from ${dateRange} (${days} day${days > 1 ? 's' : ''}). During my absence, please feel free to reach out to me via email for any urgent matters. I will ensure all pending tasks are handed over prior to my leave.\n\nThank you for your understanding.\n\nBest regards,\nJohn Doe\n\n---\n\n**2. Neutral**\n\nHi,\n\nJust a heads-up that I've applied for ${pool.label} from ${dateRange} (${days} day${days > 1 ? 's' : ''}). I'll make sure to wrap up any outstanding items before then. Let me know if there's anything you'd like me to hand over.\n\nThanks,\nJohn Doe\n\n---\n\n**3. Casual**\n\nHey,\n\nQuick note — I've put in leave from ${dateRange} (${days} day${days > 1 ? 's' : ''}), using my ${pool.label}. Will tie up loose ends before I'm off. Give me a shout if you need anything before then!\n\nCheers,\nJohn Doe`,
+          delayMs: 400,
+        },
+        {
+          type: "text",
+          content: "Feel free to copy any version above, or let me know if you'd like me to tweak the tone, add more details, or adjust anything.",
+          delayMs: 500,
+        },
+      ];
+    },
+
+    onSkipEmail: [
+      {
+        type: "text",
+        content: "No problem! Let me know if there's anything else I can help with.",
+        delayMs: 300,
+      },
+    ],
+
+    onEmailStyleSelected: (style: string, leaveType: string, dateRange: string) => {
+      const pool = LEAVE_POOLS[leaveType] || LEAVE_POOLS.vacation;
+      const days = countBusinessDays(dateRange);
+
+      const emails: Record<string, string> = {
+        formal: `Dear Sir/Ma'am,\n\nI am writing to inform you that I have applied for ${pool.label} from **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nDuring my absence, please feel free to reach out to me via email for any urgent matters. I will ensure all pending tasks are handed over prior to my leave.\n\nThank you for your understanding.\n\nBest regards,\nJohn Doe`,
+        neutral: `Hi,\n\nJust a heads-up that I've applied for ${pool.label} from **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nI'll make sure to wrap up any outstanding items before then. Let me know if there's anything you'd like me to hand over.\n\nThanks,\nJohn Doe`,
+        casual: `Hey,\n\nQuick note — I've put in leave from **${dateRange}** (${days} day${days > 1 ? 's' : ''}), using my ${pool.label}.\n\nWill tie up loose ends before I'm off. Give me a shout if you need anything before then!\n\nCheers,\nJohn Doe`,
+      };
+
+      const email = emails[style] || emails.neutral;
+
+      return [
+        {
+          type: "text",
+          content: `Here's your **${style}** email draft:\n\n---\n\n${email}\n\n---\n\nFeel free to copy and send this to your RO, or let me know if you'd like any changes.`,
           delayMs: 400,
         },
       ];
