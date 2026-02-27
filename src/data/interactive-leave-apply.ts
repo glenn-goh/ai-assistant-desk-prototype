@@ -139,7 +139,7 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
       return [
         {
           type: "text",
-          content: `Your **${pool.label}** has been successfully applied for **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nYou now have **${remaining} day${remaining !== 1 ? 's' : ''}** remaining in your ${pool.label} pool.\n\n---\n\nI can also draft an email to notify your reporting officer (RO) about your upcoming leave. Would you like me to prepare one?`,
+          content: `Your **${pool.label}** has been successfully applied for **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nYou now have **${remaining} day${remaining !== 1 ? 's' : ''}** remaining in your ${pool.label} pool.\n\n\n\nI can also draft an email to notify your reporting officer (RO) about your upcoming leave. Would you like me to prepare one?`,
           delayMs: 400,
         },
         {
@@ -172,7 +172,7 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
         },
         {
           type: "text",
-          content: `Here are 3 draft versions:\n\n**1. Formal**\n\nDear Sir/Ma'am,\n\nI am writing to inform you that I have applied for ${pool.label} from ${dateRange} (${days} day${days > 1 ? 's' : ''}). During my absence, please feel free to reach out to me via email for any urgent matters. I will ensure all pending tasks are handed over prior to my leave.\n\nThank you for your understanding.\n\nBest regards,\nJohn Doe\n\n---\n\n**2. Neutral**\n\nHi,\n\nJust a heads-up that I've applied for ${pool.label} from ${dateRange} (${days} day${days > 1 ? 's' : ''}). I'll make sure to wrap up any outstanding items before then. Let me know if there's anything you'd like me to hand over.\n\nThanks,\nJohn Doe\n\n---\n\n**3. Casual**\n\nHey,\n\nQuick note — I've put in leave from ${dateRange} (${days} day${days > 1 ? 's' : ''}), using my ${pool.label}. Will tie up loose ends before I'm off. Give me a shout if you need anything before then!\n\nCheers,\nJohn Doe`,
+          content: `Here are 3 draft versions:\n\n\n\n**1. Formal**\n\nDear Sir/Ma'am,\n\nI am writing to inform you that I have applied for ${pool.label} from ${dateRange} (${days} day${days > 1 ? 's' : ''}). During my absence, please feel free to reach out to me via email for any urgent matters. I will ensure all pending tasks are handed over prior to my leave.\n\nThank you for your understanding.\n\nBest regards,\nJohn Doe\n\n\n\n**2. Neutral**\n\nHi,\n\nJust a heads-up that I've applied for ${pool.label} from ${dateRange} (${days} day${days > 1 ? 's' : ''}). I'll make sure to wrap up any outstanding items before then. Let me know if there's anything you'd like me to hand over.\n\nThanks,\nJohn Doe\n\n\n\n**3. Casual**\n\nHey,\n\nQuick note — I've put in leave from ${dateRange} (${days} day${days > 1 ? 's' : ''}), using my ${pool.label}. Will tie up loose ends before I'm off. Give me a shout if you need anything before then!\n\nCheers,\nJohn Doe`,
           delayMs: 400,
         },
         {
@@ -196,9 +196,9 @@ export function getLeaveApplyResponses(dateRange?: string): LeaveApplyResponses 
       const days = countBusinessDays(dateRange);
 
       const emails: Record<string, string> = {
-        formal: `Dear Sir/Ma'am,\n\nI am writing to inform you that I have applied for ${pool.label} from **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nDuring my absence, please feel free to reach out to me via email for any urgent matters. I will ensure all pending tasks are handed over prior to my leave.\n\nThank you for your understanding.\n\nBest regards,\nJohn Doe`,
-        neutral: `Hi,\n\nJust a heads-up that I've applied for ${pool.label} from **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nI'll make sure to wrap up any outstanding items before then. Let me know if there's anything you'd like me to hand over.\n\nThanks,\nJohn Doe`,
-        casual: `Hey,\n\nQuick note — I've put in leave from **${dateRange}** (${days} day${days > 1 ? 's' : ''}), using my ${pool.label}.\n\nWill tie up loose ends before I'm off. Give me a shout if you need anything before then!\n\nCheers,\nJohn Doe`,
+        formal: `Dear Sir/Ma'am,\n\nI am writing to inform you that I have applied for ${pool.label} from **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nDuring my absence, please feel free to reach out to me via email for any urgent matters. I will ensure all pending tasks are handed over prior to my leave.\n\nThank you for your understanding.\n\n\nBest regards,\nJohn Doe`,
+        neutral: `Hi,\n\nJust a heads-up that I've applied for ${pool.label} from **${dateRange}** (${days} day${days > 1 ? 's' : ''}).\n\nI'll make sure to wrap up any outstanding items before then. Let me know if there's anything you'd like me to hand over.\n\n\nThanks,\nJohn Doe`,
+        casual: `Hey,\n\nQuick note — I've put in leave from **${dateRange}** (${days} day${days > 1 ? 's' : ''}), using my ${pool.label}.\n\nWill tie up loose ends before I'm off. Give me a shout if you need anything before then!\n\n\nCheers,\nJohn Doe`,
       };
 
       const email = emails[style] || emails.neutral;
