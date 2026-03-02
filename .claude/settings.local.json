@@ -23,7 +23,14 @@
       "WebFetch(domain:github.com)",
       "Bash(npx vite build:*)",
       "Bash(git rebase:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(open:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_console_messages",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_wait_for",
+      "Bash(lsof:*)"
     ]
   }
 }

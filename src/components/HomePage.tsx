@@ -92,7 +92,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                 <div className="flex items-center gap-2 mt-2">
                   <IncognitoIcon className="w-4 h-4 text-gray-500" />
                   <p className="text-sm text-gray-500">
-                    Incognito chat does not reference memories or save to chat history
+                    Incognito chat does not access or store memories, and does not save chat history.
                   </p>
                 </div>
               </div>
@@ -146,7 +146,7 @@ export function HomePage({ colorTheme, fontStyle, onSelectChat, onNewChat, isSid
                           <div className="flex-1">
                             <div className="font-semibold text-gray-900">C(CE)/SN</div>
                             <div className="text-sm text-gray-500">Confidential (Cloud-Eligible) / Sensitive Normal</div>
-                            <div className="text-sm font-bold text-gray-900 mt-1">CCE/SN chats will not be saved.</div>
+                            <div className="text-sm font-bold text-gray-900 mt-1">Accesses but does not store memories, and does not save chat history.</div>
                           </div>
                         </div>
                       </SelectItem>

@@ -1,11 +1,9 @@
-name: Deploy Multi-Branch to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches:
-      - main
-      - MVP
-      - MVP-lite
+      - UT-mvp
 
 permissions:
   contents: read
@@ -20,10 +18,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main branch
+      - name: Checkout UT-mvp branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: UT-mvp
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -31,113 +29,11 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies for main
+      - name: Install dependencies
         run: npm ci
 
-      - name: Build main branch
-        run: npm run build
-
-      - name: Move main build to temp location
-        run: |
-          mkdir -p /tmp/pages
-          mv build/* /tmp/pages/
-
-      - name: Checkout MVP branch
-        uses: actions/checkout@v4
-        with:
-          ref: MVP
-          clean: false
-
-      - name: Install dependencies for MVP
-        run: npm ci
-
-      - name: Build MVP branch
-        run: npm run build
-
-      - name: Move MVP build to temp location
-        run: |
-          mkdir -p /tmp/pages/mvp
-          mv build/* /tmp/pages/mvp/
-
-      - name: Checkout MVP-lite branch
-        uses: actions/checkout@v4
-        with:
-          ref: MVP-lite
-          clean: false
-
-      - name: Install dependencies for MVP-lite
-        run: npm ci
-
-      - name: Build MVP-lite branch
-        run: npm run build
-
-      - name: Combine builds
-        run: |
-          mkdir -p /tmp/pages/mvp-lite
-          mv build/* /tmp/pages/mvp-lite/
-          mkdir -p build
-          mv /tmp/pages/* build/
-
-      - name: Create index redirect page
-        run: |
-          cat > build/index-selector.html << 'EOF'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <title>AI Assistant Desk - Select Version</title>
-            <style>
-              body {
-                font-family: system-ui, -apple-system, sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                margin: 0;
-                background: #f5f5f5;
-              }
-              .container {
-                text-align: center;
-                padding: 2rem;
-                background: white;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-              }
-              h1 {
-                margin-bottom: 2rem;
-                color: #171717;
-              }
-              .buttons {
-                display: flex;
-                gap: 1rem;
-                justify-content: center;
-              }
-              a {
-                padding: 1rem 2rem;
-                background: #171717;
-                color: white;
-                text-decoration: none;
-                border-radius: 6px;
-                font-weight: 500;
-                transition: background 0.2s;
-              }
-              a:hover {
-                background: #404040;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>AI Assistant Desk</h1>
-              <p>Choose which version to view:</p>
-              <div class="buttons">
-                <a href="./index.html">Main Version</a>
-                <a href="./mvp/">MVP Version</a>
-                <a href="./mvp-lite/">MVP-lite Version</a>
-              </div>
-            </div>
-          </body>
-          </html>
-          EOF
+      - name: Build
+        run: npm run build -- --base=/ai-assistant-desk-prototype/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -145,7 +41,6 @@ jobs:
           path: ./build
 
   deploy:
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/MVP' || github.ref == 'refs/heads/MVP-lite'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

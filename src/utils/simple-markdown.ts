@@ -68,7 +68,9 @@ export function renderSimpleMarkdown(text: string): string {
       paraLines.push(lines[i].trim());
       i++;
     }
-    htmlParts.push(`<p>${inlineFormat(paraLines.join('<br/>'))}</p>`);
+    const formatted = inlineFormat(paraLines.join('<br/>'));
+    const isBoldHeader = formatted.startsWith('<strong>');
+    htmlParts.push(`<p${isBoldHeader ? ' style="margin-top:1.25em"' : ''}>${formatted}</p>`);
   }
 
   return htmlParts.join('');

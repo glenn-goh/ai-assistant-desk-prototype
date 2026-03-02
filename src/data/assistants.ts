@@ -1,4 +1,4 @@
-import { Mic, Presentation, FileText, Mail, BarChart3, Briefcase, Share2, CheckCircle, BookOpen, Microscope, Users, TrendingUp, MessageSquare, PieChart, Lightbulb, Calendar, ClipboardList, Newspaper, GraduationCap, Scale, Globe } from 'lucide-react';
+import { Mic, Presentation, FileText, Mail, BarChart3, Briefcase, Share2, CheckCircle, BookOpen, Microscope, Users, TrendingUp, MessageSquare, PieChart, Lightbulb, Calendar, ClipboardList, Newspaper, GraduationCap, Scale, Globe, Palmtree } from 'lucide-react';
 
 export interface Assistant {
   id: string;
@@ -382,6 +382,18 @@ const allAssistants = {
     type: 'Community' as const,
     assistantType: 'interview-assistant',
   },
+  leaveAssistant: {
+    id: 'leave-assistant',
+    name: 'HR Assistant',
+    description: 'Apply for leave through Workday. Checks your leave balances and submits applications on your behalf.',
+    owner: 'AI Assistant Team',
+    tags: ['HR', 'Leave'],
+    icon: Palmtree,
+    uses: '6.2k',
+    classification: 'R/SN',
+    type: 'Official' as const,
+    assistantType: 'leave-assistant',
+  },
 };
 
 // Essential tools for all roles
@@ -410,6 +422,7 @@ export const topRatedAssistants: Assistant[] = [
   allAssistants.legalReview,
   allAssistants.translationHelper,
   allAssistants.interviewAssistant,
+  allAssistants.leaveAssistant,
 ];
 
 // Role-specific assistant mappings
@@ -421,13 +434,13 @@ export const roleBasedAssistants: Record<string, Assistant[]> = {
     allAssistants.marketResearch,
   ],
   'hr': [
-    allAssistants.workdayShortlister,
+    // allAssistants.workdayShortlister,
     allAssistants.interviewQuestions,
     allAssistants.onboardingGuide,
     allAssistants.performanceReview,
   ],
   'human resources': [
-    allAssistants.workdayShortlister,
+    // allAssistants.workdayShortlister,
     allAssistants.interviewQuestions,
     allAssistants.onboardingGuide,
     allAssistants.performanceReview,

@@ -48,6 +48,10 @@ interface ChatHeaderProps {
   // Canvas toggle
   showOutputPanel: boolean;
   onShowOutputPanel: () => void;
+
+  // Demo message count (optional, for landing page demo)
+  demoMessageCount?: number;
+  demoMessageLimit?: number;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -73,6 +77,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
   onReplaceToolAssistant,
   showOutputPanel,
   onShowOutputPanel,
+  demoMessageCount,
+  demoMessageLimit,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editTitleValue, setEditTitleValue] = useState('');
@@ -256,6 +262,11 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+        )}
+        {demoMessageCount !== undefined && demoMessageLimit !== undefined && (
+          <span className="text-xs text-gray-500 mr-2">
+            {demoMessageLimit - demoMessageCount} messages remaining
+          </span>
         )}
         {!showOutputPanel && (
           <TooltipProvider>

@@ -8,13 +8,8 @@ interface LoginPageProps {
 
 export function LoginPage({ onLogin }: LoginPageProps) {
     const handleWOGLogin = () => {
-        const defaultProfile: UserProfile = {
-            name: 'John Doe',
-            email: 'john.doe@tech.gov.sg',
-            role: 'Product Manager',
-            agency: 'GovTech'
-        };
-        onLogin(defaultProfile, true);
+        // Don't set profile here - will be set on AccountSelectionPage
+        onLogin({} as UserProfile, true);
     };
 
     return (
@@ -26,7 +21,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                             Welcome to the
                         </p>
                         <h1 className="text-gray-900 text-2xl font-bold leading-tight">
-                            AI Assistant Desk (MVP)
+                            AIBots V2 - UT
                         </h1>
                     </div>
 

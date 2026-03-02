@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Separator } from './ui/separator';
 import type { Project } from '../types/project';
 import type { Chat } from '../App';
+import { isProcurementProject, generateProcurementFiles } from '../utils/procurementFiles';
 
 interface ProjectPageProps {
   project: Project;
@@ -50,17 +51,28 @@ export function ProjectPage({
   };
 
   const handleFileUpload = () => {
-    // Simulated file upload - in real implementation would open file picker
-    const mockFile = {
-      id: Date.now().toString(),
-      name: 'document.pdf',
-      size: 1024 * 100,
-      uploadedAt: new Date(),
-    };
-    if (onUpdateProject) {
-      onUpdateProject(project.id, {
-        files: [...(project.files || []), mockFile],
-      });
+    // Check if this is a procurement project
+    if (isProcurementProject(project.name)) {
+      // Always replace with the 3 procurement files
+      const procurementFiles = generateProcurementFiles();
+      if (onUpdateProject) {
+        onUpdateProject(project.id, {
+          files: procurementFiles,
+        });
+      }
+    } else {
+      // Original behavior: add a single mock file
+      const mockFile = {
+        id: Date.now().toString(),
+        name: 'document.pdf',
+        size: 1024 * 100,
+        uploadedAt: new Date(),
+      };
+      if (onUpdateProject) {
+        onUpdateProject(project.id, {
+          files: [...(project.files || []), mockFile],
+        });
+      }
     }
   };
 

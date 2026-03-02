@@ -5,7 +5,9 @@ import { StudioPage } from './components/StudioPage';
 import { LibraryPage } from './components/LibraryPage';
 import { ChatsPage } from './components/ChatsPage';
 import { HomePage } from './components/HomePage';
+import { LandingPage } from './components/LandingPage';
 import { LoginPage } from './components/LoginPage';
+import { AccountSelectionPage } from './components/AccountSelectionPage';
 import { OnboardingPage } from './components/OnboardingPage';
 import { PersonalizationDialog } from './components/PersonalizationDialog';
 import { ChatSimulatorView } from './components/ChatSimulatorView';
@@ -30,7 +32,10 @@ import { marketingSoftwareAorData } from './data/marketing-software-aor';
 import { pqResponseDataV2 } from './data/pq-response-mnd-v2';
 import { canvasDemoData } from './data/canvas-demo';
 import { getWebSearchResponses } from './data/interactive-web-search';
+import { getLeaveApplyResponses, getDefaultLeaveDateRange } from './data/interactive-leave-apply';
 import { getDiagramInChatResponses, getDiagramInCanvasResponses } from './data/interactive-diagram';
+import { getAORResponses, getITQResponses } from './data/interactive-aor-itq';
+import { getLeaveApplySimulationData } from './data/leave-apply-simulation';
 
 export interface Message {
   id: string;
@@ -106,10 +111,39 @@ function detectDiagramKeyword(message: string): 'chat' | 'canvas' | null {
   return null;
 }
 
+function detectLeaveKeyword(message: string): { dateRange?: string } | null {
+  const lower = message.toLowerCase();
+  if (!lower.includes('apply leave') && !lower.includes('apply for leave')) {
+    return null;
+  }
+  // Try to extract date range in DD MMM YYYY to DD MMM YYYY format
+  const datePattern = /(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4})\s+to\s+(\d{1,2}\s+(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{4})/i;
+  const match = message.match(datePattern);
+  if (match) {
+    return { dateRange: `${match[1]} to ${match[2]}` };
+  }
+  return { dateRange: undefined };
+}
+
+function detectAORKeyword(message: string): boolean {
+  const lower = message.toLowerCase();
+  return lower.includes('draft an aor') || lower.includes('draft aor') || lower.includes('create an aor');
+}
+
+function detectITQKeyword(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (lower.includes('draft') && (lower.includes('itq') || lower.includes('invitation to quote')));
+}
+
+// Check once at module load — stable across re-renders
+const isDirectChat = window.location.hash.slice(1) === '/chat';
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState(window.location.hash.slice(1) || '/');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [hasSeenLanding, setHasSeenLanding] = useState(isDirectChat);
+  const [isAuthenticated, setIsAuthenticated] = useState(isDirectChat);
+  const [hasSelectedAccount, setHasSelectedAccount] = useState(isDirectChat);
+  const [hasOnboarded, setHasOnboarded] = useState(isDirectChat);
 
   // Simple hash-based routing
   useEffect(() => {
@@ -119,6 +153,27 @@ export default function App() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Browser back button support for landing → login transition
+  useEffect(() => {
+    if (isDirectChat) return;
+    // Seed initial history entry so back button has something to return to
+    if (!hasSeenLanding) {
+      window.history.replaceState({ page: 'landing' }, '');
+    }
+    const handlePopState = (e: PopStateEvent) => {
+      if (e.state?.page === 'landing') {
+        setHasSeenLanding(false);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleLeaveLanding = () => {
+    window.history.pushState({ page: 'login' }, '');
+    setHasSeenLanding(true);
+  };
   const [userProfile, setUserProfile] = useState<UserProfile>({
     name: 'John Doe',
     email: 'john.doe@tech.gov.sg',
@@ -141,16 +196,16 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [favoritedAssistants, setFavoritedAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('favoritedAssistants');
-    return stored ? JSON.parse(stored) : [];
+    localStorage.removeItem('favoritedAssistants');
+    return [];
   });
   const [pinnedAssistants, setPinnedAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('pinnedAssistants');
-    return stored ? JSON.parse(stored) : [];
+    localStorage.removeItem('pinnedAssistants');
+    return [];
   });
   const [toolAssistants, setToolAssistants] = useState<string[]>(() => {
-    const stored = localStorage.getItem('toolAssistants');
-    return stored ? JSON.parse(stored) : [];
+    localStorage.removeItem('toolAssistants');
+    return [];
   });
   const [viewedSimulations, setViewedSimulations] = useState<string[]>([]); // Track viewed simulations (base IDs, for non-assistant simulation launches)
   const [simulationInstances, setSimulationInstances] = useState<Array<{ instanceId: string; simulationId: string }>>([]);  // Each simulation chat instance
@@ -159,6 +214,7 @@ export default function App() {
   const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const [pendingBotResponses, setPendingBotResponses] = useState<any[]>([]);
   const [pendingSearchTerm, setPendingSearchTerm] = useState<string>('');
+  const [pendingLeaveContext, setPendingLeaveContext] = useState<{ dateRange: string; leaveType?: string; phase?: 'leave-type' | 'confirm' | 'email-prompt' | 'email-style' } | null>(null);
   const [showExitIncognitoDialog, setShowExitIncognitoDialog] = useState(false);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem('hasSeenWalkthrough') === 'true';
@@ -185,14 +241,16 @@ export default function App() {
 
   // Handle browser back button to return to login
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isDirectChat) {
       // Push a new history state when authenticated
       window.history.pushState({ authenticated: true }, '');
     }
 
     const handlePopState = () => {
+      if (isDirectChat) return;
       // When browser back is pressed, sign out
       setIsAuthenticated(false);
+      setHasSelectedAccount(false);
       setHasOnboarded(false);
     };
 
@@ -321,10 +379,34 @@ export default function App() {
       return;
     }
 
+    // Check for leave application keywords — trigger leave response pipeline
+    const leaveMatch = detectLeaveKeyword(content);
+    if (leaveMatch) {
+      const resolvedDateRange = leaveMatch.dateRange || getDefaultLeaveDateRange();
+      const responses = getLeaveApplyResponses(resolvedDateRange);
+      setPendingLeaveContext({ dateRange: resolvedDateRange });
+      setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
     // Check for diagram/flowchart keywords — trigger diagram response pipeline
     const diagramMode = detectDiagramKeyword(content);
     if (diagramMode) {
       const responses = diagramMode === 'chat' ? getDiagramInChatResponses() : getDiagramInCanvasResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for AOR drafting keywords — trigger AOR response pipeline
+    if (detectAORKeyword(content)) {
+      const responses = getAORResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for ITQ drafting keywords — trigger ITQ response pipeline
+    if (detectITQKeyword(content)) {
+      const responses = getITQResponses();
       setPendingBotResponses(responses);
       return;
     }
@@ -390,6 +472,7 @@ export default function App() {
     setIncognitoChat(null); // Clear any incognito chat
     setPendingBotResponses([]);
     setPendingSearchTerm('');
+    setPendingLeaveContext(null);
     setActiveChatId('new-rsn');
     setActiveView('home');
     setHomeResetKey(prev => prev + 1);
@@ -441,10 +524,34 @@ export default function App() {
       return;
     }
 
+    // Check for leave application keywords — trigger leave response pipeline
+    const leaveMatch2 = detectLeaveKeyword(message);
+    if (leaveMatch2) {
+      const resolvedDateRange = leaveMatch2.dateRange || getDefaultLeaveDateRange();
+      const responses = getLeaveApplyResponses(resolvedDateRange);
+      setPendingLeaveContext({ dateRange: resolvedDateRange });
+      setPendingBotResponses(responses.preDecision);
+      return;
+    }
+
     // Check for diagram/flowchart keywords — trigger diagram response pipeline
     const diagramMode = detectDiagramKeyword(message);
     if (diagramMode) {
       const responses = diagramMode === 'chat' ? getDiagramInChatResponses() : getDiagramInCanvasResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for AOR drafting keywords — trigger AOR response pipeline
+    if (detectAORKeyword(message)) {
+      const responses = getAORResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for ITQ drafting keywords — trigger ITQ response pipeline
+    if (detectITQKeyword(message)) {
+      const responses = getITQResponses();
       setPendingBotResponses(responses);
       return;
     }
@@ -556,6 +663,7 @@ export default function App() {
   const assistantSimulationMap: Record<string, string> = {
     'workday-shortlister': 'hr-candidate-shortlisting',
     'parliamentary-question': 'pq-response-mnd-v2',
+    'leave-assistant': 'leave-apply-simulation',
   };
 
   const handleStartAssistantChat = (assistantName: string, assistantType: string) => {
@@ -622,19 +730,62 @@ export default function App() {
     setIncognitoChat(null); // Clear any incognito chat
     setPendingBotResponses([]);
     setPendingSearchTerm('');
+    setPendingLeaveContext(null);
     setActiveChatId(chatId);
     setActiveView('chat');
   };
 
   const handleDecisionMade = (value: string) => {
-    if (!pendingSearchTerm) return;
-    const responses = getWebSearchResponses(pendingSearchTerm);
-    if (value === 'proceed') {
-      setPendingBotResponses(responses.onProceed);
-    } else {
-      setPendingBotResponses(responses.onCancel);
+    // Web search decision flow
+    if (pendingSearchTerm) {
+      const responses = getWebSearchResponses(pendingSearchTerm);
+      if (value === 'proceed') {
+        setPendingBotResponses(responses.onProceed);
+      } else {
+        setPendingBotResponses(responses.onCancel);
+      }
+      setPendingSearchTerm('');
+      return;
     }
-    setPendingSearchTerm('');
+
+    // Leave application decision flow
+    if (pendingLeaveContext) {
+      const responses = getLeaveApplyResponses(pendingLeaveContext.dateRange);
+
+      if (value === 'cancel') {
+        // Cancel at any phase
+        setPendingBotResponses(responses.onCancel);
+        setPendingLeaveContext(null);
+        return;
+      }
+
+      const phase = pendingLeaveContext.phase || 'leave-type';
+
+      if (phase === 'leave-type') {
+        // Phase 1: user selected a leave type from multiDecision
+        const leaveType = value;
+        setPendingLeaveContext({ ...pendingLeaveContext, leaveType, phase: 'confirm' });
+        setPendingBotResponses(responses.onLeaveTypeSelected(leaveType, pendingLeaveContext.dateRange));
+      } else if (phase === 'confirm') {
+        // Phase 2: user confirmed or cancelled the application
+        if (value === 'proceed') {
+          setPendingBotResponses(responses.onConfirm(pendingLeaveContext.leaveType!, pendingLeaveContext.dateRange));
+          setPendingLeaveContext({ ...pendingLeaveContext, phase: 'email-prompt' });
+        } else {
+          setPendingBotResponses(responses.onCancel);
+          setPendingLeaveContext(null);
+        }
+      } else if (phase === 'email-prompt') {
+        // Phase 3: user chose to draft email or skip
+        if (value === 'draft-email') {
+          setPendingBotResponses(responses.onDraftEmail(pendingLeaveContext.leaveType!, pendingLeaveContext.dateRange));
+        } else {
+          setPendingBotResponses(responses.onSkipEmail);
+        }
+        setPendingLeaveContext(null);
+      }
+      return;
+    }
   };
 
   const handleRichResponseComplete = () => {
@@ -672,6 +823,7 @@ export default function App() {
 
   // Auto-start walkthrough when user logs in directly (skips onboarding)
   useEffect(() => {
+    if (isDirectChat) return;
     if (isAuthenticated && hasOnboarded && !isWalkthroughOpen) {
       // Only start if we haven't already started it from onboarding
       setTimeout(() => {
@@ -682,7 +834,9 @@ export default function App() {
 
   const handleSignOut = () => {
     // Reset authentication state
+    setHasSeenLanding(false);
     setIsAuthenticated(false);
+    setHasSelectedAccount(false);
     setHasOnboarded(false);
     // Reset to default profile
     setUserProfile({
@@ -699,13 +853,18 @@ export default function App() {
   };
 
   const handleLogin = (profile: UserProfile, skipOnboarding: boolean) => {
-    setUserProfile(profile);
+    // Don't set userProfile here - will be set in handleAccountSelected
     setIsAuthenticated(true);
     if (skipOnboarding) {
       setHasOnboarded(true);
       // Start with empty chats for all users
       setChats([]);
     }
+  };
+
+  const handleAccountSelected = (profile: UserProfile) => {
+    setUserProfile(profile);
+    setHasSelectedAccount(true);
   };
 
   const handleSelectSimulation = (simulationId: string) => {
@@ -870,6 +1029,7 @@ export default function App() {
     'marketing-software-aor': marketingSoftwareAorData,
     'pq-response-mnd-v2': pqResponseDataV2,
     'canvas-demo': canvasDemoData,
+    'leave-apply-simulation': getLeaveApplySimulationData(),
   };
   // Resolve simulation data: check instance-based IDs first, then legacy exact IDs
   const resolveSimulationData = () => {
@@ -883,15 +1043,25 @@ export default function App() {
   };
   const simulationData = resolveSimulationData();
 
+  // Early return for landing page
+  if (!hasSeenLanding) {
+    return <LandingPage onGetStarted={handleLeaveLanding} />;
+  }
+
   // Early return for login page
   if (!isAuthenticated) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
+  // Early return for account selection page
+  if (!hasSelectedAccount) {
+    return <AccountSelectionPage onAccountSelected={handleAccountSelected} />;
+  }
+
   // Early return for onboarding page
   if (!hasOnboarded) {
     return (
-      <OnboardingPage 
+      <OnboardingPage
         userProfile={userProfile}
         onUpdateProfile={setUserProfile}
         onComplete={handleCompleteOnboarding}
