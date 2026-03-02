@@ -1387,27 +1387,34 @@ export const ChatSimulatorView: React.FC<ChatSimulatorProps> = ({
                     const allArtifacts = [
                       ...displayedMessages.filter(m => m.type === 'artifact'),
                       ...interactiveDisplayedMessages.filter(m => m.type === 'artifact'),
+                      // Also extract artifacts from richContent of committed messages
+                      ...interactiveMessages.flatMap(m =>
+                        m.richContent?.filter((rc: any) => rc.type === 'artifact') || []
+                      ),
                     ];
                     return allArtifacts.length > 0 ? (
                     <div className="space-y-2">
-                      {allArtifacts.map((msg, idx) => (
+                      {allArtifacts.map((msg, idx) => {
+                        const artifact = msg.type === 'artifact' ? msg.data : msg;
+                        return (
                         <button
-                          key={idx}
-                          onClick={() => setSelectedArtifact(msg.data)}
+                          key={`${artifact.title}-${idx}`}
+                          onClick={() => setSelectedArtifact(artifact)}
                           className="w-full flex items-center gap-3 p-3 bg-white rounded-lg border border-gray-300 hover:border-gray-900 hover:shadow-sm transition-all text-left"
                         >
                           <div className="p-2 rounded-lg bg-gray-100 text-gray-700">
-                            {getFileIcon(msg.data.fileType)}
+                            {getFileIcon(artifact.fileType)}
                           </div>
                           <div className="flex-1">
-                            <div className="text-sm font-medium text-gray-900">{msg.data.title}</div>
-                            <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{msg.data.description}</div>
+                            <div className="text-sm font-medium text-gray-900">{artifact.title}</div>
+                            <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{artifact.description}</div>
                           </div>
                           <div className="text-gray-500">
                             <ArrowLeft className="w-4 h-4 rotate-180" />
                           </div>
                         </button>
-                      ))}
+                      )
+                      })}
                     </div>
                   ) : (
                     <div className="text-center py-12 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
