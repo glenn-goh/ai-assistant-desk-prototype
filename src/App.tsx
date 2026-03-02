@@ -34,6 +34,7 @@ import { canvasDemoData } from './data/canvas-demo';
 import { getWebSearchResponses } from './data/interactive-web-search';
 import { getLeaveApplyResponses, getDefaultLeaveDateRange } from './data/interactive-leave-apply';
 import { getDiagramInChatResponses, getDiagramInCanvasResponses } from './data/interactive-diagram';
+import { getAORResponses, getITQResponses } from './data/interactive-aor-itq';
 import { getLeaveApplySimulationData } from './data/leave-apply-simulation';
 
 export interface Message {
@@ -122,6 +123,16 @@ function detectLeaveKeyword(message: string): { dateRange?: string } | null {
     return { dateRange: `${match[1]} to ${match[2]}` };
   }
   return { dateRange: undefined };
+}
+
+function detectAORKeyword(message: string): boolean {
+  const lower = message.toLowerCase();
+  return lower.includes('draft an aor') || lower.includes('draft aor') || lower.includes('create an aor');
+}
+
+function detectITQKeyword(message: string): boolean {
+  const lower = message.toLowerCase();
+  return (lower.includes('draft') && (lower.includes('itq') || lower.includes('invitation to quote')));
 }
 
 // Check once at module load — stable across re-renders
@@ -386,6 +397,20 @@ export default function App() {
       return;
     }
 
+    // Check for AOR drafting keywords — trigger AOR response pipeline
+    if (detectAORKeyword(content)) {
+      const responses = getAORResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for ITQ drafting keywords — trigger ITQ response pipeline
+    if (detectITQKeyword(content)) {
+      const responses = getITQResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
     // Simulate AI response
     setTimeout(() => {
       // Check if this is an incognito chat or a regular chat
@@ -513,6 +538,20 @@ export default function App() {
     const diagramMode = detectDiagramKeyword(message);
     if (diagramMode) {
       const responses = diagramMode === 'chat' ? getDiagramInChatResponses() : getDiagramInCanvasResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for AOR drafting keywords — trigger AOR response pipeline
+    if (detectAORKeyword(message)) {
+      const responses = getAORResponses();
+      setPendingBotResponses(responses);
+      return;
+    }
+
+    // Check for ITQ drafting keywords — trigger ITQ response pipeline
+    if (detectITQKeyword(message)) {
+      const responses = getITQResponses();
       setPendingBotResponses(responses);
       return;
     }
